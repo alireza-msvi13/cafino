@@ -22,7 +22,7 @@ export class UserController {
     return await this.userService.getUserInfo(phone, response)
   }
 
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtGuard, AdminGuard)
   @Get("users-list")
   @ApiOperation({ summary: "get all users list" })
   async getUserList(

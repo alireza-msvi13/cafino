@@ -23,19 +23,17 @@ export class PublicStrategy extends PassportStrategy(Strategy, 'public') {
     }
     async validate(
         payload: JwtPayload
-    ): Promise<{ phone: string, username: string }> {
+    ): Promise<{ phone: string }> {
         if (!payload || payload == null) {
             return null;
         }
         const {
             phone,
-            username
         } = await this.userService.findUser(
             payload.phone
         )
         return {
-            phone,
-            username
+            phone
         };
     }
 }

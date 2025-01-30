@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OtpEntity } from './entities/otp.entity';
 import { UserStatus } from './enum/status.enum';
 import { Response } from 'express';
+import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 
 @Injectable()
 export class UserService {
@@ -36,7 +37,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -58,7 +59,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -86,7 +87,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -122,7 +123,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -157,7 +158,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -179,7 +180,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -210,7 +211,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -231,7 +232,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }

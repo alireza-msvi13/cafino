@@ -34,8 +34,8 @@ export class UserEntity extends BaseEntity {
     @Column({ enum: UserStatus, default: UserStatus.Normal })
     status: string;
 
-    // @Column({ nullable: true })
-    // rt_hash: string;
+    @Column({ nullable: true })
+    rt_hash: string;
     // @Column({ nullable: true })
     // favoriteFoods: string[];
     // @Column({ nullable: true })

@@ -2,6 +2,7 @@ namespace NodeJS {
     interface ProcessEnv {
         //Application
         PORT: number
+        NODE_ENV: string
         //Database
         DB_PORT: number
         DB_NAME: string
@@ -13,6 +14,7 @@ namespace NodeJS {
         OTP_TOKEN_SECRET: string
         ACCESS_TOKEN_SECRET: string
         EMAIL_TOKEN_SECRET: string
+        REFRESH_TOKEN_SECRET: string
         PHONE_TOKEN_SECRET: string
         PASSWORD_TOKEN_SECRET: string
         //Sms

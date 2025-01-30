@@ -1,5 +1,5 @@
-export enum SwaggerConsumes {
-    UrlEncoded="application/x-www-form-urlencoded",
-    Json= "application/json",
-    MultipartData= "multipart/form-data"
+export enum SwaggerTypes {
+    JSON= "application/json",
+    FORM_URL_ENCODED= "application/x-www-form-urlencoded",
+    MULTIPART= "multipart/form-data",
 } 

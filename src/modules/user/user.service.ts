@@ -132,7 +132,7 @@ export class UserService {
     async saveOtp(
         code: string,
         expireIn: Date,
-        userId: number,
+        userId: string,
         phone: string
     ): Promise<void> {
         try {

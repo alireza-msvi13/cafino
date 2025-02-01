@@ -1,5 +1,4 @@
 import { Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiResponseProperty, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
@@ -15,7 +14,6 @@ import { GetUser } from 'src/common/decorators/get-user.decorator';
 @Controller('auth')
 export class AuthController {
     constructor(
-        private userService: UserService,
         private authService: AuthService
     ) { }
 

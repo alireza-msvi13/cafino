@@ -8,9 +8,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { SmsModule } from './modules/sms/sms.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
-// import { ItemModule } from './modules/item/item.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { CategoryModule } from './modules/category/category.module';
+import { ItemModule } from './modules/item/item.module';
 
 @Module({
   imports: [
@@ -27,8 +27,8 @@ import { CategoryModule } from './modules/category/category.module';
     AuthModule,
     SmsModule,
     StorageModule,
-    CategoryModule
-    // ItemModule,
+    CategoryModule,
+    ItemModule,
     
   ],
   controllers: [],

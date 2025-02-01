@@ -45,19 +45,22 @@ export class CategoryService {
         Folder.Category
       )
 
-      await this.storageService.uploadSingleFile(
-        image.filename,
-        image.buffer,
-        Folder.Category
-      )
+      await Promise.all([
+        this.storageService.uploadSingleFile(
+          image.filename,
+          image.buffer,
+          Folder.Category
+        ),
 
-      await this.categoryRepository.insert({
-        title,
-        slug,
-        show,
-        image: image.filename,
-        imageUrl
-      });
+        this.categoryRepository.insert({
+          title,
+          slug,
+          show,
+          image: image.filename,
+          imageUrl
+        })
+      ])
+
 
       return response
         .status(HttpStatus.OK)

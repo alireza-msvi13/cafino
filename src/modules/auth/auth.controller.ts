@@ -5,7 +5,6 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiResponseProperty, A
 import { ResendCodeDto } from './dto/resend-code.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { VerfiyOtpDto } from './dto/verfiy-otp.dto';
-import { PublicGuard } from './guards/public.guard';
 import { RefreshGuard } from './guards/refresh-token.guard';
 import { JwtGuard } from './guards/access-token.guard';
 import { SwaggerTypes } from 'src/common/enums/swagger.enum';

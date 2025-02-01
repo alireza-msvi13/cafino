@@ -5,8 +5,8 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import * as compression from 'compression'
-import { allowOrigins } from './common/constants/allow-origins.constant';
-import { compressionConfig } from './common/constants/compression.constant';
+import { AllowOrigins } from './common/constants/allow-origins.constant';
+import { CompressionConfig } from './common/constants/compression.constant';
 import { SwaggerConfigInit } from './common/config/swagger/swagger.config';
 
 async function bootstrap() {
@@ -20,14 +20,14 @@ async function bootstrap() {
 
   app.enableVersioning({ type: VersioningType.URI }); 
 
-  app.enableCors({ credentials: true, origin: allowOrigins });
+  app.enableCors({ credentials: true, origin: AllowOrigins });
 
   SwaggerConfigInit(app);
 
   app.useGlobalPipes(new ValidationPipe())
 
 
-  app.use(compression(compressionConfig));
+  app.use(compression(CompressionConfig));
 
   const {PORT} = process.env;
   await app.listen(PORT, () => {

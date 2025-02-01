@@ -3,26 +3,19 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseInterceptors,
   UploadedFile,
   Query,
-  ParseIntPipe,
-  ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
-  applyDecorators,
   UseGuards,
   Put,
-  UploadedFiles,
   Res,
 } from "@nestjs/common";
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 import { UpdateCategoryDto } from "./dto/update-category.dto";
-import { ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiConsumes, ApiOperation } from "@nestjs/swagger";
 import { SwaggerTypes } from "src/common/enums/swagger.enum";
 import { JwtGuard } from "../auth/guards/access-token.guard";
 import { UploadFileAws } from "src/common/interceptors/upload-file.interceptor";

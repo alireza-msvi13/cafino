@@ -6,7 +6,6 @@ import { PassportModule } from '@nestjs/passport';
 import { AdminStrategy } from './strategy/admin.strategy';
 import { RefreshStrategy } from './strategy/refresh-token.strategy';
 import { JwtStrategy } from './strategy/access-token.strategy';
-import { PublicStrategy } from './strategy/public.strategy';
 import { UserModule } from '../user/user.module';
 
 @Module({
@@ -22,7 +21,6 @@ import { UserModule } from '../user/user.module';
     AuthService,
     RefreshStrategy,
     JwtStrategy,
-    PublicStrategy,
     AdminStrategy
   ],
   exports: [

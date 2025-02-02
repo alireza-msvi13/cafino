@@ -1,7 +1,7 @@
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { extname } from "path";
 import { HttpException, HttpStatus } from "@nestjs/common";
-import { AllowdImageFormats } from "../constants/image.constant";
+import { AllowdImageFormats } from "../constants/image-mime-type.constant";
 
 export function UploadFileAws(fieldName: string) {
     return FileInterceptor(

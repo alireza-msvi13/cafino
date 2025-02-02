@@ -5,7 +5,7 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags, Api
 import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Put, Query, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { JwtGuard } from '../auth/guards/access-token.guard';
-import { SwaggerTypes } from 'src/common/enums/swagger.enum';
+import { SwaggerContentType } from 'src/common/enums/swagger.enum';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { UploadMultiFilesAws } from 'src/common/interceptors/upload-file.interceptor';
 import { MulterFileType } from 'src/common/types/multer.file.type';
@@ -23,14 +23,14 @@ export class ItemController {
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadMultiFilesAws('images'))
   @ApiOperation({ summary: "create new menu item" })
-  @ApiConsumes(SwaggerTypes.MULTIPART)
-  async create(
+  @ApiConsumes(SwaggerContentType.MULTIPART)
+  async createItem(
     @StringToArray("ingredients") _: null,
     @UploadedFiles() images: Array<MulterFileType>,
     @Body() createFoodDto: CreateItemDto,
     @Res() response: Response
   ): Promise<Response> {
-    return this.itemService.create(
+    return this.itemService.createItem(
       createFoodDto,
       images,
       response
@@ -39,7 +39,7 @@ export class ItemController {
 
   @Get("/all")
   @ApiOperation({ summary: "get all items" })
-  async getFoods(
+  async getAllItem(
     @Res() response: Response
   ): Promise<Response> {
     return this.itemService.getAllItems(
@@ -49,7 +49,7 @@ export class ItemController {
 
   @Get("/:id")
   @ApiOperation({ summary: "get item by id " })
-  async getFoodById(
+  async getItemById(
     @Param("id") itemId: string,
     @Res() response: Response
   ): Promise<Response> {
@@ -62,7 +62,7 @@ export class ItemController {
   @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "delete a menu item" })
   @Delete(':id')
-  async deleteFoodById(
+  async deleteItemById(
     @Param("id") itemId: string,
     @Res() response: Response
   ): Promise<Response> {
@@ -76,15 +76,15 @@ export class ItemController {
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadMultiFilesAws('images'))
   @ApiOperation({ summary: "update menu item" })
-  @ApiConsumes(SwaggerTypes.MULTIPART)
-  async updateFood(
+  @ApiConsumes(SwaggerContentType.MULTIPART)
+  async updateItem(
     @StringToArray('ingredients') _: null,
     @UploadedFiles() images: Array<MulterFileType>,
     @Body() updateFoodDto: UpdateItemDto,
     @Res() response: Response,
     @Param("itemId") itemId: string
   ): Promise<Response> {
-    return this.itemService.update(
+    return this.itemService.updateItem(
       itemId,
       updateFoodDto,
       images,
@@ -96,7 +96,7 @@ export class ItemController {
 
   @Get("/:search")
   @ApiOperation({ summary: "search item" })
-  @ApiConsumes(SwaggerTypes.MULTIPART, SwaggerTypes.JSON)
+  @ApiConsumes(SwaggerContentType.MULTIPART, SwaggerContentType.JSON)
   async searchItem(
     @Param('search') searchQuery: string,
     @Res() response: Response,

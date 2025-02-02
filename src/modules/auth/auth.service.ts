@@ -5,12 +5,12 @@ import { ResendCodeDto } from './dto/resend-code.dto';
 import { Request, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from "bcrypt"
-import { generateOtpCode } from 'src/common/utils/generate-otp-code';
+import { generateOtpCode } from 'src/common/utils/generate-otp-code.utils';
 import { SmsService } from '../sms/sms.service';
 import { SmsType } from 'src/common/types/sms.type';
 import { JwtPayload } from 'src/common/types/jwt-payload-type';
 import { AccessCookieConfig, RefreshCookieConfig } from 'src/common/constants/token-config.constants';
-import { Token } from 'src/common/types/token.type';
+import { TokenType } from 'src/common/types/token.type';
 import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 
 @Injectable()
@@ -151,7 +151,7 @@ export class AuthService {
                     HttpStatus.UNAUTHORIZED
                 );
             }
-            const tokens: Token = await this.createTokens(
+            const tokens: TokenType = await this.createTokens(
                 phone,
                 user.id.toString()
             );
@@ -273,7 +273,7 @@ export class AuthService {
 
     async createTokens(
         phone: string, userId: string
-    ): Promise<Token> {
+    ): Promise<TokenType> {
         try {
             const jwtPayload: JwtPayload = {
                 user: userId,

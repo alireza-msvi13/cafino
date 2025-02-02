@@ -26,7 +26,7 @@ export class ItemService {
 
   // *primary
 
-  async create(
+  async createItem(
     createItemDto: CreateItemDto,
     images: MulterFileType[],
     response: Response
@@ -92,7 +92,7 @@ export class ItemService {
       }
     }
   }
-  async update(
+  async updateItem(
     itemId: string,
     updateItemDto: UpdateItemDto,
     images: MulterFileType[],

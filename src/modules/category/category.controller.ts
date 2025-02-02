@@ -16,7 +16,7 @@ import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 import { UpdateCategoryDto } from "./dto/update-category.dto";
 import { ApiConsumes, ApiOperation } from "@nestjs/swagger";
-import { SwaggerTypes } from "src/common/enums/swagger.enum";
+import { SwaggerContentType } from "src/common/enums/swagger.enum";
 import { JwtGuard } from "../auth/guards/access-token.guard";
 import { UploadFileAws } from "src/common/interceptors/upload-file.interceptor";
 import { MulterFileType } from "src/common/types/multer.file.type";
@@ -31,7 +31,7 @@ export class CategoryController {
   @Post()
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadFileAws('image'))
-  @ApiConsumes(SwaggerTypes.MULTIPART)
+  @ApiConsumes(SwaggerContentType.MULTIPART)
   @ApiOperation({ summary: "create new category" })
   create(
     @UploadedFile() image: MulterFileType,
@@ -70,7 +70,7 @@ export class CategoryController {
   @Put(":id")
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadFileAws('image'))
-  @ApiConsumes(SwaggerTypes.MULTIPART)
+  @ApiConsumes(SwaggerContentType.MULTIPART)
   @ApiOperation({ summary: "update new category" })
   update(
     @Param("id") id: string,

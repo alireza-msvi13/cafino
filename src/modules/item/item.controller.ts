@@ -38,7 +38,7 @@ export class ItemController {
     )
   }
 
-  @Get("/all")
+  @Get()
   @ApiOperation({ summary: "get all items" })
   async getAllItem(
     @Res() response: Response
@@ -62,7 +62,7 @@ export class ItemController {
 
   @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "delete a menu item" })
-  @Delete(':id')
+  @Delete('/:id')
   async deleteItemById(
     @Param("id") itemId: string,
     @Res() response: Response

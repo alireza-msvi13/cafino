@@ -7,7 +7,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { VerfiyOtpDto } from './dto/verfiy-otp.dto';
 import { RefreshGuard } from './guards/refresh-token.guard';
 import { JwtGuard } from './guards/access-token.guard';
-import { SwaggerContentType } from 'src/common/enums/swagger.enum';
+import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
 import { GetCookie } from 'src/common/decorators/get-cookie.decorator';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 @Controller('auth')
@@ -18,7 +18,7 @@ export class AuthController {
 
     @Post('send-otp')
     @ApiOperation({ summary: "send otp" })
-    @ApiConsumes(SwaggerContentType.FORM_URL_ENCODED, SwaggerContentType.JSON)
+    @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
     async sendOtp(
         @Body() loginUserDto: LoginUserDto,
         @Res() response: Response
@@ -32,7 +32,7 @@ export class AuthController {
     @Post('verfiy-otp')
     @ApiOperation({ summary: "verfiy otp" })
     @ApiBody({ type: VerfiyOtpDto, required: true })
-    @ApiConsumes(SwaggerContentType.FORM_URL_ENCODED, SwaggerContentType.JSON)
+    @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
     async verfiyOtp(
         @Body() verfiyOtpDto: VerfiyOtpDto,
         @Res() response: Response,
@@ -46,7 +46,7 @@ export class AuthController {
 
     @Post('resend-otp')
     @ApiOperation({ summary: "resend otp code" })
-    @ApiConsumes(SwaggerContentType.FORM_URL_ENCODED, SwaggerContentType.JSON)
+    @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
     async resendOtp(
         @Res() response: Response,
         @Body() resendCodeDto: ResendCodeDto

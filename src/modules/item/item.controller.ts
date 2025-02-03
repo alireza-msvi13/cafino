@@ -5,13 +5,14 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags, Api
 import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Put, Query, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { JwtGuard } from '../auth/guards/access-token.guard';
-import { SwaggerContentType } from 'src/common/enums/swagger.enum';
+import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { UploadMultiFilesAws } from 'src/common/interceptors/upload-file.interceptor';
 import { MulterFileType } from 'src/common/types/multer.file.type';
 import { StringToArray } from 'src/common/decorators/string-to-array.decorator';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { EmptyStringInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
 
 @Controller('item')
 export class ItemController {
@@ -23,7 +24,7 @@ export class ItemController {
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadMultiFilesAws('images'))
   @ApiOperation({ summary: "create new menu item" })
-  @ApiConsumes(SwaggerContentType.MULTIPART)
+  @ApiConsumes(SwaggerContentTypes.MULTIPART)
   async createItem(
     @StringToArray("ingredients") _: null,
     @UploadedFiles() images: Array<MulterFileType>,
@@ -74,9 +75,9 @@ export class ItemController {
 
   @Put("/:itemId")
   @UseGuards(JwtGuard, AdminGuard)
-  @UseInterceptors(UploadMultiFilesAws('images'))
+  @UseInterceptors(UploadMultiFilesAws('images'), EmptyStringInterceptor)
   @ApiOperation({ summary: "update menu item" })
-  @ApiConsumes(SwaggerContentType.MULTIPART)
+  @ApiConsumes(SwaggerContentTypes.MULTIPART)
   async updateItem(
     @StringToArray('ingredients') _: null,
     @UploadedFiles() images: Array<MulterFileType>,
@@ -94,13 +95,14 @@ export class ItemController {
 
 
 
-  @Get("/:search")
+  @Get("search/:search")
   @ApiOperation({ summary: "search item" })
-  @ApiConsumes(SwaggerContentType.MULTIPART, SwaggerContentType.JSON)
   async searchItem(
     @Param('search') searchQuery: string,
     @Res() response: Response,
   ): Promise<Response> {
+    console.log(searchQuery);
+
     return this.itemService.searchItem(
       searchQuery,
       response

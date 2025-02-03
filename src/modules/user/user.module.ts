@@ -5,12 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { OtpEntity } from './entities/otp.entity';
 // import { AuthModule } from '../auth/auth.module';
-import { UserAddressesEntity } from './entities/address.entity';
+import { UserAddressEntity } from './entities/address.entity';
 
 @Module({
   imports: [
     // AuthModule,
-    TypeOrmModule.forFeature([UserEntity, OtpEntity , UserAddressesEntity])
+    TypeOrmModule.forFeature([UserEntity, OtpEntity , UserAddressEntity])
   ],
   controllers: [UserController],
   providers: [UserService],

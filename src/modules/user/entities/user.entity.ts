@@ -4,7 +4,7 @@ import { OtpEntity } from "./otp.entity";
 import { EntityName } from "src/common/enums/entity.enum";
 import { Roles } from "src/common/enums/role.enum";
 import { UserStatus } from "../enum/status.enum";
-import { UserAddressesEntity } from "./address.entity";
+import { UserAddressEntity } from "./address.entity";
 import { BaseEntity } from "src/common/abstracts/base.entity";
 
 @Entity(EntityName.User)
@@ -19,7 +19,7 @@ export class UserEntity extends BaseEntity {
     birthday: Date;
     @Column({ nullable: true })
     imageUrl: string;
-    @Column({ unique: true})
+    @Column({ unique: true })
     phone: string;
     @Column({ unique: true, nullable: true })
     email: string;
@@ -41,10 +41,10 @@ export class UserEntity extends BaseEntity {
     // @Column({ nullable: true })
     // comments: string[]; 
     @OneToOne(() => OtpEntity, otp => otp.user, { nullable: true })
-    @JoinColumn()
+    @JoinColumn({ name: "otp_id" })
     otp: OtpEntity
-    @OneToMany(() => UserAddressesEntity, (addresses) => addresses.user)
-    addressesList: UserAddressesEntity[];
+    @OneToMany(() => UserAddressEntity, (addresses) => addresses.user)
+    addressesList: UserAddressEntity[];
     @CreateDateColumn()
 
     created_at: Date

@@ -11,5 +11,5 @@ export class LoginUserDto {
         example: "09254652258",
         nullable: false
     })
-    readonly phone: string;
+    phone: string;
 }

@@ -17,5 +17,6 @@ export class VerfiyOtpDto {
         type: 'string',
         example: 12345,
     })
+    @Length(5)
     otpCode: string;
 }

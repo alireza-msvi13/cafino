@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     }
     async validate(
         payload: JwtPayload
-    ): Promise<{ phone: string }> {
+    ): Promise<{ phone: string, id: string }> {
         if (!payload || payload == null || !payload?.phone?.startsWith("09")) {
             throw new HttpException(
                 "Token Is Not Valid",
@@ -33,10 +33,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         }
         const {
             phone,
+            id
         } = await this.userService.findUser(
             payload.phone
         )
         return {
+            id,
             phone
         };
     }

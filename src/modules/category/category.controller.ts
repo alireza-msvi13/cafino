@@ -83,6 +83,7 @@ export class CategoryController {
   }
 
   @Delete(":id")
+  @ApiOperation({ summary: "delete a category" })
   delete(@Param("id") id: string, @Res() response: Response) {
     return this.categoryService.delete(id, response);
   }

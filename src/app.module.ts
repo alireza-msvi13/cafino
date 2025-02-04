@@ -11,6 +11,7 @@ import { UserModule } from './modules/user/user.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { CategoryModule } from './modules/category/category.module';
 import { ItemModule } from './modules/item/item.module';
+import { CommentModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ItemModule } from './modules/item/item.module';
     StorageModule,
     CategoryModule,
     ItemModule,
+    CommentModule,
     
   ],
   controllers: [],

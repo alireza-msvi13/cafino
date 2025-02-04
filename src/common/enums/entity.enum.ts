@@ -5,5 +5,6 @@ export enum EntityName {
     Category = "category",
     UserAddress = "user_address",
     Item = "item",
-    ItemImage = "item_image"
+    ItemImage = "item_image",
+    Comment = "comment"
 }

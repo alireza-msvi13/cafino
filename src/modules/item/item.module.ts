@@ -14,5 +14,6 @@ import { ItemImageEntity } from './entities/item-image.entity';
     TypeOrmModule.forFeature([ItemEntity, ItemImageEntity])],
   controllers: [ItemController],
   providers: [ItemService],
+  exports: [ItemService]
 })
 export class ItemModule { }

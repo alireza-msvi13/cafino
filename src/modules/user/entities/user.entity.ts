@@ -6,6 +6,7 @@ import { Roles } from "src/common/enums/role.enum";
 import { UserStatus } from "../enum/status.enum";
 import { UserAddressEntity } from "./address.entity";
 import { BaseEntity } from "src/common/abstracts/base.entity";
+import { CommentEntity } from "src/modules/comment/entities/comment.entity";
 
 @Entity(EntityName.User)
 export class UserEntity extends BaseEntity {
@@ -36,17 +37,16 @@ export class UserEntity extends BaseEntity {
 
     @Column({ nullable: true })
     rt_hash: string;
-    // @Column({ nullable: true })
-    // favoriteFoods: string[];
-    // @Column({ nullable: true })
-    // comments: string[]; 
     @OneToOne(() => OtpEntity, otp => otp.user, { nullable: true })
     @JoinColumn({ name: "otp_id" })
     otp: OtpEntity
-    @OneToMany(() => UserAddressEntity, (addresses) => addresses.user)
-    addressesList: UserAddressEntity[];
-    @CreateDateColumn()
+    @OneToMany(() => UserAddressEntity, (address) => address.user)
+    addressList: UserAddressEntity[];
+    @OneToMany(() => CommentEntity, (addresses) => addresses.user)
+    comments: CommentEntity[];
 
+
+    @CreateDateColumn()
     created_at: Date
     @UpdateDateColumn()
     updated_at: Date

@@ -13,6 +13,7 @@ import { StringToArray } from 'src/common/decorators/string-to-array.decorator';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { EmptyStringInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('item')
 export class ItemController {
@@ -41,10 +42,12 @@ export class ItemController {
   @Get()
   @ApiOperation({ summary: "get all items" })
   async getAllItem(
-    @Res() response: Response
+    @Res() response: Response,
+    @Query() paginationDto: PaginationDto,
   ): Promise<Response> {
     return this.itemService.getAllItems(
-      response
+      response,
+      paginationDto
     )
   }
 

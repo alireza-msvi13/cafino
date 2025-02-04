@@ -3,6 +3,7 @@ import { EntityName } from 'src/common/enums/entity.enum';
 import { CategoryEntity } from 'src/modules/category/entities/category.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import {  ItemImageEntity } from './item-image.entity';
+import { CommentEntity } from 'src/modules/comment/entities/comment.entity';
 
 @Entity(EntityName.Item)
 export class ItemEntity extends BaseEntity {
@@ -41,6 +42,9 @@ export class ItemEntity extends BaseEntity {
     })
     @JoinColumn({ name: "category_id" }) 
     category: CategoryEntity;
+
+    @OneToMany(() => CommentEntity, (comment) => comment.item)
+    comments: CommentEntity;
 
 
 

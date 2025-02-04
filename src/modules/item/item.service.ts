@@ -13,6 +13,7 @@ import { CategoryService } from '../category/category.service';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { toBoolean } from 'src/common/utils/boolean.utils';
 import { ItemImageEntity } from './entities/item-image.entity';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 
 @Injectable()
@@ -94,7 +95,7 @@ export class ItemService {
     response: Response
   ): Promise<Response> {
     try {
-      
+
       const {
         title,
         ingredients,
@@ -168,17 +169,42 @@ export class ItemService {
     }
   }
   async getAllItems(
-    response: Response
+    response: Response,
+    paginationDto: PaginationDto
   ): Promise<Response> {
     try {
-      const items = await this.itemRepository.find({ relations: ['images', 'category'] });
+      const { page, limit } = paginationDto
+      const data = await this.itemRepository
+        .createQueryBuilder("item")
+        .leftJoin("item.category", "category")
+        .leftJoin("item.images", "itemImage")
+        .select([
+          "item.id",
+          "item.title",
+          "item.ingredients",
+          "item.description",
+          "item.price",
+          "item.discount",
+          "item.quantity",
+          "item.rate",
+          "item.rateCount",
+          "category.title",
+          "itemImage.image",
+          "itemImage.imageUrl",
+        ])
+        .skip((page - 1) * limit)
+        .take(limit)
+        .getMany();
+
       return response
         .status(HttpStatus.OK)
         .json({
-          data: items,
+          data,
           statusCode: HttpStatus.OK
         })
     } catch (error) {
+      console.log(error);
+
       if (error instanceof HttpException) {
         throw error;
       } else {
@@ -189,23 +215,48 @@ export class ItemService {
       }
     }
   }
-  async getItemById(
-    itemId: string,
-    response: Response
-  ): Promise<Response> {
+  async getItemById(itemId: string, response: Response): Promise<Response> {
     try {
-      const item = await this.itemRepository.findOne({
-        where: { id: itemId },
-        relations: ['category', 'images'],
-      });
+      const item = await this.itemRepository
+        .createQueryBuilder("item")
+        .leftJoin("item.category", "category")
+        .leftJoin("item.images", "itemImage")
+        .leftJoin("item.comments", "comment", "comment.accept = true")
+        .leftJoin("comment.user", "user")
+        .leftJoin("comment.children", "children", "children.accept = true")
+        .leftJoin("children.user", "childrenUser")
+        .select([
+          "item.id",
+          "item.title",
+          "item.ingredients",
+          "item.description",
+          "item.price",
+          "item.discount",
+          "item.quantity",
+          "item.rate",
+          "item.rateCount",
+          "category.title",
+          "itemImage.image",
+          "itemImage.imageUrl",
+          "comment.id",
+          "comment.text",
+          "user.first_name",
+          "user.last_name",
+          "user.username",
+          "children.text",
+          "childrenUser.first_name",
+          "childrenUser.last_name",
+          "childrenUser.username"
+        ])
+        .where("item.id = :itemId", { itemId })
+        .getOne();
+
       if (!item) throw new NotFoundException("Item Not Found");
 
-      return response
-        .status(HttpStatus.OK)
-        .json({
-          data: item,
-          statusCode: HttpStatus.OK
-        })
+      return response.status(HttpStatus.OK).json({
+        data: item,
+        statusCode: HttpStatus.OK
+      });
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -262,6 +313,25 @@ export class ItemService {
         data: items,
         statusCode: HttpStatus.OK,
       });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException(
+          INTERNAL_SERVER_ERROR_MESSAGE,
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
+  }
+  async checkItemExist(itemId: string): Promise<boolean> {
+    try {
+      const item = await this.itemRepository.findOne({
+        where: { id: itemId },
+        relations: ['category', 'images'],
+      });
+
+      return item ? true : false
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

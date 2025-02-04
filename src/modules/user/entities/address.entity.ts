@@ -18,7 +18,7 @@ export class UserAddressEntity extends BaseEntity {
   city: string;
   @Column()
   address: string;
-  @ManyToOne(() => UserEntity, (user) => user.addressesList, {
+  @ManyToOne(() => UserEntity, (user) => user.addressList, {
     onDelete: "CASCADE",
   })
   @JoinColumn({ name: "user_id" })

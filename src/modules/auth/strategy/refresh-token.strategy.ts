@@ -4,12 +4,14 @@ import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { AuthService } from "../auth.service";
 import { JwtPayload } from "src/common/types/jwt-payload-type";
+import { UserService } from "src/modules/user/user.service";
 
 
 @Injectable()
 export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     constructor(
         private authService: AuthService,
+        private userService: UserService
     ) {
         super({
             ignoreExpiration: false,
@@ -26,7 +28,7 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     async validate(
         request: Request,
         payload: JwtPayload
-    ): Promise<{ phone: string }> {
+    ): Promise<{ phone: string, id: string }> {
         if (!payload || payload == null || !payload?.phone?.startsWith("09")) {
             throw new HttpException(
                 "Token Is Not Valid",
@@ -34,12 +36,13 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
             );
         }
         const refreshToken = request?.cookies["refresh-token"];
-        const phone = await this.authService.validRefreshToken(
+        const { phone, id } = await this.authService.validRefreshToken(
             refreshToken,
             payload.phone
         );
         return {
-            phone
+            phone,
+            id
         };
     }
 }

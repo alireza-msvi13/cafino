@@ -12,7 +12,7 @@ import { MulterFileType } from 'src/common/types/multer.file.type';
 import { StringToArray } from 'src/common/decorators/string-to-array.decorator';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
-import { EmptyStringInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
+import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('item')
@@ -78,7 +78,7 @@ export class ItemController {
 
   @Put("/:itemId")
   @UseGuards(JwtGuard, AdminGuard)
-  @UseInterceptors(UploadMultiFilesAws('images'), EmptyStringInterceptor)
+  @UseInterceptors(UploadMultiFilesAws('images'), EmptyStringToUndefindInterceptor)
   @ApiOperation({ summary: "update menu item" })
   @ApiConsumes(SwaggerContentTypes.MULTIPART)
   async updateItem(

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsBoolean, IsString, MaxLength } from "class-validator";
+import { IsBoolean, IsString, Length, MaxLength } from "class-validator";
 
 export class CreateCategoryDto {
   @ApiProperty()
@@ -13,6 +13,6 @@ export class CreateCategoryDto {
   @ApiProperty({ format: "binary" })
   image: string;
   @ApiProperty({ type: "boolean", default: true })
-  @IsBoolean()
+  @Length(4, 5)
   show: boolean;
 }

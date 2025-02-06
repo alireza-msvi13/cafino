@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 // ? This is useful for Swagger
 
 @Injectable()
-export class EmptyStringInterceptor implements NestInterceptor {
+export class EmptyStringToUndefindInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const req = context.switchToHttp().getRequest();
     if (req.body) {

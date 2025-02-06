@@ -2,7 +2,7 @@
 
 
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNumberString, IsOptional, IsString, Length, MaxLength } from "class-validator";
+import { IsBoolean, IsNumberString, IsOptional, IsString, Length, MaxLength } from "class-validator";
 export class CreateItemDto {
 
     @ApiProperty()
@@ -23,16 +23,16 @@ export class CreateItemDto {
     description?: string;
 
     @ApiProperty({ default: 1000, description: 'Price should be a number' })
-    @IsNumberString()
+    @IsString()
     @MaxLength(10)
     price: string;
 
     @ApiProperty({ default: 0, description: 'Discount should be a number' })
-    @IsNumberString()
+    @IsString()
     @Length(1, 3)
     discount: string;
 
-    @ApiProperty({ default: 1 , description: 'Quantity should be a number' })
+    @ApiProperty({ default: 1, description: 'Quantity should be a number' })
     @IsNumberString()
     @MaxLength(100)
     quantity: string;
@@ -46,5 +46,9 @@ export class CreateItemDto {
     @IsString()
     @MaxLength(36)
     category: string;
+
+    @ApiProperty({ type: "boolean", default: true })
+    @Length(4,5)
+    show: boolean;
 
 }

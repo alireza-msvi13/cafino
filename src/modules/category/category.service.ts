@@ -107,7 +107,9 @@ export class CategoryService {
   }
   async findAll(response: Response) {
     try {
-      const data = await this.categoryRepository.find({})
+      const data = await this.categoryRepository.find({
+        where: { show: true }
+      })
       return response
         .status(HttpStatus.OK)
         .json({
@@ -181,7 +183,7 @@ export class CategoryService {
   async findBySlug(slug: string, response: Response) {
     try {
       const category = await this.categoryRepository.findOne({
-        where: { slug }
+        where: { slug , show: true }
       });
       if (!category) throw new NotFoundException("Not Found Category by this Slug");
 

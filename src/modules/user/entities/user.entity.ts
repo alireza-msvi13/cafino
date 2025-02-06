@@ -7,6 +7,7 @@ import { UserStatus } from "../enum/status.enum";
 import { UserAddressEntity } from "./address.entity";
 import { BaseEntity } from "src/common/abstracts/base.entity";
 import { CommentEntity } from "src/modules/comment/entities/comment.entity";
+import { CartEntity } from "src/modules/cart/entity/cart.entity";
 
 @Entity(EntityName.User)
 export class UserEntity extends BaseEntity {
@@ -42,8 +43,10 @@ export class UserEntity extends BaseEntity {
     otp: OtpEntity
     @OneToMany(() => UserAddressEntity, (address) => address.user)
     addressList: UserAddressEntity[];
-    @OneToMany(() => CommentEntity, (addresses) => addresses.user)
+    @OneToMany(() => CommentEntity, (comment) => comment.user)
     comments: CommentEntity[];
+    @OneToMany(() => CartEntity, (cart) => cart.user)
+    carts: CartEntity[];
 
 
     @CreateDateColumn()

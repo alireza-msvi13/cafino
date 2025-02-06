@@ -12,6 +12,8 @@ import { StorageModule } from './modules/storage/storage.module';
 import { CategoryModule } from './modules/category/category.module';
 import { ItemModule } from './modules/item/item.module';
 import { CommentModule } from './modules/comment/comment.module';
+import { CartModule } from './modules/cart/cart.module';
+import { DiscountModule } from './modules/discount/discount.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { CommentModule } from './modules/comment/comment.module';
     CategoryModule,
     ItemModule,
     CommentModule,
+    CartModule,
+    DiscountModule,
     
   ],
   controllers: [],

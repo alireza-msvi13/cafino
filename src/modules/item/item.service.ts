@@ -11,7 +11,7 @@ import { DeepPartial, Repository } from 'typeorm';
 import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 import { CategoryService } from '../category/category.service';
 import { UpdateItemDto } from './dto/update-item.dto';
-import { toBoolean } from 'src/common/utils/boolean.utils';
+import { isBoolean, toBoolean } from 'src/common/utils/boolean.utils';
 import { ItemImageEntity } from './entities/item-image.entity';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
@@ -42,12 +42,18 @@ export class ItemService {
       price,
       discount,
       quantity,
+      show,
       category: categoryId,
     } = createItemDto;
 
     try {
       const category = await this.categoryService.findOneById(categoryId);
       if (!category) throw new NotFoundException("category not found");
+
+      let showBoolean = show;
+      if (isBoolean(show)) {
+        showBoolean = toBoolean(show);
+      }
 
       const newItem = this.itemRepository.create({
         title,
@@ -57,6 +63,7 @@ export class ItemService {
         discount: Number(discount),
         quantity: Number(quantity),
         category: { id: categoryId },
+        show: showBoolean
       });
       await this.itemRepository.save(newItem);
 
@@ -103,6 +110,7 @@ export class ItemService {
         price,
         discount,
         quantity,
+        show,
         category: categoryId
       } = updateItemDto;
 
@@ -124,6 +132,8 @@ export class ItemService {
       if (price) updateObject.price = +price;
       if (discount) updateObject.discount = +discount;
       if (quantity) updateObject.quantity = +quantity
+      if (show && isBoolean(show)) updateObject.show = toBoolean(show);
+
 
       if (images.length > 0) {
         await Promise.all([
@@ -192,6 +202,8 @@ export class ItemService {
           "itemImage.image",
           "itemImage.imageUrl",
         ])
+        .where("category.show = :show", { show: true })
+        .andWhere("item.show = :show", { show: true })
         .skip((page - 1) * limit)
         .take(limit)
         .getMany();
@@ -249,6 +261,8 @@ export class ItemService {
           "childrenUser.username"
         ])
         .where("item.id = :itemId", { itemId })
+        .andWhere("category.show = :show", { show: true })
+        .andWhere("item.show = :show", { show: true })
         .getOne();
 
       if (!item) throw new NotFoundException("Item Not Found");
@@ -305,9 +319,15 @@ export class ItemService {
         .createQueryBuilder('item')
         .leftJoinAndSelect('item.category', 'category')
         .leftJoinAndSelect('item.images', 'images')
-        .where('item.title ILIKE :search', { search: `%${searchQuery}%` })
+        .where("category.show = :show", { show: true })
+        .andWhere("item.show = :show", { show: true })
+        .andWhere('item.title ILIKE :search', { search: `%${searchQuery}%` })
         .orWhere('item.description ILIKE :search', { search: `%${searchQuery}%` })
         .getMany();
+
+      if (!items.length) {
+        throw new NotFoundException()
+      }
 
       return response.status(HttpStatus.OK).json({
         data: items,
@@ -324,20 +344,97 @@ export class ItemService {
       }
     }
   }
-  async checkItemExist(itemId: string): Promise<boolean> {
-    try {
-      const item = await this.itemRepository.findOne({
-        where: { id: itemId },
-        relations: ['category', 'images'],
-      });
 
-      return item ? true : false
+  // *helper
+
+  async checkItemExist(itemId: string): Promise<ItemEntity> {
+    try {
+      const item = await this.itemRepository
+        .createQueryBuilder('item')
+        .leftJoinAndSelect('item.category', 'category')
+        .where('item.id = :itemId', { itemId })
+        .andWhere('category.show = :show', { show: true })
+        .andWhere('item.show = :show', { show: true })
+        .getOne();
+
+      if (!item) throw new NotFoundException('Item Not Found');
+      return item
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       } else {
         throw new HttpException(
           INTERNAL_SERVER_ERROR_MESSAGE,
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
+  }
+  async checkItemQuantity(
+    itemId: string,
+    count: number = 1
+  ): Promise<void> {
+    try {
+      const item = await this.checkItemExist(itemId)
+
+      const remainingItem = item?.quantity - count;
+
+      if (remainingItem <= 0) {
+        throw new HttpException(
+          "Unfortunately, the Item Stock is less than the Quantity you Requested",
+          HttpStatus.UNPROCESSABLE_ENTITY
+        )
+      }
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException(
+          (error),
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
+  }
+  async incrementItemQuantity(
+    itemId: string,
+    count: number = 1
+  ): Promise<void> {
+    try {
+      const item = await this.checkItemExist(itemId)
+
+      item.quantity += count
+
+      await this.itemRepository.update({ id: item.id }, { quantity: item.quantity })
+
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException(
+          (error),
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
+  }
+  async decrementItemQuantity(
+    itemId: string,
+    count: number = 1
+  ): Promise<void> {
+    try {
+      const item = await this.checkItemExist(itemId)
+
+      item.quantity -= count
+
+      await this.itemRepository.update({ id: item.id }, { quantity: item.quantity })
+
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException(
+          (error),
           HttpStatus.INTERNAL_SERVER_ERROR
         );
       }

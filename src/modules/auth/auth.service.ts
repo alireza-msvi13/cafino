@@ -312,11 +312,12 @@ export class AuthService {
     async validRefreshToken(
         refreshToken: string,
         userPhone: string
-    ): Promise<string> {
+    ): Promise<{ id: string, phone: string }> {
         try {
             const {
                 rt_hash,
-                phone
+                phone,
+                id
             } = await this.userService.findUser(userPhone);
             const isTokensEqual: boolean = await bcrypt.compare(
                 refreshToken,
@@ -336,7 +337,7 @@ export class AuthService {
                     "Token is not Valid", HttpStatus.UNAUTHORIZED
                 );
             }
-            return phone;
+            return { phone, id };
         } catch (error) {
             if (error instanceof HttpException) {
                 throw error;

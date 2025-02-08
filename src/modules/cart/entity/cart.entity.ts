@@ -8,7 +8,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 
 @Entity(EntityName.Cart)
 export class CartEntity extends BaseEntity {
-  @Column({ default: 1 })
+  @Column({ type: 'integer', default: 1 })
   count: number;
   @ManyToOne(() => ItemEntity, (item) => item.cart, { onDelete: "CASCADE" })
   @JoinColumn({ name: 'item_id' })

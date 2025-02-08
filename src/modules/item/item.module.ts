@@ -10,7 +10,7 @@ import { ItemImageEntity } from './entities/item-image.entity';
 @Module({
   imports: [
     StorageModule,
-    CategoryModule,
+    forwardRef(() => CategoryModule),
     TypeOrmModule.forFeature([ItemEntity, ItemImageEntity])],
   controllers: [ItemController],
   providers: [ItemService],

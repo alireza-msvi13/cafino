@@ -24,6 +24,7 @@ export class ItemService {
     @InjectRepository(ItemImageEntity)
     private itemImageRepository: Repository<ItemImageEntity>,
     private storageService: StorageService,
+    @Inject(forwardRef(() => CategoryService))
     private categoryService: CategoryService,
   ) { }
 
@@ -47,8 +48,7 @@ export class ItemService {
     } = createItemDto;
 
     try {
-      const category = await this.categoryService.findOneById(categoryId);
-      if (!category) throw new NotFoundException("category not found");
+      await this.categoryService.findOneById(categoryId);
 
       let showBoolean = show;
       if (isBoolean(show)) {
@@ -121,8 +121,7 @@ export class ItemService {
       if (!item) throw new NotFoundException("Item Not Found");
 
       if (categoryId) {
-        const category = await this.categoryService.findOneById(categoryId);
-        if (!category) throw new NotFoundException("Category Not Found");
+        await this.categoryService.findOneById(categoryId);
       }
 
       const updateObject: DeepPartial<ItemEntity> = {};
@@ -168,6 +167,8 @@ export class ItemService {
         });
 
     } catch (error) {
+      console.log(error);
+
       if (error instanceof HttpException) {
         throw error;
       } else {
@@ -197,7 +198,7 @@ export class ItemService {
           "item.discount",
           "item.quantity",
           "item.rate",
-          "item.rateCount",
+          "item.rate_count",
           "category.title",
           "itemImage.image",
           "itemImage.imageUrl",
@@ -227,6 +228,26 @@ export class ItemService {
       }
     }
   }
+  async getAllItemsByAdmin(response: Response) {
+    try {
+      const data = await this.itemRepository.find({})
+      return response
+        .status(HttpStatus.OK)
+        .json({
+          data,
+          statusCode: HttpStatus.OK
+        })
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException(
+          INTERNAL_SERVER_ERROR_MESSAGE,
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
+  }
   async getItemById(itemId: string, response: Response): Promise<Response> {
     try {
       const item = await this.itemRepository
@@ -246,7 +267,7 @@ export class ItemService {
           "item.discount",
           "item.quantity",
           "item.rate",
-          "item.rateCount",
+          "item.rate_count",
           "category.title",
           "itemImage.image",
           "itemImage.imageUrl",
@@ -283,18 +304,19 @@ export class ItemService {
     }
   }
   async deleteItemById(
-    menuId: string,
+    itemId: string,
     response: Response
   ): Promise<Response> {
     try {
-      const item = await this.itemRepository.delete({ id: menuId })
-      if (!item) {
+      const deleteResult = await this.itemRepository.delete({ id: itemId });
+
+      if (deleteResult.affected === 0) {
         return response
-          .status(HttpStatus.OK)
+          .status(HttpStatus.NOT_FOUND) 
           .json({
             message: "Item Not Found",
             statusCode: HttpStatus.NOT_FOUND
-          })
+          });
       }
       return response
         .status(HttpStatus.OK)
@@ -435,6 +457,23 @@ export class ItemService {
       } else {
         throw new HttpException(
           (error),
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
+  }
+  async updateItemShowStatusByCategoryId(categoryId: string, showStatus: boolean): Promise<void> {
+    try {
+      await this.itemRepository.update({ category: { id: categoryId } }, {
+        show: showStatus
+      })
+
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException(
+          INTERNAL_SERVER_ERROR_MESSAGE,
           HttpStatus.INTERNAL_SERVER_ERROR
         );
       }

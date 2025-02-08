@@ -6,19 +6,19 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity(EntityName.Discount)
 export class DiscountEntity extends BaseEntity {
-  @Column({ unique: true })
+  @Column({ type: 'varchar', unique: true })
   code: string;
-  @Column({ type: "float", nullable: true })
+  @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
   percent: number;
-  @Column({ type: "float", nullable: true })
+  @Column({ type: 'numeric', precision: 10, scale: 2, nullable: true })
   amount: number;
-  @Column({ nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   expires_in: Date;
-  @Column({ nullable: true })
+  @Column({ type: 'integer', nullable: true })
   limit: number;
-  @Column({ nullable: true, default: 0 })
+  @Column({ type: 'integer', nullable: true, default: 0 })
   usage: number;
-  @Column({ default: true })
+  @Column({ type: 'boolean', default: true })
   active: boolean;
   @OneToMany(() => CartEntity, (cart) => cart.discount)
   carts: CartEntity[];

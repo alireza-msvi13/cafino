@@ -2,7 +2,7 @@
 
 
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsNumberString, IsOptional, IsString, Length, MaxLength } from "class-validator";
+import { IsBoolean, IsNumberString, IsOptional, IsString, IsUUID, Length, MaxLength } from "class-validator";
 export class CreateItemDto {
 
     @ApiProperty()
@@ -43,12 +43,11 @@ export class CreateItemDto {
 
 
     @ApiProperty()
-    @IsString()
-    @MaxLength(36)
+    @IsUUID('4', { message: "categoryId is not valid" })
     category: string;
 
     @ApiProperty({ type: "boolean", default: true })
-    @Length(4,5)
+    @Length(4, 5)
     show: boolean;
 
 }

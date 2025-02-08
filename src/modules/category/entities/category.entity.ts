@@ -10,15 +10,15 @@ import {
 
 @Entity(EntityName.Category)
 export class CategoryEntity extends BaseEntity {
-  @Column({ unique: true })
+  @Column({ type: 'text', unique: true })
   title: string;
-  @Column({ unique: true })
+  @Column({ type: 'varchar', unique: true })
   slug: string;
   @Column()
   image: string;
   @Column()
   imageUrl: string;
-  @Column()
+  @Column({ type: 'boolean', default: true })
   show: boolean;
   @OneToMany(() => ItemEntity, (item) => item.category)
   items: ItemEntity[];

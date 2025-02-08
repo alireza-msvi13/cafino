@@ -11,6 +11,8 @@ import {
   UseGuards,
   Put,
   Res,
+  ParseUUIDPipe,
+  BadRequestException,
 } from "@nestjs/common";
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
@@ -49,13 +51,21 @@ export class CategoryController {
   ) {
     return this.categoryService.findByPagination(pagination, response);
   }
-  
+
   @Get()
   @ApiOperation({ summary: "get all categories " })
   findAll(
     @Res() response: Response,
   ) {
     return this.categoryService.findAll(response);
+  }
+
+  @Get('admin')
+  @ApiOperation({ summary: "get all categories by admin, including categories that are not allowed to be shown" })
+  findAllByAdmin(
+    @Res() response: Response,
+  ) {
+    return this.categoryService.findAllByAdmin(response);
   }
 
   @Get("/by-slug/:slug")
@@ -73,18 +83,26 @@ export class CategoryController {
   @ApiConsumes(SwaggerContentTypes.MULTIPART)
   @ApiOperation({ summary: "update new category" })
   update(
-    @Param("id") id: string,
+    @Param("id",
+      new ParseUUIDPipe({
+        exceptionFactory: () => new BadRequestException("Invalid Category Id"),
+      })
+    ) categoryId: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
     @UploadedFile() image: MulterFileType,
     @Res() response: Response
 
   ) {
-    return this.categoryService.update(id, updateCategoryDto, image, response);
+    return this.categoryService.update(categoryId, updateCategoryDto, image, response);
   }
 
   @Delete(":id")
   @ApiOperation({ summary: "delete a category" })
-  delete(@Param("id") id: string, @Res() response: Response) {
-    return this.categoryService.delete(id, response);
+  delete(@Param("id",
+    new ParseUUIDPipe({
+      exceptionFactory: () => new BadRequestException("Invalid Category Id"),
+    })
+  ) categoryId: string, @Res() response: Response) {
+    return this.categoryService.delete(categoryId, response);
   }
 }

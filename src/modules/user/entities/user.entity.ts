@@ -17,7 +17,7 @@ export class UserEntity extends BaseEntity {
     first_name: string;
     @Column({ nullable: true })
     last_name: string;
-    @Column({ nullable: true })
+    @Column({ type: 'timestamp', nullable: true })
     birthday: Date;
     @Column({ nullable: true })
     imageUrl: string;
@@ -25,20 +25,20 @@ export class UserEntity extends BaseEntity {
     phone: string;
     @Column({ unique: true, nullable: true })
     email: string;
-    @Column({ default: Roles.User })
+    @Column({ type: "enum", enum: Roles, default: Roles.User })
     role: string;
     @Column({ nullable: true })
     new_email: string;
     @Column({ nullable: true })
     new_phone: string;
-    @Column({ nullable: true, default: false })
+    @Column({ type: 'boolean', nullable: true, default: false })
     is_email_verified: boolean;
-    @Column({ enum: UserStatus, default: UserStatus.Normal })
+    @Column({ type: "enum", enum: UserStatus, default: UserStatus.Normal })
     status: string;
 
     @Column({ nullable: true })
     rt_hash: string;
-    @OneToOne(() => OtpEntity, otp => otp.user, { nullable: true })
+    @OneToOne(() => OtpEntity, otp => otp.user, { onDelete: "CASCADE" })
     @JoinColumn({ name: "otp_id" })
     otp: OtpEntity
     @OneToMany(() => UserAddressEntity, (address) => address.user)

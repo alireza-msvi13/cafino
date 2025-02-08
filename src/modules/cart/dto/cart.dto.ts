@@ -1,9 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, Length } from "class-validator";
+import { IsUUID } from "class-validator";
 
 export class CartDto {
     @ApiProperty()
-    @IsString()
-    @Length(36)
+    @IsUUID('4', { message: "itemId is not valid" })
     itemId: string;
 }

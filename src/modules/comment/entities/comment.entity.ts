@@ -7,9 +7,9 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } fr
 
 @Entity(EntityName.Comment)
 export class CommentEntity extends BaseEntity {
-    @Column()
+    @Column({ type: 'text' })
     text: string;
-    @Column({ default: false })
+    @Column({ type: 'boolean', default: false })
     accept: boolean;
     @ManyToOne(() => UserEntity, user => user.comments, { onDelete: "CASCADE" })
     @JoinColumn({ name: "user_id" })

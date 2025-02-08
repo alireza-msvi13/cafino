@@ -2,7 +2,7 @@
 import { Response } from 'express';
 import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Put, Query, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Put, Query, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
@@ -51,10 +51,25 @@ export class ItemController {
     )
   }
 
+  @Get('admin')
+  @UseGuards(JwtGuard, AdminGuard)
+  @ApiOperation({ summary: "get all items by admin, including items that are not allowed to be shown" })
+  async getAllItemsByAdmin(
+    @Res() response: Response,
+  ): Promise<Response> {
+    return this.itemService.getAllItemsByAdmin(
+      response,
+    )
+  }
+
   @Get("/:id")
   @ApiOperation({ summary: "get item by id " })
   async getItemById(
-    @Param("id") itemId: string,
+    @Param("id",
+      new ParseUUIDPipe({
+        exceptionFactory: () => new BadRequestException("Invalid Item Id"),
+      })
+    ) itemId: string,
     @Res() response: Response
   ): Promise<Response> {
     return this.itemService.getItemById(
@@ -67,7 +82,11 @@ export class ItemController {
   @ApiOperation({ summary: "delete a menu item" })
   @Delete('/:id')
   async deleteItemById(
-    @Param("id") itemId: string,
+    @Param("id",
+      new ParseUUIDPipe({
+        exceptionFactory: () => new BadRequestException("Invalid Item Id"),
+      })
+    ) itemId: string,
     @Res() response: Response
   ): Promise<Response> {
     return this.itemService.deleteItemById(
@@ -86,7 +105,11 @@ export class ItemController {
     @UploadedFiles() images: Array<MulterFileType>,
     @Body() updateFoodDto: UpdateItemDto,
     @Res() response: Response,
-    @Param("itemId") itemId: string
+    @Param("id",
+      new ParseUUIDPipe({
+        exceptionFactory: () => new BadRequestException("Invalid Item Id"),
+      })
+    ) itemId: string
   ): Promise<Response> {
     return this.itemService.updateItem(
       itemId,

@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { Response } from 'express';
 import { CartDto } from './dto/cart.dto';
 import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
@@ -30,15 +30,17 @@ export class CartService {
         try {
             const { itemId } = cartDto;
             await this.itemService.checkItemExist(itemId);
-
+            
             let cartItem = await this.cartRepository.findOne({
                 where: {
                     user: { id: userId },
                     item: { id: itemId },
                 },
             });
-            if (cartItem) throw new NotFoundException("Item is Already in your Cart");
+            if (cartItem) throw new ConflictException("Item is Already in your Cart");
 
+            await this.itemService.checkItemQuantity(itemId)
+            await this.itemService.decrementItemQuantity(itemId)
 
             cartItem = this.cartRepository.create({
                 user: { id: userId },
@@ -182,6 +184,7 @@ export class CartService {
             if (!cartItem) throw new NotFoundException("Item is Not Exist in Your Cart");
 
             await this.cartRepository.remove(cartItem);
+            await this.itemService.incrementItemQuantity(itemId, cartItem.count)
 
             return response
                 .status(HttpStatus.OK)
@@ -325,6 +328,7 @@ export class CartService {
             if (discount.limit && discount.limit <= discount.usage) {
                 throw new BadRequestException("Discount Code Expired");
             }
+
             if (
                 discount?.expires_in &&
                 discount?.expires_in?.getTime() <= new Date().getTime()
@@ -348,6 +352,8 @@ export class CartService {
                     statusCode: HttpStatus.OK
                 })
         } catch (error) {
+            console.log(error);
+
             if (error instanceof HttpException) {
                 throw error;
             } else {

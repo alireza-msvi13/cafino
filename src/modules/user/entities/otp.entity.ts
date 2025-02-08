@@ -6,12 +6,12 @@ import { UserEntity } from "./user.entity";
 
 @Entity(EntityName.Otp)
 export class OtpEntity extends BaseEntity {
-    @Column()
+    @Column({ type: 'varchar', length: 6 })
     code: string;
-    @Column()
+    @Column({ type: 'varchar', length: 15 })
     phone: string;
-    @Column()
+    @Column({ type: 'timestamp' })
     expires_in: Date;
-    @OneToOne(() => UserEntity, (user) => user.otp, { onDelete: "CASCADE" })
+    @OneToOne(() => UserEntity, (user) => user.otp)
     user: UserEntity;
 }

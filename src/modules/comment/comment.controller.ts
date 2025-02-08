@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, ParseUUIDPipe, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
@@ -40,7 +40,11 @@ export class CommentController {
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: "accept comment for menu item by admin" })
   acceptComment(
-    @Param("id") id: string,
+    @Param("id",
+      new ParseUUIDPipe({
+        exceptionFactory: () => new BadRequestException("Invalid Comment Id"),
+      })
+    ) id: string,
     @Res() response: Response) {
     return this.commentService.acceptComment(id, response)
   }
@@ -48,7 +52,11 @@ export class CommentController {
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: "reject comment for menu item by admin" })
   rejectComment(
-    @Param("id") id: string,
+    @Param("id",
+      new ParseUUIDPipe({
+        exceptionFactory: () => new BadRequestException("Invalid Comment Id"),
+      })
+    ) id: string,
     @Res() response: Response) {
     return this.commentService.rejectComment(id, response)
   }

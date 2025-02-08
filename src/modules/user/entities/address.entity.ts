@@ -12,11 +12,11 @@ import { BaseEntity } from "src/common/abstracts/base.entity";
 
 @Entity(EntityName.UserAddress)
 export class UserAddressEntity extends BaseEntity {
-  @Column()
+  @Column({ type: 'varchar', length: 100 })
   province: string;
-  @Column()
+  @Column({ type: 'varchar', length: 100 })
   city: string;
-  @Column()
+  @Column({ type: 'text' })
   address: string;
   @ManyToOne(() => UserEntity, (user) => user.addressList, {
     onDelete: "CASCADE",

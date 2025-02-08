@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Post,
   Res,
   UseGuards,
@@ -42,7 +44,11 @@ export class DiscountController {
   }
   @Delete("/:id")
   @ApiOperation({ summary: " delete discount code " })
-  remove(@Param("id") id: string, @Res() response: Response) {
+  remove(@Param("id",
+    new ParseUUIDPipe({
+      exceptionFactory: () => new BadRequestException("Invalid Discount Id"),
+    })
+  ) id: string, @Res() response: Response) {
     return this.discountService.delete(id, response);
   }
 }

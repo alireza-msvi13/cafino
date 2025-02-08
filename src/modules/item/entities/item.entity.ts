@@ -18,24 +18,23 @@ export class ItemEntity extends BaseEntity {
     @Column({ type: 'text', nullable: true })
     description: string;
 
-    @Column({ type: 'decimal' })
+    @Column({ type: 'numeric', precision: 10, scale: 2 })
     price: number;
 
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'numeric', precision: 5, scale: 2, default: 0 })
     discount: number;
 
     @Column({ type: 'integer', default: 1 })
     quantity: number;
 
-    @Column({ default: true })
-    show: boolean;
-
-    @Column({ type: 'float', default: 5 })
+    @Column({ type: 'real', default: 5 })
     rate: number;
 
     @Column({ type: 'integer', default: 1 })
-    rateCount: number;
+    rate_count: number;
 
+    @Column({ type: 'boolean', default: true })
+    show: boolean;
 
     @OneToMany(() => ItemImageEntity, (image) => image.item)
     images: ItemImageEntity[];
@@ -47,10 +46,10 @@ export class ItemEntity extends BaseEntity {
     category: CategoryEntity;
 
     @OneToMany(() => CommentEntity, (comment) => comment.item)
-    comments: CommentEntity;
+    comments: CommentEntity[];
 
     @OneToMany(() => CartEntity, (cart) => cart.item)
-    cart: CartEntity;
+    cart: CartEntity[];
 
 
 

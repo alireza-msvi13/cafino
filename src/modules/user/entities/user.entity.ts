@@ -4,7 +4,7 @@ import { OtpEntity } from "./otp.entity";
 import { EntityName } from "src/common/enums/entity.enum";
 import { Roles } from "src/common/enums/role.enum";
 import { UserStatus } from "../enum/status.enum";
-import { UserAddressEntity } from "./address.entity";
+import { AddressEntity } from "./address.entity";
 import { BaseEntity } from "src/common/abstracts/base.entity";
 import { CommentEntity } from "src/modules/comment/entities/comment.entity";
 import { CartEntity } from "src/modules/cart/entity/cart.entity";
@@ -44,8 +44,8 @@ export class UserEntity extends BaseEntity {
     @OneToOne(() => OtpEntity, otp => otp.user, { onDelete: "CASCADE" })
     @JoinColumn({ name: "otp_id" })
     otp: OtpEntity
-    @OneToMany(() => UserAddressEntity, (address) => address.user)
-    addressList: UserAddressEntity[];
+    @OneToMany(() => AddressEntity, (address) => address.user)
+    addressList: AddressEntity[];
     @OneToMany(() => CommentEntity, (comment) => comment.user)
     comments: CommentEntity[];
     @OneToMany(() => CartEntity, (cart) => cart.user)

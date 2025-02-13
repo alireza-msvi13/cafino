@@ -9,7 +9,7 @@ import { Response } from 'express';
 import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 import { UpdateUserDto } from '../profile/dto/update-user-dto';
 import { CreateAddressDto } from '../profile/dto/create-address-dto';
-import { UserAddressEntity } from './entities/address.entity';
+import { AddressEntity } from './entities/address.entity';
 import { UpdateAddressDto } from '../profile/dto/update-address-dto';
 import { FavoriteEntity } from './entities/favorite.entity';
 
@@ -21,8 +21,8 @@ export class UserService {
         private userRepository: Repository<UserEntity>,
         @InjectRepository(OtpEntity)
         private otpRepository: Repository<OtpEntity>,
-        @InjectRepository(UserAddressEntity)
-        private addressRepository: Repository<UserAddressEntity>,
+        @InjectRepository(AddressEntity)
+        private addressRepository: Repository<AddressEntity>,
         @InjectRepository(FavoriteEntity)
         private favoriteRepository: Repository<FavoriteEntity>,
     ) { }

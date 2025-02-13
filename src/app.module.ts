@@ -14,6 +14,7 @@ import { ItemModule } from './modules/item/item.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { CartModule } from './modules/cart/cart.module';
 import { DiscountModule } from './modules/discount/discount.module';
+import { ProfileModule } from './modules/profile/profile.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { DiscountModule } from './modules/discount/discount.module';
     CommentModule,
     CartModule,
     DiscountModule,
+    ProfileModule
     
   ],
   controllers: [],

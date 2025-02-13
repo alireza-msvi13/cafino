@@ -5,6 +5,7 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOn
 import { ItemImageEntity } from './item-image.entity';
 import { CommentEntity } from 'src/modules/comment/entities/comment.entity';
 import { CartEntity } from 'src/modules/cart/entity/cart.entity';
+import { FavoriteEntity } from 'src/modules/user/entities/favorite.entity';
 
 @Entity(EntityName.Item)
 export class ItemEntity extends BaseEntity {
@@ -50,6 +51,8 @@ export class ItemEntity extends BaseEntity {
 
     @OneToMany(() => CartEntity, (cart) => cart.item)
     cart: CartEntity[];
+    @OneToMany(() => FavoriteEntity, (favorite) => favorite.item)
+    favorites: FavoriteEntity[];
 
 
 

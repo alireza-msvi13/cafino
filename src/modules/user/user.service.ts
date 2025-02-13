@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/user.dto';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
@@ -7,6 +7,11 @@ import { OtpEntity } from './entities/otp.entity';
 import { UserStatus } from './enum/status.enum';
 import { Response } from 'express';
 import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
+import { UpdateUserDto } from '../profile/dto/update-user-dto';
+import { CreateAddressDto } from '../profile/dto/create-address-dto';
+import { UserAddressEntity } from './entities/address.entity';
+import { UpdateAddressDto } from '../profile/dto/update-address-dto';
+import { FavoriteEntity } from './entities/favorite.entity';
 
 @Injectable()
 export class UserService {
@@ -16,6 +21,10 @@ export class UserService {
         private userRepository: Repository<UserEntity>,
         @InjectRepository(OtpEntity)
         private otpRepository: Repository<OtpEntity>,
+        @InjectRepository(UserAddressEntity)
+        private addressRepository: Repository<UserAddressEntity>,
+        @InjectRepository(FavoriteEntity)
+        private favoriteRepository: Repository<FavoriteEntity>,
     ) { }
 
 
@@ -45,8 +54,11 @@ export class UserService {
     }
     async getUsersList(response: Response) {
         try {
+
+            // TODO remove rt_hash
+
             const users = await this.userRepository.find({
-                relations: ['addressesList']
+                relations: ['addressList'],
             });
             return response
                 .status(HttpStatus.OK)
@@ -65,13 +77,270 @@ export class UserService {
             }
         }
     }
+    
 
+    // *profile
+
+    async updateUser(
+        updateUserDto: UpdateUserDto,
+        userId: string
+    ): Promise<void> {
+        try {
+            const { username, email, first_name, last_name, birthday } = updateUserDto
+
+            await this.userRepository.update({ id: userId }, {
+                username,
+                email,
+                first_name,
+                last_name,
+                birthday
+            })
+
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async createAddress(
+        userId: string,
+        createAddressDto: CreateAddressDto
+    ): Promise<void> {
+        try {
+
+            const { province, city, address } = createAddressDto
+            const newAddress = this.addressRepository.create({
+                province,
+                city,
+                address,
+                user: { id: userId }
+            })
+
+            await this.addressRepository.save(newAddress)
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async updateAddress(
+        addressId: string,
+        updateAddressDto: UpdateAddressDto,
+    ): Promise<void> {
+        try {
+            const { province, city, address } = updateAddressDto
+
+            await this.addressRepository.update({ id: addressId }, {
+                province,
+                city,
+                address
+            })
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async deleteAddress(
+        addressId: string
+    ): Promise<void> {
+        try {
+            await this.userRepository.delete({ id: addressId })
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async getAddresses(
+        userId: string,
+    ) {
+        try {
+
+            const addresses = await this.addressRepository.find({
+                where: { user: { id: userId } }
+            })
+
+            return addresses
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async updateImage(
+        userId: string,
+        image: string,
+        imageUrl: string
+    ): Promise<void> {
+        try {
+            await this.userRepository.update({ id: userId }, {
+                image,
+                imageUrl
+            })
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async deleteImage(
+        userId: string,
+    ): Promise<void> {
+        try {
+            await this.userRepository.update({ id: userId }, {
+                image: null,
+                imageUrl: null
+            })
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async addToFavorite(
+        userId: string,
+        itemId: string
+    ): Promise<void> {
+        try {
+            const item = await this.favoriteRepository.findOne({
+                where: {
+                    user: { id: userId },
+                    item: { id: itemId }
+                }
+            })
+
+            if (item) {
+                throw new BadRequestException('Item is Already Exist in Favorites')
+            }
+            const newItem = this.favoriteRepository.create({
+                user: { id: userId },
+                item: { id: itemId }
+            })
+            await this.favoriteRepository.save(newItem)
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async removeFromFavorite(
+        userId: string,
+        itemId: string
+    ): Promise<void> {
+        try {
+            await this.favoriteRepository.delete({
+                user: { id: userId },
+                item: { id: itemId }
+            })
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async findUserFavorites(userId: string) {
+        try {
+            const data = await this.favoriteRepository.find({
+                where: {
+                    user: { id: userId }
+                },
+                relations: {
+                    item: true
+                },
+            })
+
+            if (!data.length) {
+                throw new NotFoundException("Not Found any Item in User Favorite")
+            }
+            return data
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    INTERNAL_SERVER_ERROR_MESSAGE,
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
     // *helper
 
     async findUser(phone: string, relations: string[] = []): Promise<UserEntity> {
         try {
             const user = await this.userRepository.findOne({
                 where: { phone },
+                relations,
+            });
+
+            if (!user) {
+                throw new HttpException(
+                    "User Not Found",
+                    HttpStatus.NOT_FOUND
+                );
+            }
+            return user;
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    INTERNAL_SERVER_ERROR_MESSAGE,
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async findUserById(id: string, relations: string[] = []): Promise<UserEntity> {
+        try {
+            const user = await this.userRepository.findOne({
+                where: { id },
                 relations,
             });
 
@@ -227,6 +496,54 @@ export class UserService {
                     rt_hash: null
                 }
             )
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    INTERNAL_SERVER_ERROR_MESSAGE,
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async checkUsernameExist(
+        username: string,
+    ): Promise<void> {
+        try {
+            const isDuplicateUsername = await this.userRepository.findOne({
+                where: { username }
+            })
+            if (isDuplicateUsername) {
+                throw new HttpException(
+                    "Username Already Used",
+                    HttpStatus.CONFLICT
+                )
+            }
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    INTERNAL_SERVER_ERROR_MESSAGE,
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async checkAddressExist(
+        addressId: string,
+    ): Promise<void> {
+        try {
+            const address = await this.addressRepository.findOne({
+                where: { id: addressId }
+            })
+            if (!address) {
+                throw new HttpException(
+                    "Address Not Found",
+                    HttpStatus.NOT_FOUND
+                );
+            }
         } catch (error) {
             if (error instanceof HttpException) {
                 throw error;

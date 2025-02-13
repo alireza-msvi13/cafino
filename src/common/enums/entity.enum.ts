@@ -9,4 +9,5 @@ export enum EntityName {
     Comment = "comment",
     Cart = "cart",
     Discount = "discount",
+    Favorite = "favorite"
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Res, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Response } from 'express';
 import { ApiOperation } from '@nestjs/swagger';

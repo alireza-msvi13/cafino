@@ -6,14 +6,15 @@ import { UserEntity } from './entities/user.entity';
 import { OtpEntity } from './entities/otp.entity';
 // import { AuthModule } from '../auth/auth.module';
 import { UserAddressEntity } from './entities/address.entity';
+import { FavoriteEntity } from './entities/favorite.entity';
 
 @Module({
   imports: [
     // AuthModule,
-    TypeOrmModule.forFeature([UserEntity, OtpEntity , UserAddressEntity])
+    TypeOrmModule.forFeature([UserEntity, OtpEntity, UserAddressEntity, FavoriteEntity])
   ],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],
 })
-export class UserModule {}
+export class UserModule { }

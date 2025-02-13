@@ -8,6 +8,7 @@ import { UserAddressEntity } from "./address.entity";
 import { BaseEntity } from "src/common/abstracts/base.entity";
 import { CommentEntity } from "src/modules/comment/entities/comment.entity";
 import { CartEntity } from "src/modules/cart/entity/cart.entity";
+import { FavoriteEntity } from "./favorite.entity";
 
 @Entity(EntityName.User)
 export class UserEntity extends BaseEntity {
@@ -17,8 +18,10 @@ export class UserEntity extends BaseEntity {
     first_name: string;
     @Column({ nullable: true })
     last_name: string;
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'date', nullable: true })
     birthday: Date;
+    @Column({ nullable: true })
+    image: string;
     @Column({ nullable: true })
     imageUrl: string;
     @Column({ unique: true })
@@ -47,6 +50,8 @@ export class UserEntity extends BaseEntity {
     comments: CommentEntity[];
     @OneToMany(() => CartEntity, (cart) => cart.user)
     carts: CartEntity[];
+    @OneToMany(() => FavoriteEntity, (favorite) => favorite.user)
+    favorites: FavoriteEntity[];
 
 
     @CreateDateColumn()

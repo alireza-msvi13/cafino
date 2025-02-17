@@ -9,5 +9,8 @@ export enum EntityName {
     Comment = "comment",
     Cart = "cart",
     Discount = "discount",
-    Favorite = "favorite"
+    Favorite = "favorite",
+    Order = "order",
+    OrderItem = "order_item",
+    Payment = "payment",
 }

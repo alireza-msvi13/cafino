@@ -8,7 +8,7 @@ export class VerfiyOtpDto {
     @IsPhoneNumber('IR', { message: errorMessage })
     @ApiProperty({
         title: "enter phone number for login",
-        example: "09254652258",
+        example: "09375012365",
         nullable: false
     })
     phone: string;

@@ -15,6 +15,9 @@ import { CommentModule } from './modules/comment/comment.module';
 import { CartModule } from './modules/cart/cart.module';
 import { DiscountModule } from './modules/discount/discount.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { GatewayModule } from './modules/gateway/gateway.module';
+import { OrderModule } from './modules/order/order.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -36,7 +39,10 @@ import { ProfileModule } from './modules/profile/profile.module';
     CommentModule,
     CartModule,
     DiscountModule,
-    ProfileModule
+    ProfileModule,
+    OrderModule,
+    PaymentModule,
+    GatewayModule
     
   ],
   controllers: [],

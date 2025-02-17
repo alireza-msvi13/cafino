@@ -9,6 +9,7 @@ import { BaseEntity } from "src/common/abstracts/base.entity";
 import { CommentEntity } from "src/modules/comment/entities/comment.entity";
 import { CartEntity } from "src/modules/cart/entity/cart.entity";
 import { FavoriteEntity } from "./favorite.entity";
+import { OrderEntity } from "src/modules/order/entity/order.entity";
 
 @Entity(EntityName.User)
 export class UserEntity extends BaseEntity {
@@ -52,6 +53,10 @@ export class UserEntity extends BaseEntity {
     carts: CartEntity[];
     @OneToMany(() => FavoriteEntity, (favorite) => favorite.user)
     favorites: FavoriteEntity[];
+    @OneToMany(() => OrderEntity, (order) => order.user)
+    orders: OrderEntity[];
+    @OneToMany(() => OrderEntity, (order) => order.user)
+    payments: OrderEntity[];
 
 
     @CreateDateColumn()

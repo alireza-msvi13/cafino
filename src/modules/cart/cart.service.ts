@@ -21,6 +21,7 @@ export class CartService {
     ) { }
 
 
+    // *primary
 
     async addToCart(
         cartDto: CartDto,
@@ -30,7 +31,7 @@ export class CartService {
         try {
             const { itemId } = cartDto;
             await this.itemService.checkItemExist(itemId);
-            
+
             let cartItem = await this.cartRepository.findOne({
                 where: {
                     user: { id: userId },
@@ -230,67 +231,25 @@ export class CartService {
             }
         }
     }
-    async getCarts(
+    async getCart(
         userId: string,
         response: Response
     ): Promise<Response> {
         try {
-            const cart = await this.cartRepository.find({
-                relations: { discount: true, item: { category: true, images: true } },
-                where: { user: { id: userId } },
-            });
-
-            const activeGeneralDiscount = cart.find(item => item.discount?.active);
-            let totalAmount = 0;
-            let totalDiscount = 0;
-            let finalAmount = 0;
-
-            const cartItems = cart.map(({ item, count }) => {
-                const itemTotalPrice = item.price * count;
-                const itemDiscount = item.discount > 0 ? itemTotalPrice * (item.discount / 100) : 0;
-
-                totalAmount += itemTotalPrice;
-                totalDiscount += itemDiscount;
-                finalAmount += itemTotalPrice - itemDiscount;
-
-                return {
-                    itemId: item.id,
-                    title: item.title,
-                    description: item.description,
-                    count,
-                    images: item.images ? item.images.map(image => image.imageUrl) : [],
-                    price: item.price,
-                    discount: item.discount,
-                    finalPrice: itemTotalPrice - itemDiscount,
-                    category: item.category ? { title: item.category.title } : null,
-                };
-            });
-
-            let generalDiscount = {};
-            if (activeGeneralDiscount?.discount?.active) {
-                const { discount } = activeGeneralDiscount;
-                if (discount?.limit && discount.limit > discount.usage) {
-                    let discountAmount =
-                        discount.percent > 0 ? finalAmount * (discount.percent / 100) : discount.amount || 0;
-
-                    finalAmount = Math.max(finalAmount - discountAmount, 0);
-                    totalDiscount += discountAmount;
-
-                    generalDiscount = {
-                        code: discount.code,
-                        ...(discount.percent ? { percent: discount.percent } : {}),
-                        ...(discount.amount ? { amount: discount.amount } : {}),
-                        discountAmount,
-                    };
-                }
-            }
+            const {
+                totalAmount,
+                totalDiscount,
+                paymentAmount,
+                cartItems,
+                generalDiscount,
+            } = await this.getUserCart(userId)
 
             return response
                 .status(HttpStatus.OK)
                 .json({
                     totalAmount,
                     totalDiscount,
-                    finalAmount,
+                    paymentAmount,
                     cartItems,
                     generalDiscount,
                     statusCode: HttpStatus.OK
@@ -403,6 +362,80 @@ export class CartService {
             } else {
                 throw new HttpException(
                     (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+
+    // *helper
+    async getUserCart(
+        userId: string,
+    ) {
+        try {
+            const cart = await this.cartRepository.find({
+                relations: { discount: true, item: { category: true, images: true } },
+                where: { user: { id: userId } },
+            });
+
+            const activeGeneralDiscount = cart.find(item => item.discount?.active);
+            let totalAmount = 0;
+            let totalDiscount = 0;
+            let paymentAmount = 0;
+
+            const cartItems = cart.map(({ item, count }) => {
+                const itemTotalPrice = item.price * count;
+                const itemDiscount = item.discount > 0 ? itemTotalPrice * (item.discount / 100) : 0;
+
+                totalAmount += itemTotalPrice;
+                totalDiscount += itemDiscount;
+                paymentAmount += itemTotalPrice - itemDiscount;
+
+                return {
+                    itemId: item.id,
+                    title: item.title,
+                    description: item.description,
+                    count,
+                    images: item.images ? item.images.map(image => image.imageUrl) : [],
+                    price: item.price,
+                    discount: item.discount,
+                    finalPrice: itemTotalPrice - itemDiscount,
+                    category: item.category ? { title: item.category.title } : null,
+                };
+            });
+
+            let generalDiscount = {};
+            if (activeGeneralDiscount?.discount?.active) {
+                const { discount } = activeGeneralDiscount;
+                if (discount?.limit && discount.limit > discount.usage) {
+                    let discountAmount =
+                        discount.percent > 0 ? paymentAmount * (discount.percent / 100) : discount.amount || 0;
+
+                    paymentAmount = Math.max(paymentAmount - discountAmount, 0);
+                    totalDiscount += discountAmount;
+
+                    generalDiscount = {
+                        code: discount.code,
+                        ...(discount.percent ? { percent: discount.percent } : {}),
+                        ...(discount.amount ? { amount: discount.amount } : {}),
+                        discountAmount,
+                    };
+                }
+            }
+
+            return {
+                totalAmount,
+                totalDiscount,
+                paymentAmount,
+                cartItems,
+                generalDiscount,
+            }
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error.message),
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }

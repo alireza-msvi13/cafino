@@ -77,7 +77,7 @@ export class UserService {
             }
         }
     }
-    
+
 
     // *profile
 
@@ -544,6 +544,34 @@ export class UserService {
                     HttpStatus.NOT_FOUND
                 );
             }
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    INTERNAL_SERVER_ERROR_MESSAGE,
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+
+    async findUserByAddress(userId: string, addressId: string): Promise<AddressEntity> {
+        try {
+            const address = await this.addressRepository.findOne({
+                where: {
+                    id: addressId,
+                    user: { id: userId }
+                }
+            })
+
+            if (!address) {
+                throw new HttpException(
+                    "Address Not Found",
+                    HttpStatus.NOT_FOUND
+                );
+            }
+            return address;
         } catch (error) {
             if (error instanceof HttpException) {
                 throw error;

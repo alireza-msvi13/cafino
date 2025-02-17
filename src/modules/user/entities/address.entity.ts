@@ -4,11 +4,13 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  ManyToOne
+  ManyToOne,
+  OneToMany
 } from "typeorm";
 import { UserEntity } from "./user.entity";
 import { EntityName } from "src/common/enums/entity.enum";
 import { BaseEntity } from "src/common/abstracts/base.entity";
+import { OrderEntity } from "src/modules/order/entity/order.entity";
 
 @Entity(EntityName.Address)
 export class AddressEntity extends BaseEntity {
@@ -23,8 +25,8 @@ export class AddressEntity extends BaseEntity {
   })
   @JoinColumn({ name: "user_id" })
   user: UserEntity;
-  // @OneToMany(() => OrderEntity, (order) => order.address)
-  // orders: OrderEntity[];
+  @OneToMany(() => OrderEntity, (order) => order.address)
+  orders: OrderEntity[];
   @CreateDateColumn()
   created_at: Date;
 }

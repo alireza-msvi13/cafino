@@ -38,7 +38,7 @@ export class CartController {
     @Res() response: Response,
     @GetUser("id") userId: string
   ): Promise<Response> {
-    return this.cartService.getCarts(
+    return this.cartService.getCart(
       userId,
       response
     )

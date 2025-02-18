@@ -14,6 +14,8 @@ import { OrderStatus } from "src/common/enums/order-status.enum";
 import { INTERNAL_SERVER_ERROR_MESSAGE } from "src/common/constants/error.constant";
 import { OrderDto } from "./dto/order.dto";
 import { AllowdOrderStatus } from "src/common/constants/order-status.constant";
+import { Response } from "express";
+import { PaginationDto } from "src/common/dto/pagination.dto";
 
 @Injectable()
 export class OrderService {
@@ -88,13 +90,13 @@ export class OrderService {
       }
     }
   }
-  async changeOrderStatus(id: string, status: string) {
+  async changeOrderStatus(orderId: string, status: string) {
     try {
       if (!AllowdOrderStatus.includes(status)) {
         throw new BadRequestException('Invalid Status')
       }
 
-      await this.orderRepository.update({ id }, {
+      await this.orderRepository.update({ id: orderId }, {
         status
       })
 
@@ -109,5 +111,62 @@ export class OrderService {
       }
     }
   }
+  async changeOrderStatusByAdmin(orderId: string, status: string, response: Response) {
+    try {
+      await this.changeOrderStatus(orderId, status)
+
+      return response.status(HttpStatus.OK).json({
+        message: `Order Status Changed To ${status} Successfully`,
+        statusCode: HttpStatus.OK,
+      });
+
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException(
+          INTERNAL_SERVER_ERROR_MESSAGE,
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
+  }
+
+  async getAllOrders(
+    paginationDto: PaginationDto,
+    response: Response
+  ): Promise<Response> {
+    try {
+      const { limit = 10, page = 1 } = paginationDto;
+
+      const data = await this.orderRepository
+        .createQueryBuilder("order")
+        .leftJoinAndSelect("order.user", "user")
+        .leftJoinAndSelect("order.address", "address")
+        .leftJoinAndSelect("order.items", "items")
+        .leftJoinAndSelect("items.item", "item")
+        .leftJoinAndSelect("order.payments", "payments")
+        .skip((page - 1) * limit)
+        .take(limit)
+        .getMany();
+
+      return response.status(HttpStatus.OK).json({
+        data,
+        statusCode: HttpStatus.OK,
+      });
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException(
+          INTERNAL_SERVER_ERROR_MESSAGE,
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
+  }
+
 
 }

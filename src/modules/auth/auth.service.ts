@@ -45,7 +45,7 @@ export class AuthService {
                 phone,
                 code: otpCode
             }
-            // await this.smsService.sendSms(smsOptions)
+            await this.smsService.sendSms(smsOptions)
             return response
                 .status(HttpStatus.OK)
                 .json({
@@ -188,7 +188,7 @@ export class AuthService {
                 phone,
                 code: otpCode
             }
-            // // await this.smsService.sendSms(smsOptions)
+            await this.smsService.sendSms(smsOptions)
 
             return response
                 .status(HttpStatus.OK)
@@ -234,11 +234,10 @@ export class AuthService {
             delete response?.req?.rawHeaders[3];
             delete response?.req?.headers.cookie;
             await this.userService.removeRefreshToken(phone);
-            const responseMessage: string = "خروج کاربر با موفقیت انجام شد"
             return response
                 .status(HttpStatus.OK)
                 .json({
-                    message: responseMessage,
+                    message: "User logout Successfully",
                     statusCode: HttpStatus.OK
                 })
         } catch (error) {

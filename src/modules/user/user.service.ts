@@ -591,11 +591,18 @@ export class UserService {
         try {
             const user = await this.findUser(phone, ['otp']);
 
-            const now = new Date();
+            if (user && user.status === UserStatus.Block) {
+                throw new NotFoundException(
+                    "Unfortunately You are in the Blacklist",
+                )
+            }
 
             if (!user.otp) {
                 throw new BadRequestException("Previous Code Not Found");
             }
+
+            const now = new Date();
+
 
             if (now < user.otp.expires_in) {
                 throw new BadRequestException(

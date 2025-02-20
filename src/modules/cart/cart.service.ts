@@ -107,7 +107,7 @@ export class CartService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -159,7 +159,7 @@ export class CartService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -198,7 +198,7 @@ export class CartService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error.message),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -225,7 +225,7 @@ export class CartService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -259,7 +259,7 @@ export class CartService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error.message),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -317,7 +317,7 @@ export class CartService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -361,7 +361,7 @@ export class CartService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -435,7 +435,7 @@ export class CartService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error.message),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }

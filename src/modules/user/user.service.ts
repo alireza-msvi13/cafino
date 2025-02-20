@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -44,7 +44,7 @@ export class UserService {
                 })
         } catch (error) {
             console.log(error);
-            
+
             if (error instanceof HttpException) {
                 throw error;
             } else {
@@ -131,7 +131,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -159,7 +159,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -183,7 +183,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -208,7 +208,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -237,7 +237,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -263,7 +263,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -286,7 +286,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -302,7 +302,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -323,7 +323,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -344,7 +344,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -363,7 +363,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -394,7 +394,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -414,7 +414,7 @@ export class UserService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -457,10 +457,7 @@ export class UserService {
             });
 
             if (!user) {
-                throw new HttpException(
-                    "User Not Found",
-                    HttpStatus.NOT_FOUND
-                );
+                throw new NotFoundException("User Not Found")
             }
             return user;
         } catch (error) {
@@ -482,9 +479,8 @@ export class UserService {
             });
 
             if (!user) {
-                throw new HttpException(
-                    "User Not Found",
-                    HttpStatus.NOT_FOUND
+                throw new NotFoundException(
+                    "User Not Found"
                 );
             }
             return user;
@@ -508,9 +504,8 @@ export class UserService {
             });
 
             if (user && user.status === UserStatus.Block) {
-                throw new HttpException(
+                throw new NotFoundException(
                     "Unfortunately You are in the Blacklist",
-                    HttpStatus.BAD_REQUEST
                 )
             }
 
@@ -599,12 +594,12 @@ export class UserService {
             const now = new Date();
 
             if (!user.otp) {
-                throw new HttpException("Previous Code Not Found", HttpStatus.BAD_REQUEST);
+                throw new BadRequestException("Previous Code Not Found");
             }
 
             if (now < user.otp.expires_in) {
-                throw new HttpException(
-                    "Code is Not Expird Yet", HttpStatus.BAD_REQUEST
+                throw new BadRequestException(
+                    "Code is Not Expird Yet"
                 )
             }
 
@@ -652,9 +647,8 @@ export class UserService {
                 where: { username }
             })
             if (isDuplicateUsername) {
-                throw new HttpException(
-                    "Username Already Used",
-                    HttpStatus.CONFLICT
+                throw new ConflictException(
+                    "Username Already Used"
                 )
             }
         } catch (error) {
@@ -676,9 +670,8 @@ export class UserService {
                 where: { id: addressId }
             })
             if (!address) {
-                throw new HttpException(
+                throw new NotFoundException(
                     "Address Not Found",
-                    HttpStatus.NOT_FOUND
                 );
             }
         } catch (error) {
@@ -701,12 +694,8 @@ export class UserService {
                 }
             })
 
-            if (!address) {
-                throw new HttpException(
-                    "Address Not Found",
-                    HttpStatus.NOT_FOUND
-                );
-            }
+            if (!address) throw new NotFoundException("Address Not Found")
+
             return address;
         } catch (error) {
             if (error instanceof HttpException) {

@@ -312,7 +312,7 @@ export class ItemService {
 
       if (deleteResult.affected === 0) {
         return response
-          .status(HttpStatus.NOT_FOUND) 
+          .status(HttpStatus.NOT_FOUND)
           .json({
             message: "Item Not Found",
             statusCode: HttpStatus.NOT_FOUND
@@ -412,7 +412,7 @@ export class ItemService {
         throw error;
       } else {
         throw new HttpException(
-          (error),
+          INTERNAL_SERVER_ERROR_MESSAGE,
           HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
@@ -434,7 +434,7 @@ export class ItemService {
         throw error;
       } else {
         throw new HttpException(
-          (error),
+          INTERNAL_SERVER_ERROR_MESSAGE,
           HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
@@ -456,7 +456,7 @@ export class ItemService {
         throw error;
       } else {
         throw new HttpException(
-          (error),
+          INTERNAL_SERVER_ERROR_MESSAGE,
           HttpStatus.INTERNAL_SERVER_ERROR
         );
       }

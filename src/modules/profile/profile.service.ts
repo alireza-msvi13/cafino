@@ -49,7 +49,7 @@ export class ProfileService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -76,7 +76,7 @@ export class ProfileService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -104,7 +104,7 @@ export class ProfileService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -128,7 +128,7 @@ export class ProfileService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -153,7 +153,7 @@ export class ProfileService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -194,7 +194,7 @@ export class ProfileService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -226,7 +226,7 @@ export class ProfileService {
             return response
                 .status(HttpStatus.OK)
                 .json({
-                    message: "پروفایل کاربر با موفقیت به حذف شد",
+                    message: "User Profile Image Deleted",
                     statusCode: HttpStatus.OK
                 })
         } catch (error) {
@@ -234,7 +234,7 @@ export class ProfileService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -259,7 +259,7 @@ export class ProfileService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }
@@ -286,7 +286,7 @@ export class ProfileService {
                 throw error;
             } else {
                 throw new HttpException(
-                    (error),
+                    INTERNAL_SERVER_ERROR_MESSAGE,
                     HttpStatus.INTERNAL_SERVER_ERROR
                 );
             }

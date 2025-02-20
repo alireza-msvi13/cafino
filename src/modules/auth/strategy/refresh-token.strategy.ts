@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
@@ -30,10 +30,7 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
         payload: JwtPayload
     ): Promise<{ phone: string, id: string }> {
         if (!payload || payload == null || !payload?.phone?.startsWith("09")) {
-            throw new HttpException(
-                "Token Is Not Valid",
-                HttpStatus.FORBIDDEN
-            );
+            throw new UnauthorizedException("Token is Not Valid")
         }
         const refreshToken = request?.cookies["refresh-token"];
         const { phone, id } = await this.authService.validRefreshToken(

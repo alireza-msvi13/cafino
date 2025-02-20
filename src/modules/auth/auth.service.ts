@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { ResendCodeDto } from './dto/resend-code.dto';
@@ -72,19 +72,11 @@ export class AuthService {
             const user = await this.userService.findUser(phone, ['otp']);
 
             const now = new Date();
-            if (now > user.otp.expires_in) {
-                throw new HttpException(
-                    "Code Expired",
-                    HttpStatus.UNAUTHORIZED
-                )
-            }
+            if (now > user.otp.expires_in) throw new UnauthorizedException("Code Expired")
 
-            if (user.otp.code !== otpCode) {
-                throw new HttpException(
-                    "Code is Not Correct",
-                    HttpStatus.UNAUTHORIZED
-                )
-            }
+
+            if (user.otp.code !== otpCode) throw new UnauthorizedException("Code is Not Correct")
+
             const tokens = await this.createTokens(
                 user.phone,
                 user.id.toString()
@@ -133,24 +125,16 @@ export class AuthService {
                 refreshToken,
                 user.rt_hash
             );
-            if (!isTokensEqual) {
-                throw new HttpException(
-                    "Token is Not Valid",
-                    HttpStatus.UNAUTHORIZED
-                );
-            }
+            if (!isTokensEqual) throw new UnauthorizedException("Token is Not Valid")
+
             const isValidToken = await this.jwtService.verify(
                 refreshToken,
                 {
                     secret: process.env.REFRESH_TOKEN_SECRET
                 }
             )
-            if (!isValidToken) {
-                throw new HttpException(
-                    "Token is Not Valid",
-                    HttpStatus.UNAUTHORIZED
-                );
-            }
+            if (!isValidToken) throw new UnauthorizedException("Token is Not Valid")
+
             const tokens: TokenType = await this.createTokens(
                 phone,
                 user.id.toString()
@@ -323,20 +307,14 @@ export class AuthService {
                 refreshToken,
                 rt_hash
             );
-            if (!isTokensEqual) {
-                throw new HttpException(
-                    "Token is not Valid", HttpStatus.UNAUTHORIZED
-                );
-            }
+            if (!isTokensEqual) throw new UnauthorizedException("Token is Not Valid")
+
             const isTokenValid = await this.jwtService.verify(
                 refreshToken,
                 { secret: process.env.REFRESH_TOKEN_SECRET }
             )
-            if (!isTokenValid) {
-                throw new HttpException(
-                    "Token is not Valid", HttpStatus.UNAUTHORIZED
-                );
-            }
+            if (!isTokenValid) throw new UnauthorizedException("Token is Not Valid")
+
             return { phone, id };
         } catch (error) {
             if (error instanceof HttpException) {

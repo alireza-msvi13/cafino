@@ -1,10 +1,9 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/user.dto';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OtpEntity } from './entities/otp.entity';
-import { UserStatus } from './enum/status.enum';
+import { UserStatus } from '../../common/enums/user-status.enum';
 import { Response } from 'express';
 import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 import { UpdateUserDto } from '../profile/dto/update-user-dto';
@@ -12,6 +11,8 @@ import { CreateAddressDto } from '../profile/dto/create-address-dto';
 import { AddressEntity } from './entities/address.entity';
 import { UpdateAddressDto } from '../profile/dto/update-address-dto';
 import { FavoriteEntity } from './entities/favorite.entity';
+import { UserPermissionDto } from './dto/permission.dto';
+import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -33,7 +34,7 @@ export class UserService {
     async getUserInfo(phone: string, response: Response) {
         try {
 
-            const user = await this.findUser(phone, ["addressesList"])
+            const user = await this.findUser(phone, ["addressList"])
             const { otp, rt_hash, new_email, new_phone, ...sanitizedUser } = user;
             return response
                 .status(HttpStatus.OK)
@@ -42,6 +43,8 @@ export class UserService {
                     statusCode: HttpStatus.OK
                 })
         } catch (error) {
+            console.log(error);
+            
             if (error instanceof HttpException) {
                 throw error;
             } else {
@@ -77,7 +80,140 @@ export class UserService {
             }
         }
     }
+    async changeUserPermission(userPermissionDto: UserPermissionDto, response: Response) {
+        try {
 
+            const { phone, role } = userPermissionDto
+
+            if (!["admin", "user"].includes(role)) {
+                throw new BadRequestException('Invalid role')
+            }
+
+            await this.userRepository.update({ phone }, {
+                role
+            })
+
+            return response.status(HttpStatus.OK).json({
+                message: `User Role Changed To ${role.toUpperCase()} Successfully`,
+                statusCode: HttpStatus.OK,
+            });
+
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    INTERNAL_SERVER_ERROR_MESSAGE,
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async addUserToBlacklist(
+        userDto: UserDto,
+        response: Response
+    ): Promise<Response> {
+        try {
+            await this.userRepository.update(
+                { phone: userDto.phone },
+                {
+                    status: UserStatus.Block
+                }
+            )
+            return response
+                .status(HttpStatus.OK)
+                .json({
+                    message: "User Added to Blacklist",
+                    statusCode: HttpStatus.OK
+                })
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async removeUserToBlacklist(
+        userDto: UserDto,
+        response: Response
+    ): Promise<Response> {
+        try {
+            await this.userRepository.update(
+                { phone: userDto.phone },
+                {
+                    status: UserStatus.Normal
+                }
+            )
+            return response
+                .status(HttpStatus.OK)
+                .json({
+                    message: "User Removed to Blacklist",
+                    statusCode: HttpStatus.OK
+                })
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async getBlacklist(
+        response: Response
+    ): Promise<Response> {
+        try {
+            const data = await this.userRepository.find({
+                where: { status: UserStatus.Block }
+            })
+            return response
+                .status(HttpStatus.OK)
+                .json({
+                    data,
+                    statusCode: HttpStatus.OK
+                })
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async deleteUser(
+        delteUserDto: UserDto,
+        response: Response
+    ): Promise<Response> {
+        try {
+            await this.userRepository.delete({
+                phone: delteUserDto.phone
+            })
+            return response
+                .status(HttpStatus.OK)
+                .json({
+                    message: "User Deleted Successfully",
+                    statusCode: HttpStatus.OK
+                })
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
 
     // *profile
 
@@ -310,6 +446,7 @@ export class UserService {
             }
         }
     }
+
     // *helper
 
     async findUser(phone: string, relations: string[] = []): Promise<UserEntity> {
@@ -555,7 +692,6 @@ export class UserService {
             }
         }
     }
-
     async findUserByAddress(userId: string, addressId: string): Promise<AddressEntity> {
         try {
             const address = await this.addressRepository.findOne({

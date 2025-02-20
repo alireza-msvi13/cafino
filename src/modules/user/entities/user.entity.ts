@@ -3,7 +3,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, OneToOne, Upda
 import { OtpEntity } from "./otp.entity";
 import { EntityName } from "src/common/enums/entity.enum";
 import { Roles } from "src/common/enums/role.enum";
-import { UserStatus } from "../enum/status.enum";
+import { UserStatus } from "../../../common/enums/user-status.enum";
 import { AddressEntity } from "./address.entity";
 import { BaseEntity } from "src/common/abstracts/base.entity";
 import { CommentEntity } from "src/modules/comment/entities/comment.entity";

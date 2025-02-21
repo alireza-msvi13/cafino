@@ -14,7 +14,7 @@
 
 
 
-# ☕ Cafe Platform +50 route
+## ☕ Cafe Platform +50 route
 
 This is a full-featured cafe platform developed using NestJS
 
@@ -22,22 +22,16 @@ If this project have been helpful to you, I’d appreciate your support by givin
 
 ## 🚀 Features  
 
-- Authentication
+- Authentication with phone - sms
 
-- User
+- User mangement - blacklist & permission
   
-- Profile
+- Profile mangement - address & favorite & profile image
 
-- Category
+- Category & Item & Comment mangement
 
-- Item
+- Shopping cart and Order management
 
-- Comment
-
-- Cart
-
-- Discount
+- Apply Discounts on cart
   
-- Order
-  
-- Payemnt
+- Payemnt mangement - zarinpal gateway payment

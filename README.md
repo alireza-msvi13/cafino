@@ -33,7 +33,7 @@ If this project have been helpful to you, I’d appreciate your support by givin
 
 - Item
 
-- Comments
+- Comment
 
 - Cart
 

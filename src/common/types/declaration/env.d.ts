@@ -1,7 +1,7 @@
 namespace NodeJS {
     interface ProcessEnv {
 
-        //Applicatio
+        //App
         PORT: number
         NODE_ENV: string
         FRONTEND_URL: string
@@ -24,21 +24,12 @@ namespace NodeJS {
         SMS_FROM_NUM: string
         SMS_BASE_URL: string
 
-        //google
-        GOOGLE_CLIENT_ID: string;
-        GOOGLE_SECRET_ID: string;
-
-        // Email
-        EMAIL: string;
-        EMAIL_PASS: string;
-
         // aws
         S3_SECRET_KEY: string
         S3_ACCESS_KEY: string
         S3_BUCKET_NAME: string
         S3_ENDPOINT: string
         S3_FILE_PATH_URL: string
-
 
         // zarinpal
         ZARINPAL_GATEWAY_URL: string

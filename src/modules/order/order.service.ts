@@ -168,5 +168,32 @@ export class OrderService {
     }
   }
 
+  async getUserOrders(
+    userId: string
+  ) {
+    try {
+
+      const data = await this.orderRepository
+        .createQueryBuilder("order")
+        .leftJoinAndSelect("order.address", "address")
+        .leftJoinAndSelect("order.items", "items")
+        .leftJoinAndSelect("items.item", "item")
+        .leftJoinAndSelect("order.payments", "payments")
+        .where("order.user.id = :userId", { userId })
+        .getMany();
+
+      return data
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException(
+          INTERNAL_SERVER_ERROR_MESSAGE,
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
+  }
+
 
 }

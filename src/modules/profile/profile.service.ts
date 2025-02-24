@@ -8,6 +8,8 @@ import { UpdateAddressDto } from './dto/update-address-dto';
 import { Folder } from 'src/common/enums/folder.enum';
 import { ItemService } from '../item/item.service';
 import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
+import { OrderService } from '../order/order.service';
+import { OrderStatus } from 'src/common/enums/order-status.enum';
 
 
 @Injectable()
@@ -17,8 +19,7 @@ export class ProfileService {
         private userService: UserService,
         private storageService: StorageService,
         private itemService: ItemService,
-        // @Inject(forwardRef(() => OrderService))
-        // private orderService: OrderService
+        private orderService: OrderService
     ) { }
 
 
@@ -292,7 +293,7 @@ export class ProfileService {
             }
         }
     }
-    async findUserFavorites(userId:string,response: Response) {
+    async findUserFavorites(userId: string, response: Response) {
         try {
             const data = await this.userService.findUserFavorites(userId)
             return response
@@ -312,6 +313,56 @@ export class ProfileService {
             }
         }
     }
-
+    async cancelOrder(
+        orderId: string,
+        response: Response
+    ): Promise<Response> {
+        try {
+            await this.orderService.changeOrderStatus(
+                orderId,
+                OrderStatus.Canceled
+            )
+            return response
+                .status(HttpStatus.OK)
+                .json({
+                    message: "Order Cancel Successfully",
+                    statusCode: HttpStatus.OK
+                })
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    INTERNAL_SERVER_ERROR_MESSAGE,
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
+    async getUserOrders(
+        userId: string,
+        response: Response
+    ): Promise<Response> {
+        try {
+            const userOrders = await this.orderService.getUserOrders(
+                userId,
+            )
+            return response
+                .status(HttpStatus.OK)
+                .json({
+                    data: userOrders,
+                    statusCode: HttpStatus.OK
+                })
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    (error),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
 
 }

@@ -20,31 +20,29 @@ export class ProfileController {
     ) { }
 
 
-    // @UseGuards(JwtGuard)
-    // @ApiOperation({ summary: " user orders " })
-    // @Get('orders')
-    // async getUserOrders(
-    //     @GetUser('id') userId: string,
-    //     @Res() response: Response
-    // ): Promise<Response> {
-    //     return await this.profileService.getUserOrders(
-    //         userId,
-    //         filterQuery,
-    //         response
-    //     );
-    // }
+    @Get('orders')
+    @ApiOperation({ summary: " user orders " })
+    async getUserOrders(
+        @GetUser('id') userId: string,
+        @Res() response: Response
+    ): Promise<Response> {
+        return await this.profileService.getUserOrders(
+            userId,
+            response
+        );
+    }
 
-    // @Put('orders/:id')
-    // @ApiOperation({ summary: " cancel order " })
-    // async cancelOrder(
-    //     @Query("id") orderId: string,
-    //     @Res() response: Response
-    // ): Promise<Response> {
-    //     return await this.profileService.cancelOrder(
-    //         orderId,
-    //         response
-    //     );
-    // }
+    @Put('orders/:id')
+    @ApiOperation({ summary: " cancel order " })
+    async cancelOrder(
+        @Query("id") orderId: string,
+        @Res() response: Response
+    ): Promise<Response> {
+        return await this.profileService.cancelOrder(
+            orderId,
+            response
+        );
+    }
 
     @Put('update')
     @ApiOperation({ summary: "update user profile " })

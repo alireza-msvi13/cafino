@@ -1,13 +1,12 @@
 import { Body, Controller, Delete, Get, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Response } from 'express';
-import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { ApiOperation } from '@nestjs/swagger';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { UserPermissionDto } from './dto/permission.dto';
 import { UserDto } from './dto/user.dto';
-import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
 
 @Controller('user')
 export class UserController {
@@ -38,7 +37,6 @@ export class UserController {
   @UseGuards(JwtGuard, AdminGuard)
   @Delete()
   @ApiOperation({ summary: "delete user" })
-  @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
   async deleteUser(
     @Body() deleteUserDto: UserDto,
     @Res() response: Response
@@ -52,7 +50,6 @@ export class UserController {
   @UseGuards(JwtGuard, AdminGuard)
   @Patch("permission")
   @ApiOperation({ summary: "change user permission by admin" })
-  @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
   async changeUserPermission(
     @Res() response: Response,
     @Body() userPermissionDto: UserPermissionDto
@@ -77,7 +74,6 @@ export class UserController {
   @UseGuards(JwtGuard, AdminGuard)
   @Post("blacklist")
   @ApiOperation({ summary: "add user to blacklist by phone" })
-  @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
   async addUserToBlacklist(
     @Body() userDto: UserDto,
     @Res() response: Response

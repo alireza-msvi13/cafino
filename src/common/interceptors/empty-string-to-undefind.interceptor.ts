@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 // ? This interceptor transforms empty string values in the request body to `undefined`.
-// ? This is useful for Swagger
+// ? This is useful for Swagger ApiConsumes (multipart/form-data and application/x-www-form-urlencoded)
 
 @Injectable()
 export class EmptyStringToUndefindInterceptor implements NestInterceptor {

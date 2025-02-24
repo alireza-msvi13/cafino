@@ -26,6 +26,7 @@ export class DiscountService {
     try {
       const { amount, code, expires_in, limit, percent } = discountDto;
 
+
       const isDiscountCodeExsit = await this.discountRepository.findOneBy({ code });
       if (isDiscountCodeExsit) throw new ConflictException("Code Already Exsit");
 
@@ -36,15 +37,15 @@ export class DiscountService {
           "You must enter one of the Amount or Percent fields"
         );
       }
-      if (amount) discountObject.amount = +amount;
-      else if (percent) discountObject.percent = +percent;
+      if (amount) discountObject.amount = amount;
+      else if (percent) discountObject.percent = percent;
 
 
       if (expires_in) {
-        const time = 1000 * 60 * 60 * 24 * +expires_in;
+        const time = 1000 * 60 * 60 * 24 * expires_in;
         discountObject.expires_in = new Date(new Date().getTime() + time);
       }
-      if (limit) discountObject.limit = +limit;
+      if (limit) discountObject.limit = limit;
 
       const discount = this.discountRepository.create(discountObject);
       await this.discountRepository.save(discount);
@@ -69,7 +70,7 @@ export class DiscountService {
   async findAll(response: Response) {
     try {
       const discounts = await this.discountRepository.find({});
-      
+
       return response
         .status(HttpStatus.OK)
         .json({

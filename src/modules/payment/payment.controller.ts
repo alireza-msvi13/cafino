@@ -3,8 +3,7 @@ import { PaymentService } from "./payment.service";
 import { PaymentDto } from "./dto/payment.dto";
 import { Response } from "express";
 import { JwtGuard } from "../auth/guards/access-token.guard";
-import { ApiConsumes, ApiOperation } from "@nestjs/swagger";
-import { SwaggerContentTypes } from "src/common/enums/swagger.enum";
+import { ApiOperation } from "@nestjs/swagger";
 import { GetUser } from "src/common/decorators/get-user.decorator";
 
 @Controller("Payment")
@@ -14,7 +13,6 @@ export class PaymentController {
 
   @Post("gateway")
   @ApiOperation({ summary: "payment gateway" })
-  @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
   paymentGatewat(
     @Body() paymentDto: PaymentDto,
     @GetUser('id') userId: string,

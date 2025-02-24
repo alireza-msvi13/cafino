@@ -1,7 +1,6 @@
 import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, ParseUUIDPipe, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
 import { CommentService } from './comment.service';
-import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
-import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
+import { ApiOperation } from '@nestjs/swagger';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { JwtGuard } from '../auth/guards/access-token.guard';
@@ -19,7 +18,6 @@ export class CommentController {
 
   @Post("/")
   @ApiOperation({ summary: "create new comment for menu item" })
-  @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
   createComment(
     @Body() createCommentDto: CreateCommentDto,
     @Res() response: Response,

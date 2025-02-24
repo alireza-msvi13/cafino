@@ -1,8 +1,5 @@
-
-
-
-import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsNumberString, IsOptional, IsString, IsUUID, Length, MaxLength } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsNumberString, IsOptional, IsString, IsUUID, Length, MaxLength } from "class-validator";
 export class CreateItemDto {
 
     @ApiProperty()
@@ -10,36 +7,36 @@ export class CreateItemDto {
     @MaxLength(100)
     title: string;
 
-    @ApiProperty({ required: false, isArray: true, type: String })
+    @ApiPropertyOptional({ isArray: true, type: String })
     @IsOptional()
     @IsString({ each: true })
     @Length(0, 50, { each: true })
     ingredients?: string[];
 
-    @ApiProperty({ required: false })
+    @ApiPropertyOptional()
     @IsOptional()
     @IsString()
     @Length(0, 1000)
     description?: string;
 
-    @ApiProperty({ default: 1000, description: 'Price should be a number' })
-    @IsString()
+    @ApiProperty({ default: 1000 })
+    @IsNumberString()
     @MaxLength(10)
     price: string;
 
-    @ApiProperty({ default: 0, description: 'Discount should be a number' })
-    @IsString()
+    @ApiPropertyOptional({ default: 0 })
+    @IsNumberString()
     @Length(1, 3)
     discount: string;
 
-    @ApiProperty({ default: 1, description: 'Quantity should be a number' })
+    @ApiProperty({ default: 1 })
     @IsNumberString()
     @MaxLength(100)
     quantity: string;
 
-    @ApiProperty({ format: 'binary', required: false })
+    @ApiPropertyOptional({ format: 'binary' })
     @IsOptional()
-    images?: string[];
+    images: string[];
 
 
     @ApiProperty()

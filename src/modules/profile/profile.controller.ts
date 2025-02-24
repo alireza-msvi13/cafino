@@ -1,14 +1,12 @@
 
 import { ProfileService } from './profile.service';
 import { Response } from 'express';
-import { ConfigService } from '@nestjs/config';
-import { Body, Controller, Delete, Get, HttpStatus, Put, Param, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Put, Param, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
 import { UpdateUserDto } from './dto/update-user-dto';
-import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
 import { CreateAddressDto } from './dto/create-address-dto';
 import { UpdateAddressDto } from './dto/update-address-dto';
 import { UploadFileAws } from 'src/common/interceptors/upload-file.interceptor';
@@ -18,8 +16,7 @@ import { MulterFileType } from 'src/common/types/multer.file.type';
 @UseGuards(JwtGuard)
 export class ProfileController {
     constructor(
-        private profileService: ProfileService,
-        private configService: ConfigService
+        private profileService: ProfileService
     ) { }
 
 
@@ -50,9 +47,7 @@ export class ProfileController {
     // }
 
     @Put('update')
-    @UseInterceptors(EmptyStringToUndefindInterceptor)
     @ApiOperation({ summary: "update user profile " })
-    @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
     async updateUser(
         @Body() updateUserDto: UpdateUserDto,
         @GetUser('id') userId: string,
@@ -67,7 +62,6 @@ export class ProfileController {
 
     @Post('address')
     @ApiOperation({ summary: "create new user address" })
-    @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
     async createAddress(
         @Body() createAddressDto: CreateAddressDto,
         @GetUser('id') userId: string,
@@ -81,9 +75,7 @@ export class ProfileController {
     }
 
     @Put('address/:id')
-    @UseInterceptors(EmptyStringToUndefindInterceptor)
     @ApiOperation({ summary: "update user address by address-id" })
-    @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
     async updateAddress(
         @Res() response: Response,
         @Body() updateAddressDto: UpdateAddressDto,
@@ -98,7 +90,6 @@ export class ProfileController {
 
     @Delete('address/:id')
     @ApiOperation({ summary: "delete user address by address-id" })
-    @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
     async deleteAddress(
         @Res() response: Response,
         @Param('id') addressId: string

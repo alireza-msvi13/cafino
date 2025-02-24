@@ -25,6 +25,7 @@ import { MulterFileType } from "src/common/types/multer.file.type";
 import { Response } from "express";
 import { AdminGuard } from "../auth/guards/admin.guard";
 import { PaginationDto } from "src/common/dto/pagination.dto";
+import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
 
 @Controller("category")
 export class CategoryController {
@@ -79,7 +80,7 @@ export class CategoryController {
 
   @Put(":id")
   @UseGuards(JwtGuard, AdminGuard)
-  @UseInterceptors(UploadFileAws('image'))
+  @UseInterceptors(UploadFileAws('image'), EmptyStringToUndefindInterceptor)
   @ApiConsumes(SwaggerContentTypes.MULTIPART)
   @ApiOperation({ summary: "update new category" })
   update(

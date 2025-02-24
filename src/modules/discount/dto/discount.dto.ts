@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNumberString, IsOptional, IsString, Length, MaxLength } from "class-validator";
+import { IsNumber, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
 
 export class DiscountDto {
   @ApiProperty()
@@ -9,25 +9,29 @@ export class DiscountDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumberString()
-  @Length(1, 3)
-  percent: string;
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  percent: number;
 
-  @ApiPropertyOptional()
-  @IsOptional() 
-  @IsNumberString()
-  @MaxLength(10)
-  amount: string;
+  @ApiPropertyOptional({ default: 1_000 })
+  @IsOptional()
+  @IsNumber()
+  @Min(1_000)
+  @Max(1_000_000)
+  amount: number;
+
+  @ApiPropertyOptional({ description: "expires in days", default: "20" })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(10_000)
+  expires_in: number;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumberString()
-  @MaxLength(100)
-  expires_in: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumberString()
-  @MaxLength(10)
-  limit: string;
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  limit: number;
 }

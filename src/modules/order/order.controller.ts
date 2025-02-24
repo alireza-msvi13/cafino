@@ -1,12 +1,11 @@
 import { Body, Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
-import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { ApiOperation } from '@nestjs/swagger';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { Response } from 'express';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { OrderService } from './order.service';
 import { OrderStatusDto } from './dto/order-status.dto';
-import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
 
 
 
@@ -18,7 +17,6 @@ export class OrderController {
 
   @Post("/status")
   @ApiOperation({ summary: "change order status by admin" })
-  @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
   changeOrderStatusByAdmin(
     @Body() orderStatusDto: OrderStatusDto,
     @Res() response: Response,

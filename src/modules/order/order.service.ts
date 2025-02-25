@@ -57,7 +57,7 @@ export class OrderService {
         });
       }
 
-      if (!orderItems.length) throw new BadRequestException("Your Cart is Empty");
+      if (!orderItems.length) throw new BadRequestException("cart is empty");
 
       await this.orderItemRepository.insert(orderItems);
 
@@ -93,7 +93,7 @@ export class OrderService {
   async changeOrderStatus(orderId: string, status: string) {
     try {
       if (!AllowdOrderStatus.includes(status)) {
-        throw new BadRequestException('Invalid Status')
+        throw new BadRequestException('invalid status')
       }
 
       await this.orderRepository.update({ id: orderId }, {

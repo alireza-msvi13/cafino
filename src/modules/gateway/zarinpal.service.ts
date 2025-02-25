@@ -38,7 +38,7 @@ export class ZarinpalService {
       };
     }
 
-    throw new BadRequestException("Connection failed in Zarinpal");
+    throw new BadRequestException("connection failed in zarinpal");
   }
   async verifyRequest(authority: string, amount: number) {
     const options = {
@@ -60,7 +60,7 @@ export class ZarinpalService {
       return response.data.data;
     } catch (error) {
       console.log(error);
-      throw new InternalServerErrorException('Error in Zarinpal request');
+      throw new InternalServerErrorException('error in zarinpal request');
     }
   }
 }

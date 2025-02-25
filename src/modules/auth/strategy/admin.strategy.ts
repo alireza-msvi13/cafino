@@ -27,7 +27,7 @@ export class AdminStrategy extends PassportStrategy(Strategy, 'admin') {
         payload: JwtPayload
     ): Promise<{ phone: string, id: string }> {
         if (!payload || payload == null || !payload?.phone?.startsWith("09")) {
-            throw new UnauthorizedException("Token is Not Valid")
+            throw new UnauthorizedException("token is not valid")
         }
         const {
             phone,
@@ -37,7 +37,7 @@ export class AdminStrategy extends PassportStrategy(Strategy, 'admin') {
             payload.phone
         );
         if (role == Roles.User) {
-            throw new UnauthorizedException("You Dont Have Access")
+            throw new UnauthorizedException("you dont have access")
         }
         return {
             id,

@@ -29,7 +29,7 @@ export class CommentService {
       const { parentId, text, itemId } = createCommentDto;
 
       const item = await this.itemService.checkItemExist(itemId)
-      if (!item) throw new NotFoundException("Item Not Found");
+      if (!item) throw new NotFoundException("item not found");
 
       let parent = null;
       if (parentId) {
@@ -151,7 +151,7 @@ export class CommentService {
   // *helper
   async checkCommentExist(id: string) {
     const comment = await this.commentRepository.findOneBy({ id });
-    if (!comment) throw new NotFoundException("Comment Not Found");
+    if (!comment) throw new NotFoundException("comment not found");
     return comment;
   }
 

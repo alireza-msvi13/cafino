@@ -211,7 +211,7 @@ export class ProfileService {
             } = await this.userService.findUserById(
                 userId
             );
-            if (!image) throw new BadRequestException("User dosnt have Image profile")
+            if (!image) throw new BadRequestException("user dosnt have image profile")
 
             const storageQuery = this.storageService.deleteFile(
                 image,

@@ -72,10 +72,10 @@ export class AuthService {
             const user = await this.userService.findUser(phone, ['otp']);
 
             const now = new Date();
-            if (now > user.otp.expires_in) throw new UnauthorizedException("Code Expired")
+            if (now > user.otp.expires_in) throw new UnauthorizedException("code expired")
 
 
-            if (user.otp.code !== otpCode) throw new UnauthorizedException("Code is Not Correct")
+            if (user.otp.code !== otpCode) throw new UnauthorizedException("code is not correct")
 
             const tokens = await this.createTokens(
                 user.phone,
@@ -125,7 +125,7 @@ export class AuthService {
                 refreshToken,
                 user.rt_hash
             );
-            if (!isTokensEqual) throw new UnauthorizedException("Token is Not Valid")
+            if (!isTokensEqual) throw new UnauthorizedException("token is not valid")
 
             const isValidToken = await this.jwtService.verify(
                 refreshToken,
@@ -133,7 +133,7 @@ export class AuthService {
                     secret: process.env.REFRESH_TOKEN_SECRET
                 }
             )
-            if (!isValidToken) throw new UnauthorizedException("Token is Not Valid")
+            if (!isValidToken) throw new UnauthorizedException("token is not valid")
 
             const tokens: TokenType = await this.createTokens(
                 phone,
@@ -306,13 +306,13 @@ export class AuthService {
                 refreshToken,
                 rt_hash
             );
-            if (!isTokensEqual) throw new UnauthorizedException("Token is Not Valid")
+            if (!isTokensEqual) throw new UnauthorizedException("token is not valid")
 
             const isTokenValid = await this.jwtService.verify(
                 refreshToken,
                 { secret: process.env.REFRESH_TOKEN_SECRET }
             )
-            if (!isTokenValid) throw new UnauthorizedException("Token is Not Valid")
+            if (!isTokenValid) throw new UnauthorizedException("token is not valid")
 
             return { phone, id };
         } catch (error) {

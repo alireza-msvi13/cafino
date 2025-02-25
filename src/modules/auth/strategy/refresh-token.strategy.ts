@@ -30,7 +30,7 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
         payload: JwtPayload
     ): Promise<{ phone: string, id: string }> {
         if (!payload || payload == null || !payload?.phone?.startsWith("09")) {
-            throw new UnauthorizedException("Token is Not Valid")
+            throw new UnauthorizedException("token is not valid")
         }
         const refreshToken = request?.cookies["refresh-token"];
         const { phone, id } = await this.authService.validRefreshToken(

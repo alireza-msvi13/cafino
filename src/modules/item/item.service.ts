@@ -118,7 +118,7 @@ export class ItemService {
         where: { id: itemId },
         relations: ["images"],
       });
-      if (!item) throw new NotFoundException("Item Not Found");
+      if (!item) throw new NotFoundException("item not found");
 
       if (categoryId) {
         await this.categoryService.findOneById(categoryId);
@@ -286,7 +286,7 @@ export class ItemService {
         .andWhere("item.show = :show", { show: true })
         .getOne();
 
-      if (!item) throw new NotFoundException("Item Not Found");
+      if (!item) throw new NotFoundException("item not found");
 
       return response.status(HttpStatus.OK).json({
         data: item,
@@ -314,7 +314,7 @@ export class ItemService {
         return response
           .status(HttpStatus.NOT_FOUND)
           .json({
-            message: "Item Not Found",
+            message: "item not found",
             statusCode: HttpStatus.NOT_FOUND
           });
       }
@@ -403,7 +403,7 @@ export class ItemService {
 
       if (remainingItem <= 0) {
         throw new HttpException(
-          "Unfortunately, the Item Stock is less than the Quantity you Requested",
+          "unfortunately, the item stock is less than the quantity you requested",
           HttpStatus.UNPROCESSABLE_ENTITY
         )
       }

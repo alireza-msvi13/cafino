@@ -38,7 +38,7 @@ export class CartService {
                     item: { id: itemId },
                 },
             });
-            if (cartItem) throw new ConflictException("Item is Already in your Cart");
+            if (cartItem) throw new ConflictException("item is already in your cart");
 
             await this.itemService.checkItemQuantity(itemId)
             await this.itemService.decrementItemQuantity(itemId)
@@ -87,7 +87,7 @@ export class CartService {
                 },
             });
 
-            if (!cartItem) throw new NotFoundException("Item is Not Exist in Your Cart");
+            if (!cartItem) throw new NotFoundException("item is not exist in your cart");
             else {
                 await this.itemService.checkItemQuantity(itemId)
                 await this.itemService.decrementItemQuantity(itemId)
@@ -130,7 +130,7 @@ export class CartService {
                 },
             });
 
-            if (!cartItem) throw new NotFoundException("Item is Not Exist in Your Cart");
+            if (!cartItem) throw new NotFoundException("item is not exist in your cart");
 
             if (cartItem.count === 1) {
                 await this.cartRepository.remove(cartItem);
@@ -182,7 +182,7 @@ export class CartService {
                 },
             });
 
-            if (!cartItem) throw new NotFoundException("Item is Not Exist in Your Cart");
+            if (!cartItem) throw new NotFoundException("item is not exist in your cart");
 
             await this.cartRepository.remove(cartItem);
             await this.itemService.incrementItemQuantity(itemId, cartItem.count)
@@ -282,17 +282,17 @@ export class CartService {
                 throw new BadRequestException("Already Used Discount");
             }
 
-            if (!discount.active) throw new BadRequestException("Discount Code is not Active");
+            if (!discount.active) throw new BadRequestException("discount code is not active");
 
             if (discount.limit && discount.limit <= discount.usage) {
-                throw new BadRequestException("Discount Code Expired");
+                throw new BadRequestException("discount code expired");
             }
 
             if (
                 discount?.expires_in &&
                 discount?.expires_in?.getTime() <= new Date().getTime()
             ) {
-                throw new BadRequestException("Discount Code Expired");
+                throw new BadRequestException("discount code expired");
             }
 
             await this.cartRepository.update(
@@ -337,7 +337,7 @@ export class CartService {
                 discount: { id: discount.id }
             });
             if (!userCartDiscount) {
-                throw new BadRequestException("Discount is Not Found in your Cart");
+                throw new BadRequestException("discount is not found in your cart");
             }
 
             await this.cartRepository.update(

@@ -38,7 +38,7 @@ export class CategoryService {
       const category = await this.categoryRepository.findOne({
         where: [{ slug }, { title }],
       });
-      if (category) throw new ConflictException("Category Already Exist");
+      if (category) throw new ConflictException("category already exist");
       if (isBoolean(show)) {
         show = toBoolean(show);
       }
@@ -163,7 +163,7 @@ export class CategoryService {
     try {
       const { show, slug, title } = updateCategoryDto;
       const category = await this.categoryRepository.findOneBy({ id });
-      if (!category) throw new NotFoundException("Category Not Found");
+      if (!category) throw new NotFoundException("category not found");
       const updateObject: DeepPartial<CategoryEntity> = {};
       if (image) {
         const imageUrl = this.storageService.getFileLink(
@@ -190,7 +190,7 @@ export class CategoryService {
       };
       if (slug) {
         const category = await this.categoryRepository.findOneBy({ slug });
-        if (category) throw new NotFoundException("Not Found Category by this Id");
+        if (category) throw new NotFoundException("not found category by this id");
         updateObject.slug = slug;
       }
 
@@ -217,7 +217,7 @@ export class CategoryService {
       const category = await this.categoryRepository.findOne({
         where: { slug, show: true }
       });
-      if (!category) throw new NotFoundException("Not Found Category by this Slug");
+      if (!category) throw new NotFoundException("not found category by this slug");
 
       return response
         .status(HttpStatus.OK)
@@ -241,7 +241,7 @@ export class CategoryService {
   async delete(id: string, response: Response) {
     try {
       const category = await this.categoryRepository.findOneBy({ id });
-      if (!category) throw new NotFoundException("Category Not Found");
+      if (!category) throw new NotFoundException("category not found");
       if (category && category?.image && category?.imageUrl) {
         await this.storageService.deleteFile(category.image, Folder.Category)
       }
@@ -270,8 +270,8 @@ export class CategoryService {
 
   async findOneById(id: string) {
     const category = await this.categoryRepository.findOneBy({ id });
-    if (!category) throw new NotFoundException("Category Not Found");
-    if (!category.show) throw new NotFoundException("Category is not Allow to Show");
+    if (!category) throw new NotFoundException("category not found");
+    if (!category.show) throw new NotFoundException("category is not allow to show");
     return category;
   }
 }

@@ -28,7 +28,7 @@ export class DiscountService {
 
 
       const isDiscountCodeExsit = await this.discountRepository.findOneBy({ code });
-      if (isDiscountCodeExsit) throw new ConflictException("Code Already Exsit");
+      if (isDiscountCodeExsit) throw new ConflictException("code already exsit");
 
       const discountObject: DeepPartial<DiscountEntity> = { code };
 
@@ -115,7 +115,7 @@ export class DiscountService {
   // * helper
   async findOneByCode(code: string) {
     const discount = await this.discountRepository.findOneBy({ code });
-    if (!discount) throw new NotFoundException("not found discount code");
+    if (!discount) throw new NotFoundException();
     return discount;
   }
 }

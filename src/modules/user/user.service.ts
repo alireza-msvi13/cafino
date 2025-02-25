@@ -86,7 +86,7 @@ export class UserService {
             const { phone, role } = userPermissionDto
 
             if (!["admin", "user"].includes(role)) {
-                throw new BadRequestException('Invalid role')
+                throw new BadRequestException('invalid role')
             }
 
             await this.userRepository.update({ phone }, {
@@ -382,7 +382,7 @@ export class UserService {
             })
 
             if (item) {
-                throw new BadRequestException('Item is Already Exist in Favorites')
+                throw new BadRequestException('item is already exist in favorites')
             }
             const newItem = this.favoriteRepository.create({
                 user: { id: userId },
@@ -432,7 +432,7 @@ export class UserService {
             })
 
             if (!data.length) {
-                throw new NotFoundException("Not Found any Item in User Favorite")
+                throw new NotFoundException("not found any item in user favorite")
             }
             return data
         } catch (error) {
@@ -457,7 +457,7 @@ export class UserService {
             });
 
             if (!user) {
-                throw new NotFoundException("User Not Found")
+                throw new NotFoundException("user not found")
             }
             return user;
         } catch (error) {
@@ -480,7 +480,7 @@ export class UserService {
 
             if (!user) {
                 throw new NotFoundException(
-                    "User Not Found"
+                    "user not found"
                 );
             }
             return user;
@@ -505,7 +505,7 @@ export class UserService {
 
             if (user && user.status === UserStatus.Block) {
                 throw new NotFoundException(
-                    "Unfortunately You are in the Blacklist",
+                    "unfortunately you are in the blacklist",
                 )
             }
 
@@ -593,12 +593,12 @@ export class UserService {
 
             if (user && user.status === UserStatus.Block) {
                 throw new NotFoundException(
-                    "Unfortunately You are in the Blacklist",
+                    "unfortunately you are in the blacklist",
                 )
             }
 
             if (!user.otp) {
-                throw new BadRequestException("Previous Code Not Found");
+                throw new BadRequestException("previous code not found");
             }
 
             const now = new Date();
@@ -606,7 +606,7 @@ export class UserService {
 
             if (now < user.otp.expires_in) {
                 throw new BadRequestException(
-                    "Code is Not Expird Yet"
+                    "code is not expird yet"
                 )
             }
 
@@ -655,7 +655,7 @@ export class UserService {
             })
             if (isDuplicateUsername) {
                 throw new ConflictException(
-                    "Username Already Used"
+                    "username already used"
                 )
             }
         } catch (error) {
@@ -678,7 +678,7 @@ export class UserService {
             })
             if (!address) {
                 throw new NotFoundException(
-                    "Address Not Found",
+                    "address not found",
                 );
             }
         } catch (error) {
@@ -701,7 +701,7 @@ export class UserService {
                 }
             })
 
-            if (!address) throw new NotFoundException("Address Not Found")
+            if (!address) throw new NotFoundException("address not found")
 
             return address;
         } catch (error) {

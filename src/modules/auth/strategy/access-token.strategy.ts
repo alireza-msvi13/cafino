@@ -26,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         payload: JwtPayload
     ): Promise<{ phone: string, id: string }> {
         if (!payload || payload == null || !payload?.phone?.startsWith("09")) {
-            throw new UnauthorizedException("Token is Not Valid")
+            throw new UnauthorizedException("token is not valid")
         }
         const {
             phone,

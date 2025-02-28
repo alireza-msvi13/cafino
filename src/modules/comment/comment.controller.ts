@@ -12,7 +12,7 @@ import { AdminGuard } from '../auth/guards/admin.guard';
 
 
 @Controller('comment')
-@ApiTags('comment')
+@ApiTags('Comment')
 @UseGuards(JwtGuard)
 export class CommentController {
   constructor(private commentService: CommentService) { }

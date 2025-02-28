@@ -15,7 +15,7 @@ import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('item')
-@ApiTags('item')
+@ApiTags('Item')
 export class ItemController {
   constructor(
     private itemService: ItemService,

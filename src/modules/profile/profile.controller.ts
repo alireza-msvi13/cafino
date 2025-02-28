@@ -13,7 +13,7 @@ import { UploadFileAws } from 'src/common/interceptors/upload-file.interceptor';
 import { MulterFileType } from 'src/common/types/multer.file.type';
 
 @Controller('profile')
-@ApiTags('profile')
+@ApiTags('Profile')
 @UseGuards(JwtGuard)
 export class ProfileController {
     constructor(

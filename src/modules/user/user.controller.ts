@@ -9,7 +9,7 @@ import { UserPermissionDto } from './dto/permission.dto';
 import { UserDto } from './dto/user.dto';
 
 @Controller('user')
-@ApiTags('user')
+@ApiTags('User')
 export class UserController {
   constructor(
     private readonly userService: UserService

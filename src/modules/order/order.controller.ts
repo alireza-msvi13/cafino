@@ -11,7 +11,7 @@ import { OrderStatusDto } from './dto/order-status.dto';
 
 
 @Controller('order')
-@ApiTags('order')
+@ApiTags('Order')
 @UseGuards(JwtGuard, AdminGuard)
 export class OrderController {
   constructor(private orderService: OrderService) { }

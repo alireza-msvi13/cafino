@@ -18,7 +18,7 @@ import { JwtGuard } from "../auth/guards/access-token.guard";
 import { AdminGuard } from "../auth/guards/admin.guard";
 import { Response } from "express";
 @Controller("discount")
-@ApiTags('discount')
+@ApiTags('Discount')
 @UseGuards(JwtGuard, AdminGuard)
 export class DiscountController {
   constructor(private discountService: DiscountService) { }

@@ -8,7 +8,7 @@ import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { CartDiscountDto } from './dto/cart-discount.dto';
 
 @Controller('cart')
-@ApiTags('cart')
+@ApiTags('Cart')
 @UseGuards(JwtGuard)
 export class CartController {
   constructor(

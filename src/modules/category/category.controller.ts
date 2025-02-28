@@ -28,7 +28,7 @@ import { PaginationDto } from "src/common/dto/pagination.dto";
 import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
 
 @Controller("category")
-@ApiTags('category')
+@ApiTags('Category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) { }
 

@@ -2,7 +2,7 @@
 import { ProfileService } from './profile.service';
 import { Response } from 'express';
 import { Body, Controller, Delete, Get, Put, Param, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
@@ -13,6 +13,7 @@ import { UploadFileAws } from 'src/common/interceptors/upload-file.interceptor';
 import { MulterFileType } from 'src/common/types/multer.file.type';
 
 @Controller('profile')
+@ApiTags('profile')
 @UseGuards(JwtGuard)
 export class ProfileController {
     constructor(

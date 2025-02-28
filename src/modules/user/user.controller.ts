@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Response } from 'express';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -9,13 +9,14 @@ import { UserPermissionDto } from './dto/permission.dto';
 import { UserDto } from './dto/user.dto';
 
 @Controller('user')
+@ApiTags('user')
 export class UserController {
   constructor(
     private readonly userService: UserService
   ) { }
 
-  @UseGuards(JwtGuard)
   @Get()
+  @UseGuards(JwtGuard)
   @ApiOperation({ summary: "get user info" })
   async getUser(
     @GetUser('phone') phone: string,
@@ -24,8 +25,8 @@ export class UserController {
     return await this.userService.getUserInfo(phone, response)
   }
 
-  @UseGuards(JwtGuard, AdminGuard)
   @Get("users-list")
+  @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "get all users list by admin" })
   async getUserList(
     @Res() response: Response
@@ -34,8 +35,8 @@ export class UserController {
 
   }
 
-  @UseGuards(JwtGuard, AdminGuard)
   @Delete()
+  @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "delete user" })
   async deleteUser(
     @Body() deleteUserDto: UserDto,
@@ -47,8 +48,8 @@ export class UserController {
     );
   }
 
-  @UseGuards(JwtGuard, AdminGuard)
   @Patch("permission")
+  @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "change user permission by admin" })
   async changeUserPermission(
     @Res() response: Response,
@@ -60,9 +61,9 @@ export class UserController {
     )
   }
 
+  @Get("blacklist")
   @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "get blacklist by admin" })
-  @Get("blacklist")
   async getBlacklist(
     @Res() response: Response
   ): Promise<Response> {
@@ -71,8 +72,8 @@ export class UserController {
     );
   }
 
-  @UseGuards(JwtGuard, AdminGuard)
   @Post("blacklist")
+  @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "add user to blacklist by phone" })
   async addUserToBlacklist(
     @Body() userDto: UserDto,
@@ -84,8 +85,8 @@ export class UserController {
     );
   }
 
-  @UseGuards(JwtGuard, AdminGuard)
   @Delete("blacklist")
+  @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "remove user from blacklist" })
   async removeUserToBlacklist(
     @Body() userDto: UserDto,

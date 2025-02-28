@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, ParseUUIDPipe, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
 import { CommentService } from './comment.service';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { JwtGuard } from '../auth/guards/access-token.guard';
@@ -12,6 +12,7 @@ import { AdminGuard } from '../auth/guards/admin.guard';
 
 
 @Controller('comment')
+@ApiTags('comment')
 @UseGuards(JwtGuard)
 export class CommentController {
   constructor(private commentService: CommentService) { }

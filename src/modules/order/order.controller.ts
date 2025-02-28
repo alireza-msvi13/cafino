@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { Response } from 'express';
@@ -11,6 +11,7 @@ import { OrderStatusDto } from './dto/order-status.dto';
 
 
 @Controller('order')
+@ApiTags('order')
 @UseGuards(JwtGuard, AdminGuard)
 export class OrderController {
   constructor(private orderService: OrderService) { }

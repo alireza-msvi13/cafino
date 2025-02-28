@@ -3,10 +3,11 @@ import { PaymentService } from "./payment.service";
 import { PaymentDto } from "./dto/payment.dto";
 import { Response } from "express";
 import { JwtGuard } from "../auth/guards/access-token.guard";
-import { ApiOperation } from "@nestjs/swagger";
+import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { GetUser } from "src/common/decorators/get-user.decorator";
 
 @Controller("Payment")
+@ApiTags('Payment')
 @UseGuards(JwtGuard)
 export class PaymentController {
   constructor(private paymentService: PaymentService) { }

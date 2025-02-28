@@ -10,6 +10,7 @@ import { JwtGuard } from './guards/access-token.guard';
 import { GetCookie } from 'src/common/decorators/get-cookie.decorator';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 @Controller('auth')
+@ApiTags('auth')
 export class AuthController {
     constructor(
         private authService: AuthService

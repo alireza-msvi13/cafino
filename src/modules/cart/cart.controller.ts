@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { CartDto } from './dto/cart.dto';
@@ -8,6 +8,7 @@ import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { CartDiscountDto } from './dto/cart-discount.dto';
 
 @Controller('cart')
+@ApiTags('cart')
 @UseGuards(JwtGuard)
 export class CartController {
   constructor(

@@ -17,7 +17,7 @@ import {
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 import { UpdateCategoryDto } from "./dto/update-category.dto";
-import { ApiConsumes, ApiOperation } from "@nestjs/swagger";
+import { ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { SwaggerContentTypes } from "src/common/enums/swagger.enum";
 import { JwtGuard } from "../auth/guards/access-token.guard";
 import { UploadFileAws } from "src/common/interceptors/upload-file.interceptor";
@@ -28,6 +28,7 @@ import { PaginationDto } from "src/common/dto/pagination.dto";
 import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
 
 @Controller("category")
+@ApiTags('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) { }
 

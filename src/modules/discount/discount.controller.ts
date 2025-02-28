@@ -10,7 +10,7 @@ import {
   Res,
   UseGuards
 } from "@nestjs/common";
-import { ApiConsumes, ApiOperation } from "@nestjs/swagger";
+import { ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { DiscountDto } from "./dto/discount.dto";
 import { DiscountService } from "./discount.service";
 import { SwaggerContentTypes } from "src/common/enums/swagger.enum";
@@ -18,6 +18,7 @@ import { JwtGuard } from "../auth/guards/access-token.guard";
 import { AdminGuard } from "../auth/guards/admin.guard";
 import { Response } from "express";
 @Controller("discount")
+@ApiTags('discount')
 @UseGuards(JwtGuard, AdminGuard)
 export class DiscountController {
   constructor(private discountService: DiscountService) { }

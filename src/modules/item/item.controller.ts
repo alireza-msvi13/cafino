@@ -1,8 +1,7 @@
 
 import { Response } from 'express';
-import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
-
-import { BadRequestException, Body, Controller, Delete, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Put, Query, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put, Query, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
@@ -16,6 +15,7 @@ import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('item')
+@ApiTags('item')
 export class ItemController {
   constructor(
     private itemService: ItemService,

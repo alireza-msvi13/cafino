@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
@@ -26,7 +26,7 @@ export class AdminStrategy extends PassportStrategy(Strategy, 'admin') {
     async validate(
         payload: JwtPayload
     ): Promise<{ phone: string, id: string }> {
-        if (!payload || payload == null || !payload?.phone?.startsWith("09")) {
+        if (!payload || !payload?.phone?.startsWith("09")) {
             throw new UnauthorizedException("token is not valid")
         }
         const {

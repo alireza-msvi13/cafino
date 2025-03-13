@@ -1,5 +1,5 @@
 export enum Folder {
-    Category = "cafe-api/category",
-    Item = "cafe-api/item",
-    ProfileImage = "cafe-api/profile"
+    Category = "cafino/category",
+    Item = "cafino/item",
+    ProfileImage = "cafino/profile"
 } 

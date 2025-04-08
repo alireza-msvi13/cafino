@@ -44,10 +44,11 @@ export class AuthService {
         phone,
         code: otpCode,
       };
-      await this.smsService.sendSms(smsOptions);
+      // await this.smsService.sendSms(smsOptions);
       return response.status(HttpStatus.OK).json({
-        message: `Code ${otpCode} Send Successfully`,
+        message: `Code Send Successfully`,
         statusCode: HttpStatus.OK,
+        otpCode
       });
     } catch (error) {
       if (error instanceof HttpException) {
@@ -158,11 +159,12 @@ export class AuthService {
         phone,
         code: otpCode,
       };
-      await this.smsService.sendSms(smsOptions);
+      // await this.smsService.sendSms(smsOptions);
 
       return response.status(HttpStatus.OK).json({
-        message: `Code ${otpCode} Send Successfully`,
+        message: `Code Send Successfully`,
         statusCode: HttpStatus.OK,
+        otpCode
       });
     } catch (error) {
       if (error instanceof HttpException) {

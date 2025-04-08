@@ -28,12 +28,8 @@ async function bootstrap() {
 
 
   app.use(compression(CompressionConfig));
-
-  const {PORT} = process.env;
-  await app.listen(PORT, () => {
-    console.log(`http://localhost:${PORT}`);
-    console.log(`swagger: http://localhost:${PORT}/v1/api-doc`);
-  });
+  
+  await app.listen(process.env.PORT);
 
 }
 bootstrap();

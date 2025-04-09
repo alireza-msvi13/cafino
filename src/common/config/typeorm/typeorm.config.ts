@@ -11,6 +11,7 @@ export function TypeOrmConfig(): TypeOrmModuleOptions {
     database: DB_NAME,
     autoLoadEntities: true,
     synchronize: true,
+    ssl: true,
     entities: [
       "dist/**/**/**/*.entity{.ts,.js}",
       "dist/**/**/*.entity{.ts,.js}"

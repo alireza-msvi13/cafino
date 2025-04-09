@@ -13,6 +13,7 @@ import { UpdateAddressDto } from '../profile/dto/update-address-dto';
 import { FavoriteEntity } from './entities/favorite.entity';
 import { UserPermissionDto } from './dto/permission.dto';
 import { UserDto } from './dto/user.dto';
+import { Roles } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class UserService {
@@ -516,6 +517,9 @@ export class UserService {
                 phone
             });
 
+            const userCount = await this.userRepository.count();
+            if (!userCount) user.role = Roles.Admin;
+            
             await this.userRepository.save(user)
 
             return user

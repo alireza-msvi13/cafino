@@ -26,7 +26,6 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe())
 
-
   app.use(compression(CompressionConfig));
   
   await app.listen(process.env.PORT);

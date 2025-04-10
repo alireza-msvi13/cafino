@@ -95,7 +95,7 @@ export class ItemController {
     )
   }
 
-  @Put("/:itemId")
+  @Put("/:id")
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadMultiFilesAws('images'), EmptyStringToUndefindInterceptor)
   @ApiOperation({ summary: "update menu item" })

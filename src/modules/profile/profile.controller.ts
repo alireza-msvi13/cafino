@@ -11,6 +11,7 @@ import { CreateAddressDto } from './dto/create-address-dto';
 import { UpdateAddressDto } from './dto/update-address-dto';
 import { UploadFileAws } from 'src/common/interceptors/upload-file.interceptor';
 import { MulterFileType } from 'src/common/types/multer.file.type';
+import { UpdateImageDto } from './dto/update-image-dto';
 
 @Controller('profile')
 @ApiTags('Profile')
@@ -113,12 +114,13 @@ export class ProfileController {
     }
 
     @Patch('image')
+    @ApiConsumes(SwaggerContentTypes.MULTIPART)
     @ApiOperation({ summary: "update user image" })
     @UseInterceptors(UploadFileAws('image'))
-    @ApiConsumes(SwaggerContentTypes.MULTIPART)
     async updateImage(
         @UploadedFile() image: MulterFileType,
-        @GetUser('id ') userId: string,
+        @Body() updateImageDto: UpdateImageDto,
+        @GetUser('id') userId: string,
         @Res() response: Response
     ) {
         return await this.profileService.updateImage(

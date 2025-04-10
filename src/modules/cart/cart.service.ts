@@ -244,6 +244,10 @@ export class CartService {
                 generalDiscount,
             } = await this.getUserCart(userId)
 
+            if (cartItems.length === 0) {
+                throw new NotFoundException("Your cart is empty")
+            }
+
             return response
                 .status(HttpStatus.OK)
                 .json({
@@ -441,6 +445,26 @@ export class CartService {
             }
         }
     }
+    async clearUserCart(
+        userId: string,
+    ): Promise<void> {
+        try {
+            await this.cartRepository
+                .createQueryBuilder()
+                .delete()
+                .where("user_id = :userId", { userId })
+                .execute();
 
+        } catch (error) {
+            if (error instanceof HttpException) {
+                throw error;
+            } else {
+                throw new HttpException(
+                    INTERNAL_SERVER_ERROR_MESSAGE,
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
+            }
+        }
+    }
 
 }

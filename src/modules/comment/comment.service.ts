@@ -74,6 +74,8 @@ export class CommentService {
         .select([
           "comment.id",
           "comment.text",
+          "comment.accept",
+          "comment.created_at",
           "user.id",
           "user.first_name",
           "user.last_name",

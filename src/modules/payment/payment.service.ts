@@ -82,7 +82,7 @@ export class PaymentService {
     try {
       const payment = await this.paymentRepository.findOne({
         where: { authority },
-        relations: { order: true }
+        relations: { order: true , user: true},
       })
 
       if (!payment) throw new NotFoundException();
@@ -106,6 +106,7 @@ export class PaymentService {
       await this.paymentRepository.save(payment);
 
       await this.orderService.changeOrderStatus(payment.order.id,OrderStatus.Processing);
+      await this.cartService.clearUserCart(payment.user.id);
 
       return response.redirect(`${this.frontendUrl}/payment?status=success`)
 

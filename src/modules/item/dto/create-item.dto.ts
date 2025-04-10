@@ -24,7 +24,7 @@ export class CreateItemDto {
     @MaxLength(10)
     price: string;
 
-    @ApiPropertyOptional({ default: 0 })
+    @ApiProperty({ default: 0 })
     @IsNumberString()
     @Length(1, 3)
     discount: string;

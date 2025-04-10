@@ -401,7 +401,7 @@ export class ItemService {
 
       const remainingItem = item?.quantity - count;
 
-      if (remainingItem <= 0) {
+      if (remainingItem < 0) {
         throw new HttpException(
           "unfortunately, the item stock is less than the quantity you requested",
           HttpStatus.UNPROCESSABLE_ENTITY

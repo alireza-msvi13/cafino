@@ -1,28 +1,28 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEmail, IsOptional, Max, Min } from "class-validator";
+import { IsDateString, IsEmail, IsOptional, MaxLength, MinLength } from "class-validator";
 
 export class UpdateUserDto {
     @ApiPropertyOptional()
     @IsOptional()
-    @Min(1)
-    @Max(100)
+    @MinLength(5)
+    @MaxLength(100)
     username: string;
 
     @ApiPropertyOptional()
     @IsOptional()
-    @Min(1)
-    @Max(100)
+    @MinLength(1)
+    @MaxLength(100)
     first_name: string;
 
     @ApiPropertyOptional()
     @IsOptional()
-    @Min(1)
-    @Max(100)
+    @MinLength(1)
+    @MaxLength(100)
     last_name: string;
 
     @ApiPropertyOptional()
     @IsOptional()
-    @Max(100)
+    @IsDateString()
     birthday: string;
 
     @ApiPropertyOptional()

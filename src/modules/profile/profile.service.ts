@@ -31,10 +31,13 @@ export class ProfileService {
         response: Response
     ): Promise<Response> {
         try {
-            await this.userService.checkUsernameExist(
-                updateUserDto.username,
-            )
 
+            if (updateUserDto.username) {
+                await this.userService.checkUsernameExist(
+                    updateUserDto.username,
+                )
+            }
+            
             await this.userService.updateUser(updateUserDto, userId)
 
             return response

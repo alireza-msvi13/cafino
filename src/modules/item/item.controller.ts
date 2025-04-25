@@ -24,7 +24,7 @@ export class ItemController {
   @Post()
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadMultiFilesAws('images'))
-  @ApiOperation({ summary: "create new menu item" })
+  @ApiOperation({ summary: "create new menu item by admin" })
   @ApiConsumes(SwaggerContentTypes.MULTIPART)
   async createItem(
     @StringToArray("ingredients") _: null,
@@ -79,7 +79,7 @@ export class ItemController {
   }
 
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: "delete a menu item" })
+  @ApiOperation({ summary: "delete a menu item by admin" })
   @Delete('/:id')
   async deleteItemById(
     @Param("id",
@@ -98,7 +98,7 @@ export class ItemController {
   @Put("/:id")
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadMultiFilesAws('images'), EmptyStringToUndefindInterceptor)
-  @ApiOperation({ summary: "update menu item" })
+  @ApiOperation({ summary: "update menu item by admin" })
   @ApiConsumes(SwaggerContentTypes.MULTIPART)
   async updateItem(
     @StringToArray('ingredients') _: null,

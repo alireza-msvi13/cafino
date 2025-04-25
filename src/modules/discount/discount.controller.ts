@@ -24,7 +24,7 @@ export class DiscountController {
   constructor(private discountService: DiscountService) { }
 
   @Post()
-  @ApiOperation({ summary: "generate new discount code" })
+  @ApiOperation({ summary: "generate new discount code by admin" })
   generate(
     @Body() discountDto: DiscountDto,
     @Res() response: Response,
@@ -33,13 +33,13 @@ export class DiscountController {
   }
 
   @Get()
-  @ApiOperation({ summary: "get all discount code " })
+  @ApiOperation({ summary: "get all discount code by admin " })
   findAll(@Res() response: Response) {
     return this.discountService.findAll(response);
   }
 
   @Delete("/:id")
-  @ApiOperation({ summary: " delete discount code " })
+  @ApiOperation({ summary: " delete discount code by admin" })
   remove(@Param("id",
     new ParseUUIDPipe({
       exceptionFactory: () => new BadRequestException("Invalid Discount Id"),

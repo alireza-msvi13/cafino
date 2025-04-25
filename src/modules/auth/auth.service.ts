@@ -5,9 +5,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { ConfigService } from '@nestjs/config';
 import { ResendCodeDto } from './dto/resend-code.dto';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { generateOtpCode } from 'src/common/utils/generate-otp-code.utils';
@@ -25,10 +24,9 @@ import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.consta
 export class AuthService {
   constructor(
     private userService: UserService,
-    private configService: ConfigService,
     private jwtService: JwtService,
     private smsService: SmsService,
-  ) {}
+  ) { }
 
   // * primary
 
@@ -179,7 +177,6 @@ export class AuthService {
   }
   async logout(phone: string, response: Response): Promise<Response> {
     try {
-      const d = new Date();
       response.clearCookie('refresh-token', {
         sameSite: 'none',
         httpOnly: false,
@@ -222,11 +219,11 @@ export class AuthService {
       const [accessToken, refreshToken] = await Promise.all([
         this.jwtService.signAsync(jwtPayload, {
           secret: process.env.ACCESS_TOKEN_SECRET,
-          expiresIn: '1h',
+          expiresIn: '1d',
         }),
         this.jwtService.signAsync(jwtPayload, {
           secret: process.env.REFRESH_TOKEN_SECRET,
-          expiresIn: '3d',
+          expiresIn: '7d',
         }),
       ]);
       return {
@@ -262,28 +259,6 @@ export class AuthService {
       if (!isTokenValid) throw new UnauthorizedException('token is not valid');
 
       return { phone, id };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-    }
-  }
-  async getAccessToken(phone: string, userId: string): Promise<string> {
-    try {
-      const jwtPayload: JwtPayload = {
-        user: userId,
-        phone,
-      };
-      const accessToken = await this.jwtService.signAsync(jwtPayload, {
-        secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-        expiresIn: '1h',
-      });
-      return accessToken;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

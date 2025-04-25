@@ -37,7 +37,7 @@ export class UserController {
 
   @Delete()
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: "delete user" })
+  @ApiOperation({ summary: "delete user by admin" })
   async deleteUser(
     @Body() deleteUserDto: UserDto,
     @Res() response: Response
@@ -74,7 +74,7 @@ export class UserController {
 
   @Post("blacklist")
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: "add user to blacklist by phone" })
+  @ApiOperation({ summary: "add user to blacklist with phone by admin" })
   async addUserToBlacklist(
     @Body() userDto: UserDto,
     @Res() response: Response
@@ -87,7 +87,7 @@ export class UserController {
 
   @Delete("blacklist")
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: "remove user from blacklist" })
+  @ApiOperation({ summary: "remove user from blacklist by admin" })
   async removeUserToBlacklist(
     @Body() userDto: UserDto,
     @Res() response: Response

@@ -171,7 +171,7 @@ export class ProfileController {
         );
     }
 
-    @Get()
+    @Get('favorites')
     @ApiOperation({ summary: "get user favorites" })
     findUserFavorites(
         @GetUser('id') userId: string,

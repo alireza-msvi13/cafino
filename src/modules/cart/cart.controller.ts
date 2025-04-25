@@ -32,7 +32,7 @@ export class CartController {
   }
 
   @Get()
-  @ApiOperation({ summary: "get carts" })
+  @ApiOperation({ summary: "get cart" })
   async getCarts(
     @Res() response: Response,
     @GetUser("id") userId: string

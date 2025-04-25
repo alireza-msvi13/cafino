@@ -36,7 +36,7 @@ export class CategoryController {
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadFileAws('image'))
   @ApiConsumes(SwaggerContentTypes.MULTIPART)
-  @ApiOperation({ summary: "create new category" })
+  @ApiOperation({ summary: "create new category by admin" })
   create(
     @UploadedFile() image: MulterFileType,
     @Body() createCategoryDto: CreateCategoryDto,
@@ -55,7 +55,7 @@ export class CategoryController {
   }
 
   @Get()
-  @ApiOperation({ summary: "get all categories " })
+  @ApiOperation({ summary: "get all categories" })
   findAll(
     @Res() response: Response,
   ) {
@@ -83,7 +83,7 @@ export class CategoryController {
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadFileAws('image'), EmptyStringToUndefindInterceptor)
   @ApiConsumes(SwaggerContentTypes.MULTIPART)
-  @ApiOperation({ summary: "update new category" })
+  @ApiOperation({ summary: "update new category by admin" })
   update(
     @Param("id",
       new ParseUUIDPipe({
@@ -99,7 +99,7 @@ export class CategoryController {
   }
 
   @Delete(":id")
-  @ApiOperation({ summary: "delete a category" })
+  @ApiOperation({ summary: "delete a category by admin" })
   delete(@Param("id",
     new ParseUUIDPipe({
       exceptionFactory: () => new BadRequestException("Invalid Category Id"),

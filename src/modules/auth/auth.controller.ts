@@ -56,12 +56,12 @@ export class AuthController {
     @ApiOperation({ summary: "generate new refresh & access token" })
     async refreshToken(
         @GetUser("phone") phone: string,
-        @GetCookie("refresh-token") refreshToken: string,
+        @GetUser("id") userId: string,
         @Res() response: Response
     ): Promise<Response | void> {
         return await this.authService.refreshToken(
             response,
-            refreshToken,
+            userId,
             phone
         );
     }

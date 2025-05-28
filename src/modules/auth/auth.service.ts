@@ -101,25 +101,13 @@ export class AuthService {
   }
   async refreshToken(
     response: Response,
-    refreshToken: string,
+    userId: string,
     phone: string,
   ): Promise<Response | void> {
     try {
-      const user = await this.userService.findUser(phone);
-      const isTokensEqual: boolean = await bcrypt.compare(
-        refreshToken,
-        user.rt_hash,
-      );
-      if (!isTokensEqual) throw new UnauthorizedException('token is not valid');
-
-      const isValidToken = await this.jwtService.verify(refreshToken, {
-        secret: process.env.REFRESH_TOKEN_SECRET,
-      });
-      if (!isValidToken) throw new UnauthorizedException('token is not valid');
-
       const tokens: TokenType = await this.createTokens(
         phone,
-        user.id.toString(),
+        userId,
       );
       const hashRefresh = await bcrypt.hash(tokens.refreshToken, 10);
       await this.userService.saveRefreshToken(phone, hashRefresh);

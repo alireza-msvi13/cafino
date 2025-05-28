@@ -4,14 +4,12 @@ import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { AuthService } from "../auth.service";
 import { JwtPayload } from "src/common/types/jwt-payload-type";
-import { UserService } from "src/modules/user/user.service";
 
 
 @Injectable()
 export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     constructor(
-        private authService: AuthService,
-        private userService: UserService
+        private authService: AuthService
     ) {
         super({
             ignoreExpiration: false,

@@ -1,4 +1,4 @@
 export const AllowOrigins: string[] = [
-    'http://localhost:3000'
+    // 'http://localhost:3000'
 ]
 

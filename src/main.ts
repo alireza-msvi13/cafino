@@ -20,7 +20,7 @@ async function bootstrap() {
 
   app.enableVersioning({ type: VersioningType.URI }); 
 
-  app.enableCors({ credentials: true, origin: AllowOrigins });
+  app.enableCors({ credentials: true, origin: process.env.NODE_ENV === 'production' ? AllowOrigins : true });
 
   SwaggerConfigInit(app);
 

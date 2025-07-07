@@ -18,16 +18,16 @@ async function bootstrap() {
 
   app.setGlobalPrefix('v1');
 
-  app.enableVersioning({ type: VersioningType.URI }); 
+  app.enableVersioning({ type: VersioningType.URI });
 
-  app.enableCors({ credentials: true, origin: process.env.NODE_ENV === 'production' ? AllowOrigins : true });
+  app.enableCors({ credentials: true, origin: true });
 
   SwaggerConfigInit(app);
 
   app.useGlobalPipes(new ValidationPipe())
 
   app.use(compression(CompressionConfig));
-  
+
   await app.listen(process.env.PORT);
 
 }

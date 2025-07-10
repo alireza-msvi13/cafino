@@ -55,9 +55,11 @@ export class ItemController {
   @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "get all items by admin, including items that are not allowed to be shown" })
   async getAllItemsByAdmin(
+    @Query() paginationDto: PaginationDto,
     @Res() response: Response,
   ): Promise<Response> {
     return this.itemService.getAllItemsByAdmin(
+      paginationDto,
       response,
     )
   }

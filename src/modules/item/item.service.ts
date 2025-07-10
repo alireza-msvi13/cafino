@@ -184,11 +184,18 @@ export class ItemService {
     paginationDto: PaginationDto
   ): Promise<Response> {
     try {
-      const { page, limit } = paginationDto
-      const data = await this.itemRepository
+      const { page = 1, limit = 10 } = paginationDto;
+
+      const baseQuery = this.itemRepository
         .createQueryBuilder("item")
         .leftJoin("item.category", "category")
         .leftJoin("item.images", "itemImage")
+        .where("category.show = :show", { show: true })
+        .andWhere("item.show = :show", { show: true });
+
+      const total = await baseQuery.getCount();
+
+      const data = await baseQuery
         .select([
           "item.id",
           "item.title",
@@ -203,18 +210,18 @@ export class ItemService {
           "itemImage.image",
           "itemImage.imageUrl",
         ])
-        .where("category.show = :show", { show: true })
-        .andWhere("item.show = :show", { show: true })
         .skip((page - 1) * limit)
         .take(limit)
         .getMany();
 
-      return response
-        .status(HttpStatus.OK)
-        .json({
-          data,
-          statusCode: HttpStatus.OK
-        })
+      return response.status(HttpStatus.OK).json({
+        data,
+        total,
+        page,
+        limit,
+        statusCode: HttpStatus.OK
+      });
+
     } catch (error) {
       console.log(error);
 
@@ -228,15 +235,47 @@ export class ItemService {
       }
     }
   }
-  async getAllItemsByAdmin(response: Response) {
+
+  async getAllItemsByAdmin(paginationDto: PaginationDto, response: Response) {
     try {
-      const data = await this.itemRepository.find({})
-      return response
-        .status(HttpStatus.OK)
-        .json({
-          data,
-          statusCode: HttpStatus.OK
-        })
+      const { page = 1, limit = 10 } = paginationDto;
+
+      const baseQuery = this.itemRepository
+        .createQueryBuilder("item")
+        .leftJoin("item.category", "category")
+        .leftJoin("item.images", "itemImage")
+
+
+      const total = await baseQuery.getCount();
+
+
+      const data = await baseQuery
+        .select([
+          "item.id",
+          "item.title",
+          "item.ingredients",
+          "item.description",
+          "item.price",
+          "item.discount",
+          "item.quantity",
+          "item.rate",
+          "item.rate_count",
+          "category.title",
+          "itemImage.image",
+          "itemImage.imageUrl",
+        ])
+        .skip((page - 1) * limit)
+        .take(limit)
+        .getMany();
+
+      return response.status(HttpStatus.OK).json({
+        data,
+        total,
+        page,
+        limit,
+        statusCode: HttpStatus.OK
+      });
+
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

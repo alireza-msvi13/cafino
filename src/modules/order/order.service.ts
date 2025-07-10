@@ -169,20 +169,36 @@ export class OrderService {
   }
 
   async getUserOrders(
-    userId: string
+    userId: string,
+    paginationDto: PaginationDto
   ) {
     try {
 
-      const data = await this.orderRepository
+      const { limit = 10, page = 1 } = paginationDto;
+
+      const baseQuery = this.orderRepository
         .createQueryBuilder("order")
         .leftJoinAndSelect("order.address", "address")
         .leftJoinAndSelect("order.items", "items")
         .leftJoinAndSelect("items.item", "item")
         .leftJoinAndSelect("order.payments", "payments")
-        .where("order.user.id = :userId", { userId })
+        .where("order.user.id = :userId", { userId });
+
+      const total = await baseQuery.getCount();
+
+      const data = await baseQuery
+        .skip((page - 1) * limit)
+        .take(limit)
         .getMany();
 
-      return data
+
+      return {
+        data,
+        total,
+        page,
+        limit,
+      }
+      
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

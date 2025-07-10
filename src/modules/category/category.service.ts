@@ -85,22 +85,27 @@ export class CategoryService {
   }
   async findByPagination(paginationDto: PaginationDto, response: Response) {
     try {
+      const { limit = 10, page = 1 } = paginationDto;
 
-      const { limit = 10, page = 1 } = paginationDto
-
-      const data = await this.categoryRepository
+      const queryBuilder = this.categoryRepository
         .createQueryBuilder('category')
-        .where("category.show = :show", { show: true })
+        .where("category.show = :show", { show: true });
+
+      const total = await queryBuilder.getCount();
+
+      const data = await queryBuilder
         .skip((page - 1) * limit)
         .take(limit)
-        .getMany()
+        .getMany();
 
-      return response
-        .status(HttpStatus.OK)
-        .json({
-          data,
-          statusCode: HttpStatus.OK
-        })
+      return response.status(HttpStatus.OK).json({
+        data,
+        total,
+        page,
+        limit,
+        statusCode: HttpStatus.OK
+      });
+
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -112,6 +117,7 @@ export class CategoryService {
       }
     }
   }
+
   async findAll(response: Response) {
     try {
       const data = await this.categoryRepository.find({
@@ -134,15 +140,27 @@ export class CategoryService {
       }
     }
   }
-  async findAllByAdmin(response: Response) {
+  async findByPaginationByAdmin(paginationDto: PaginationDto, response: Response) {
     try {
-      const data = await this.categoryRepository.find({})
-      return response
-        .status(HttpStatus.OK)
-        .json({
-          data,
-          statusCode: HttpStatus.OK
-        })
+      const { limit = 10, page = 1 } = paginationDto;
+
+      const queryBuilder = this.categoryRepository.createQueryBuilder('category')
+
+      const total = await queryBuilder.getCount();
+
+      const data = await queryBuilder
+        .skip((page - 1) * limit)
+        .take(limit)
+        .getMany();
+
+      return response.status(HttpStatus.OK).json({
+        data,
+        total,
+        page,
+        limit,
+        statusCode: HttpStatus.OK
+      });
+
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

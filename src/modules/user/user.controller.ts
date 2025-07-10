@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Response } from 'express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -7,6 +7,7 @@ import { JwtGuard } from '../auth/guards/access-token.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { UserPermissionDto } from './dto/permission.dto';
 import { UserDto } from './dto/user.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('user')
 @ApiTags('User')
@@ -29,9 +30,10 @@ export class UserController {
   @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "get all users list by admin" })
   async getUserList(
+    @Query() paginationDto: PaginationDto,
     @Res() response: Response
   ): Promise<Response> {
-    return await this.userService.getUsersList(response);
+    return await this.userService.getUsersList(paginationDto, response);
 
   }
 
@@ -65,9 +67,11 @@ export class UserController {
   @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "get blacklist by admin" })
   async getBlacklist(
+    @Query() paginationDto: PaginationDto,
     @Res() response: Response
   ): Promise<Response> {
     return this.userService.getBlacklist(
+      paginationDto,
       response
     );
   }

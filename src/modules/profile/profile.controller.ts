@@ -12,6 +12,7 @@ import { UpdateAddressDto } from './dto/update-address-dto';
 import { UploadFileAws } from 'src/common/interceptors/upload-file.interceptor';
 import { MulterFileType } from 'src/common/types/multer.file.type';
 import { UpdateImageDto } from './dto/update-image-dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('profile')
 @ApiTags('Profile')
@@ -25,11 +26,13 @@ export class ProfileController {
     @Get('orders')
     @ApiOperation({ summary: " user orders " })
     async getUserOrders(
+        @Query() paginationDto: PaginationDto,
         @GetUser('id') userId: string,
         @Res() response: Response
     ): Promise<Response> {
         return await this.profileService.getUserOrders(
             userId,
+            paginationDto,
             response
         );
     }
@@ -176,8 +179,9 @@ export class ProfileController {
     findUserFavorites(
         @GetUser('id') userId: string,
         @Res() response: Response,
+        @Query() paginationDto: PaginationDto,
     ) {
-        return this.profileService.findUserFavorites(userId, response);
+        return this.profileService.findUserFavorites(userId, paginationDto, response);
     }
 }
 

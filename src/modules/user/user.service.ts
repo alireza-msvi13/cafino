@@ -14,6 +14,7 @@ import { FavoriteEntity } from './entities/favorite.entity';
 import { UserPermissionDto } from './dto/permission.dto';
 import { UserDto } from './dto/user.dto';
 import { Roles } from 'src/common/enums/role.enum';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Injectable()
 export class UserService {
@@ -56,20 +57,52 @@ export class UserService {
             }
         }
     }
-    async getUsersList(response: Response) {
+    async getUsersList(
+        paginationDto: PaginationDto,
+        response: Response
+    ): Promise<Response> {
         try {
+            const { limit = 10, page = 1 } = paginationDto;
 
-            // TODO remove rt_hash
+            const baseQuery = this.userRepository
+                .createQueryBuilder("user")
+                .leftJoinAndSelect("user.addressList", "addressList")
+                .select([
+                    "user.id",
+                    "user.username",
+                    "user.first_name",
+                    "user.last_name",
+                    "user.birthday",
+                    "user.image",
+                    "user.phone",
+                    "user.email",
+                    "user.is_email_verified",
+                    "user.role",
+                    "user.status",
+                    "user.created_at",
+                    "user.updated_at",
+                    "addressList.id",
+                    "addressList.province",
+                    "addressList.city",
+                    "addressList.address",
+                    "addressList.created_at"
+                ]);
 
-            const users = await this.userRepository.find({
-                relations: ['addressList'],
+            const total = await baseQuery.getCount();
+
+            const users = await baseQuery
+                .skip((page - 1) * limit)
+                .take(limit)
+                .getMany();
+
+            return response.status(HttpStatus.OK).json({
+                data: users,
+                total,
+                page,
+                limit,
+                statusCode: HttpStatus.OK,
             });
-            return response
-                .status(HttpStatus.OK)
-                .json({
-                    data: users,
-                    statusCode: HttpStatus.OK
-                })
+
         } catch (error) {
             if (error instanceof HttpException) {
                 throw error;
@@ -81,6 +114,7 @@ export class UserService {
             }
         }
     }
+
     async changeUserPermission(userPermissionDto: UserPermissionDto, response: Response) {
         try {
 
@@ -167,16 +201,31 @@ export class UserService {
         }
     }
     async getBlacklist(
+        paginationDto: PaginationDto,
         response: Response
     ): Promise<Response> {
         try {
-            const data = await this.userRepository.find({
-                where: { status: UserStatus.Block }
-            })
+
+            const { limit = 10, page = 1 } = paginationDto;
+
+            const baseQuery = this.userRepository
+                .createQueryBuilder('user')
+                .where("user.status = :status", { status: UserStatus.Block });
+
+            const total = await baseQuery.getCount();
+
+            const data = await baseQuery
+                .skip((page - 1) * limit)
+                .take(limit)
+                .getMany();
+
             return response
                 .status(HttpStatus.OK)
                 .json({
                     data,
+                    total,
+                    page,
+                    limit,
                     statusCode: HttpStatus.OK
                 })
         } catch (error) {
@@ -421,21 +470,31 @@ export class UserService {
             }
         }
     }
-    async findUserFavorites(userId: string) {
+    async findUserFavorites(userId: string, paginationDto: PaginationDto) {
         try {
-            const data = await this.favoriteRepository.find({
-                where: {
-                    user: { id: userId }
-                },
-                relations: {
-                    item: true
-                },
-            })
 
-            if (!data.length) {
-                throw new NotFoundException("not found any item in user favorite")
+            const { limit = 10, page = 1 } = paginationDto;
+
+
+            const baseQuery = this.favoriteRepository
+                .createQueryBuilder('favorite')
+                .leftJoinAndSelect("items.item", "item")
+                .where("order.user.id = :userId", { userId });
+
+
+            const total = await baseQuery.getCount();
+
+            const data = await baseQuery
+                .skip((page - 1) * limit)
+                .take(limit)
+                .getMany();
+
+            return {
+                data,
+                total,
+                page,
+                limit,
             }
-            return data
         } catch (error) {
             if (error instanceof HttpException) {
                 throw error;
@@ -519,7 +578,7 @@ export class UserService {
 
             const userCount = await this.userRepository.count();
             if (!userCount) user.role = Roles.Admin;
-            
+
             await this.userRepository.save(user)
 
             return user

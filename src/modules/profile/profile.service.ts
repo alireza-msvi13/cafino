@@ -10,6 +10,7 @@ import { ItemService } from '../item/item.service';
 import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 import { OrderService } from '../order/order.service';
 import { OrderStatus } from 'src/common/enums/order-status.enum';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 
 @Injectable()
@@ -37,7 +38,7 @@ export class ProfileService {
                     updateUserDto.username,
                 )
             }
-            
+
             await this.userService.updateUser(updateUserDto, userId)
 
             return response
@@ -296,13 +297,22 @@ export class ProfileService {
             }
         }
     }
-    async findUserFavorites(userId: string, response: Response) {
+    async findUserFavorites(userId: string, paginationDto: PaginationDto, response: Response) {
         try {
-            const data = await this.userService.findUserFavorites(userId)
+            const {
+                data,
+                total,
+                page,
+                limit,
+            }
+                = await this.userService.findUserFavorites(userId, paginationDto)
             return response
                 .status(HttpStatus.OK)
                 .json({
                     data,
+                    total,
+                    page,
+                    limit,
                     statusCode: HttpStatus.OK
                 })
         } catch (error) {
@@ -344,16 +354,26 @@ export class ProfileService {
     }
     async getUserOrders(
         userId: string,
+        paginationDto: PaginationDto,
         response: Response
     ): Promise<Response> {
         try {
-            const userOrders = await this.orderService.getUserOrders(
+            const {
+                data,
+                total,
+                page,
+                limit,
+            } = await this.orderService.getUserOrders(
                 userId,
+                paginationDto
             )
             return response
                 .status(HttpStatus.OK)
                 .json({
-                    data: userOrders,
+                    data,
+                    total,
+                    page,
+                    limit,
                     statusCode: HttpStatus.OK
                 })
         } catch (error) {

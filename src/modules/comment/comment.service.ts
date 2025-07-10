@@ -67,10 +67,17 @@ export class CommentService {
     response: Response
   ): Promise<Response> {
     try {
-      const { limit = 10, page = 1 } = paginationDto
-      const data = await this.commentRepository
+      const { limit = 10, page = 1 } = paginationDto;
+
+      const baseQuery = this.commentRepository
         .createQueryBuilder("comment")
-        .leftJoin("comment.user", "user")
+        .leftJoin("comment.user", "user");
+
+
+      const total = await baseQuery.getCount();
+
+
+      const data = await baseQuery
         .select([
           "comment.id",
           "comment.text",
@@ -89,8 +96,12 @@ export class CommentService {
 
       return response.status(HttpStatus.OK).json({
         data,
-        statusCode: HttpStatus.OK,
+        total,
+        page,
+        limit,
+        statusCode: HttpStatus.OK
       });
+
     } catch (error) {
       console.log(error);
 
@@ -104,6 +115,7 @@ export class CommentService {
       }
     }
   }
+
   async acceptComment(id: string, response: Response): Promise<Response> {
     try {
       const comment = await this.checkCommentExist(id);

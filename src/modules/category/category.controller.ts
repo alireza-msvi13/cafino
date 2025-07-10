@@ -65,9 +65,10 @@ export class CategoryController {
   @Get('admin')
   @ApiOperation({ summary: "get all categories by admin, including categories that are not allowed to be shown" })
   findAllByAdmin(
+    @Query() pagination: PaginationDto,
     @Res() response: Response,
   ) {
-    return this.categoryService.findAllByAdmin(response);
+    return this.categoryService.findByPaginationByAdmin(pagination, response);
   }
 
   @Get("/by-slug/:slug")

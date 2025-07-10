@@ -133,40 +133,50 @@ export class OrderService {
   }
 
   async getAllOrders(
-    paginationDto: PaginationDto,
-    response: Response
-  ): Promise<Response> {
-    try {
-      const { limit = 10, page = 1 } = paginationDto;
+  paginationDto: PaginationDto,
+  response: Response
+): Promise<Response> {
+  try {
+    const { limit = 10, page = 1 } = paginationDto;
 
-      const data = await this.orderRepository
-        .createQueryBuilder("order")
-        .leftJoinAndSelect("order.user", "user")
-        .leftJoinAndSelect("order.address", "address")
-        .leftJoinAndSelect("order.items", "items")
-        .leftJoinAndSelect("items.item", "item")
-        .leftJoinAndSelect("order.payments", "payments")
-        .skip((page - 1) * limit)
-        .take(limit)
-        .getMany();
+    const baseQuery = this.orderRepository
+      .createQueryBuilder("order")
+      .leftJoinAndSelect("order.user", "user")
+      .leftJoinAndSelect("order.address", "address")
+      .leftJoinAndSelect("order.items", "items")
+      .leftJoinAndSelect("items.item", "item")
+      .leftJoinAndSelect("order.payments", "payments");
 
-      return response.status(HttpStatus.OK).json({
-        data,
-        statusCode: HttpStatus.OK,
-      });
-    } catch (error) {
-      console.log(error);
+    const total = await baseQuery.getCount();
 
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
+    const data = await baseQuery
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+
+      
+    return response.status(HttpStatus.OK).json({
+      data,
+      total,
+      page,
+      limit,
+      statusCode: HttpStatus.OK,
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    if (error instanceof HttpException) {
+      throw error;
+    } else {
+      throw new HttpException(
+        INTERNAL_SERVER_ERROR_MESSAGE,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
+}
+
 
   async getUserOrders(
     userId: string,

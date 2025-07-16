@@ -46,7 +46,8 @@
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "swagger-themes": "^1.4.3",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "ua-parser-js": "^2.0.4"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.9",

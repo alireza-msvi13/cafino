@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
@@ -7,14 +7,15 @@ import { AdminStrategy } from './strategy/admin.strategy';
 import { RefreshStrategy } from './strategy/refresh-token.strategy';
 import { JwtStrategy } from './strategy/access-token.strategy';
 import { UserModule } from '../user/user.module';
-
+import { RateLimitModule } from 'src/modules/rate-limit/rate-limit.module';
 @Module({
   imports: [
     UserModule,
+    RateLimitModule,
     PassportModule.register({}),
-    JwtModule.register({ 
+    JwtModule.register({
       global: true,
-     }),
+    }),
   ],
   controllers: [AuthController],
   providers: [
@@ -28,4 +29,4 @@ import { UserModule } from '../user/user.module';
   ]
 })
 
-export class AuthModule { }
+export class AuthModule {}

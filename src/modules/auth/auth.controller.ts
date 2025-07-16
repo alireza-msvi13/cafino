@@ -1,14 +1,15 @@
-import { Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Request, Response } from 'express';
-import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiResponseProperty, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { Response } from 'express';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResendCodeDto } from './dto/resend-code.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { VerfiyOtpDto } from './dto/verfiy-otp.dto';
 import { RefreshGuard } from './guards/refresh-token.guard';
 import { JwtGuard } from './guards/access-token.guard';
-import { GetCookie } from 'src/common/decorators/get-cookie.decorator';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
+import { RateLimitGuard } from 'src/modules/rate-limit/guards/rate-limit.guard';
+import { RateLimit } from 'src/modules/rate-limit/decorators/rate-limit.decorator';
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
@@ -16,6 +17,8 @@ export class AuthController {
         private authService: AuthService
     ) { }
 
+    @UseGuards(RateLimitGuard)
+    @RateLimit({ max: 10, duration: 1 })
     @Post('send-otp')
     @ApiOperation({ summary: "send otp" })
     async sendOtp(
@@ -28,6 +31,8 @@ export class AuthController {
         );
     }
 
+    @UseGuards(RateLimitGuard)
+    @RateLimit({ max: 10, duration: 1 })
     @Post('verfiy-otp')
     @ApiOperation({ summary: "verfiy otp" })
     @ApiBody({ type: VerfiyOtpDto, required: true })
@@ -42,6 +47,8 @@ export class AuthController {
         )
     }
 
+    @UseGuards(RateLimitGuard)
+    @RateLimit({ max: 10, duration: 1 })
     @Post('resend-otp')
     @ApiOperation({ summary: "resend otp code" })
     async resendOtp(

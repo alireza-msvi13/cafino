@@ -3,8 +3,6 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { TypeOrmConfig } from './common/config/typeorm/typeorm.config';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
 import { SmsModule } from './modules/sms/sms.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
@@ -26,10 +24,6 @@ import { PaymentModule } from './modules/payment/payment.module';
       envFilePath: join(process.cwd(), '.env')
     }),
     TypeOrmModule.forRoot(TypeOrmConfig()),
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 10,
-    }]),
     UserModule,
     AuthModule,
     SmsModule,
@@ -46,11 +40,6 @@ import { PaymentModule } from './modules/payment/payment.module';
     
   ],
   controllers: [],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
-  ],
+  providers: [],
 })
 export class AppModule { }

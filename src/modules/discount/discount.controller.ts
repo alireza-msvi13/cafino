@@ -1,11 +1,9 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   Param,
-  ParseUUIDPipe,
   Post,
   Res,
   UseGuards
@@ -17,6 +15,7 @@ import { SwaggerContentTypes } from "src/common/enums/swagger.enum";
 import { JwtGuard } from "../auth/guards/access-token.guard";
 import { AdminGuard } from "../auth/guards/admin.guard";
 import { Response } from "express";
+import { UUIDValidationPipe } from "src/common/pipes/uuid-validation.pipe";
 @Controller("discount")
 @ApiTags('Discount')
 @UseGuards(JwtGuard, AdminGuard)
@@ -40,11 +39,7 @@ export class DiscountController {
 
   @Delete("/:id")
   @ApiOperation({ summary: " delete discount code by admin" })
-  remove(@Param("id",
-    new ParseUUIDPipe({
-      exceptionFactory: () => new BadRequestException("Invalid Discount Id"),
-    })
-  ) id: string, @Res() response: Response) {
+  remove(@Param("id", UUIDValidationPipe) id: string, @Res() response: Response) {
     return this.discountService.delete(id, response);
   }
 }

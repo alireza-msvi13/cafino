@@ -1,7 +1,7 @@
 
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { BadRequestException, Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put, Query, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
@@ -13,6 +13,9 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
+import { SortItemDto } from './dto/sort-item.dto';
+import { OptionalJwtGuard } from '../auth/guards/optional-token.guard';
 
 @Controller('item')
 @ApiTags('Item')
@@ -39,15 +42,20 @@ export class ItemController {
     )
   }
 
+
   @Get()
+  @UseGuards(OptionalJwtGuard)
   @ApiOperation({ summary: "get all items" })
   async getAllItem(
     @Res() response: Response,
-    @Query() paginationDto: PaginationDto,
+    @Query() sortItemDto: SortItemDto,
+    @Req() req: Request,
   ): Promise<Response> {
+    const userId = req?.user?.id || null;
     return this.itemService.getAllItems(
       response,
-      paginationDto
+      userId,
+      sortItemDto
     )
   }
 
@@ -55,27 +63,27 @@ export class ItemController {
   @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "get all items by admin, including items that are not allowed to be shown" })
   async getAllItemsByAdmin(
-    @Query() paginationDto: PaginationDto,
     @Res() response: Response,
+    @Query() sortItemDto: SortItemDto,
   ): Promise<Response> {
     return this.itemService.getAllItemsByAdmin(
-      paginationDto,
+      sortItemDto,
       response,
     )
   }
 
   @Get("/:id")
+  @UseGuards(OptionalJwtGuard)
   @ApiOperation({ summary: "get item by id " })
   async getItemById(
-    @Param("id",
-      new ParseUUIDPipe({
-        exceptionFactory: () => new BadRequestException("Invalid Item Id"),
-      })
-    ) itemId: string,
-    @Res() response: Response
+    @Param("id", UUIDValidationPipe) itemId: string,
+    @Res() response: Response,
+    @Req() req: Request,
   ): Promise<Response> {
+    const userId = req?.user?.id || null;
     return this.itemService.getItemById(
       itemId,
+      userId,
       response
     )
   }
@@ -84,11 +92,7 @@ export class ItemController {
   @ApiOperation({ summary: "delete a menu item by admin" })
   @Delete('/:id')
   async deleteItemById(
-    @Param("id",
-      new ParseUUIDPipe({
-        exceptionFactory: () => new BadRequestException("Invalid Item Id"),
-      })
-    ) itemId: string,
+    @Param("id", UUIDValidationPipe) itemId: string,
     @Res() response: Response
   ): Promise<Response> {
     return this.itemService.deleteItemById(
@@ -107,11 +111,7 @@ export class ItemController {
     @UploadedFiles() images: Array<MulterFileType>,
     @Body() updateFoodDto: UpdateItemDto,
     @Res() response: Response,
-    @Param("id",
-      new ParseUUIDPipe({
-        exceptionFactory: () => new BadRequestException("Invalid Item Id"),
-      })
-    ) itemId: string
+    @Param("id", UUIDValidationPipe) itemId: string
   ): Promise<Response> {
     return this.itemService.updateItem(
       itemId,

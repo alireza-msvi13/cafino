@@ -1,7 +1,7 @@
 import { BaseEntity } from 'src/common/abstracts/base.entity';
 import { EntityName } from 'src/common/enums/entity.enum';
 import { CategoryEntity } from 'src/modules/category/entities/category.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany, JoinColumn, CreateDateColumn } from 'typeorm';
 import { ItemImageEntity } from './item-image.entity';
 import { CommentEntity } from 'src/modules/comment/entities/comment.entity';
 import { CartEntity } from 'src/modules/cart/entity/cart.entity';
@@ -60,6 +60,9 @@ export class ItemEntity extends BaseEntity {
     orders: OrderItemEntity[];
 
 
+
+    @CreateDateColumn()
+    createdAt: Date;
 
 
 

@@ -244,10 +244,6 @@ export class CartService {
                 generalDiscount,
             } = await this.getUserCart(userId)
 
-            if (cartItems.length === 0) {
-                throw new NotFoundException("Your cart is empty")
-            }
-
             return response
                 .status(HttpStatus.OK)
                 .json({

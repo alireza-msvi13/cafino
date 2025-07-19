@@ -14,6 +14,9 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { isBoolean, toBoolean } from 'src/common/utils/boolean.utils';
 import { ItemImageEntity } from './entities/item-image.entity';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { SortItemDto } from './dto/sort-item.dto';
+import { SortByOption } from 'src/common/enums/sort-by-option.enum';
+import { UserService } from '../user/user.service';
 
 
 @Injectable()
@@ -26,8 +29,9 @@ export class ItemService {
     private storageService: StorageService,
     @Inject(forwardRef(() => CategoryService))
     private categoryService: CategoryService,
+    @Inject(forwardRef(() => UserService))
+    private userService: UserService,
   ) { }
-
 
   // *primary
 
@@ -95,6 +99,7 @@ export class ItemService {
       }
     }
   }
+
   async updateItem(
     itemId: string,
     updateItemDto: UpdateItemDto,
@@ -179,12 +184,21 @@ export class ItemService {
       }
     }
   }
+
   async getAllItems(
     response: Response,
-    paginationDto: PaginationDto
+    userId: string,
+    sortItemDto: SortItemDto
   ): Promise<Response> {
     try {
-      const { page = 1, limit = 10 } = paginationDto;
+      const {
+        page = 1,
+        limit = 10,
+        sortBy = SortByOption.Newest,
+        minPrice,
+        maxPrice,
+        availableOnly = false
+      } = sortItemDto;
 
       const baseQuery = this.itemRepository
         .createQueryBuilder("item")
@@ -193,7 +207,131 @@ export class ItemService {
         .where("category.show = :show", { show: true })
         .andWhere("item.show = :show", { show: true });
 
+
+      if (minPrice !== undefined) baseQuery.andWhere("item.price >= :minPrice", { minPrice });
+      if (maxPrice !== undefined) baseQuery.andWhere("item.price <= :maxPrice", { maxPrice });
+      if (availableOnly) baseQuery.andWhere("item.quantity > 0");
+
+      switch (sortBy) {
+        case SortByOption.LowestPrice:
+          baseQuery.orderBy("item.price", "ASC");
+          break;
+        case SortByOption.HighestPrice:
+          baseQuery.orderBy("item.price", "DESC");
+          break;
+        case SortByOption.HighestDiscount:
+          baseQuery.orderBy("item.discount", "DESC");
+          break;
+        case SortByOption.TopRated:
+          baseQuery.orderBy("item.rate", "DESC");
+          break;
+        case SortByOption.Newest:
+        default:
+          baseQuery.orderBy("item.createdAt", "DESC");
+          break;
+      }
+
       const total = await baseQuery.getCount();
+
+      const items = await baseQuery
+        .select([
+          "item.id",
+          "item.title",
+          "item.ingredients",
+          "item.description",
+          "item.price",
+          "item.discount",
+          "item.quantity",
+          "item.rate",
+          "item.rate_count",
+          "category.title",
+          "item.createdAt",
+          "itemImage.image",
+          "itemImage.imageUrl",
+        ])
+        .skip((page - 1) * limit)
+        .take(limit)
+        .getMany();
+
+      let favoriteItemIds: string[] = [];
+      if (userId) {
+        favoriteItemIds = await this.userService.getFavoriteItemIds(userId);
+      }
+
+      const dataWithFav = items.map(item => ({
+        ...item,
+        isFav: favoriteItemIds.includes(item.id)
+      }));
+
+      return response.status(HttpStatus.OK).json({
+        data: dataWithFav,
+        total,
+        page,
+        limit,
+        statusCode: HttpStatus.OK
+      });
+
+
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException(
+          INTERNAL_SERVER_ERROR_MESSAGE,
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
+  }
+
+  async getAllItemsByAdmin(sortItemDto: SortItemDto, response: Response) {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        sortBy = SortByOption.Newest,
+        minPrice,
+        maxPrice,
+        availableOnly = false
+      } = sortItemDto;
+
+      const baseQuery = this.itemRepository
+        .createQueryBuilder("item")
+        .leftJoin("item.category", "category")
+        .leftJoin("item.images", "itemImage")
+
+
+      if (minPrice !== undefined) baseQuery.andWhere("item.price >= :minPrice", { minPrice });
+
+      if (maxPrice !== undefined) baseQuery.andWhere("item.price <= :maxPrice", { maxPrice });
+
+      if (availableOnly) baseQuery.andWhere("item.quantity > 0");
+
+
+      switch (sortBy) {
+        case SortByOption.LowestPrice:
+          baseQuery.orderBy("item.price", "ASC");
+          break;
+        case SortByOption.HighestPrice:
+          baseQuery.orderBy("item.price", "DESC");
+          break;
+        case SortByOption.HighestDiscount:
+          baseQuery.orderBy("item.discount", "DESC");
+          break;
+        case SortByOption.TopRated:
+          baseQuery.orderBy("item.rate", "DESC");
+          break;
+        case SortByOption.Newest:
+        default:
+          baseQuery.orderBy("item.createdAt", "DESC");
+          break;
+      }
+
+
+      const total = await baseQuery.getCount();
+
 
       const data = await baseQuery
         .select([
@@ -207,6 +345,7 @@ export class ItemService {
           "item.rate",
           "item.rate_count",
           "category.title",
+          "item.createdAt",
           "itemImage.image",
           "itemImage.imageUrl",
         ])
@@ -236,58 +375,7 @@ export class ItemService {
     }
   }
 
-  async getAllItemsByAdmin(paginationDto: PaginationDto, response: Response) {
-    try {
-      const { page = 1, limit = 10 } = paginationDto;
-
-      const baseQuery = this.itemRepository
-        .createQueryBuilder("item")
-        .leftJoin("item.category", "category")
-        .leftJoin("item.images", "itemImage")
-
-
-      const total = await baseQuery.getCount();
-
-
-      const data = await baseQuery
-        .select([
-          "item.id",
-          "item.title",
-          "item.ingredients",
-          "item.description",
-          "item.price",
-          "item.discount",
-          "item.quantity",
-          "item.rate",
-          "item.rate_count",
-          "category.title",
-          "itemImage.image",
-          "itemImage.imageUrl",
-        ])
-        .skip((page - 1) * limit)
-        .take(limit)
-        .getMany();
-
-      return response.status(HttpStatus.OK).json({
-        data,
-        total,
-        page,
-        limit,
-        statusCode: HttpStatus.OK
-      });
-
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
-    }
-  }
-  async getItemById(itemId: string, response: Response): Promise<Response> {
+  async getItemById(itemId: string, userId: string, response: Response): Promise<Response> {
     try {
       const item = await this.itemRepository
         .createQueryBuilder("item")
@@ -327,8 +415,15 @@ export class ItemService {
 
       if (!item) throw new NotFoundException("item not found");
 
+      const isFav = await this.userService.isItemFavorited(userId, itemId);
+
+
+
       return response.status(HttpStatus.OK).json({
-        data: item,
+        data: {
+          ...item,
+          isFav
+        },
         statusCode: HttpStatus.OK
       });
     } catch (error) {
@@ -342,6 +437,7 @@ export class ItemService {
       }
     }
   }
+
   async deleteItemById(
     itemId: string,
     response: Response
@@ -374,6 +470,7 @@ export class ItemService {
       }
     }
   }
+
   async searchItem(searchQuery: string, response: Response) {
     try {
       const items = await this.itemRepository

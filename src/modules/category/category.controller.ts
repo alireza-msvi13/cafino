@@ -11,8 +11,6 @@ import {
   UseGuards,
   Put,
   Res,
-  ParseUUIDPipe,
-  BadRequestException,
 } from "@nestjs/common";
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
@@ -26,6 +24,7 @@ import { Response } from "express";
 import { AdminGuard } from "../auth/guards/admin.guard";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
+import { UUIDValidationPipe } from "src/common/pipes/uuid-validation.pipe";
 
 @Controller("category")
 @ApiTags('Category')
@@ -86,11 +85,7 @@ export class CategoryController {
   @ApiConsumes(SwaggerContentTypes.MULTIPART)
   @ApiOperation({ summary: "update new category by admin" })
   update(
-    @Param("id",
-      new ParseUUIDPipe({
-        exceptionFactory: () => new BadRequestException("Invalid Category Id"),
-      })
-    ) categoryId: string,
+    @Param("id", UUIDValidationPipe) categoryId: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
     @UploadedFile() image: MulterFileType,
     @Res() response: Response
@@ -101,11 +96,7 @@ export class CategoryController {
 
   @Delete(":id")
   @ApiOperation({ summary: "delete a category by admin" })
-  delete(@Param("id",
-    new ParseUUIDPipe({
-      exceptionFactory: () => new BadRequestException("Invalid Category Id"),
-    })
-  ) categoryId: string, @Res() response: Response) {
+  delete(@Param("id", UUIDValidationPipe) categoryId: string, @Res() response: Response) {
     return this.categoryService.delete(categoryId, response);
   }
 }

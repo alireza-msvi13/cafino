@@ -9,7 +9,7 @@ import {
 @Injectable()
 export class UUIDValidationPipe implements PipeTransform<string> {
   private readonly parseUUID = new ParseUUIDPipe({
-    exceptionFactory: () => new BadRequestException('Invalid Item Id'),
+    exceptionFactory: () => new BadRequestException('Invalid Id'),
   });
 
   async transform(value: string, metadata: ArgumentMetadata): Promise<string> {

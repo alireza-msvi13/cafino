@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, ParseUUIDPipe, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -7,6 +7,7 @@ import { JwtGuard } from '../auth/guards/access-token.guard';
 import { Response } from 'express';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 
 
 
@@ -39,11 +40,7 @@ export class CommentController {
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: "accept comment for menu item by admin" })
   acceptComment(
-    @Param("id",
-      new ParseUUIDPipe({
-        exceptionFactory: () => new BadRequestException("Invalid Comment Id"),
-      })
-    ) id: string,
+    @Param("id", UUIDValidationPipe) id: string,
     @Res() response: Response) {
     return this.commentService.acceptComment(id, response)
   }
@@ -51,11 +48,7 @@ export class CommentController {
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: "reject comment for menu item by admin" })
   rejectComment(
-    @Param("id",
-      new ParseUUIDPipe({
-        exceptionFactory: () => new BadRequestException("Invalid Comment Id"),
-      })
-    ) id: string,
+    @Param("id", UUIDValidationPipe) id: string,
     @Res() response: Response) {
     return this.commentService.rejectComment(id, response)
   }

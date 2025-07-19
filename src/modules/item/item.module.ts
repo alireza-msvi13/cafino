@@ -6,10 +6,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ItemEntity } from './entities/item.entity';
 import { CategoryModule } from '../category/category.module';
 import { ItemImageEntity } from './entities/item-image.entity';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     StorageModule,
+    UserModule,
     forwardRef(() => CategoryModule),
     TypeOrmModule.forFeature([ItemEntity, ItemImageEntity])],
   controllers: [ItemController],

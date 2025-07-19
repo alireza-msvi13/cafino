@@ -478,8 +478,9 @@ export class UserService {
 
             const baseQuery = this.favoriteRepository
                 .createQueryBuilder('favorite')
-                .leftJoinAndSelect("items.item", "item")
-                .where("order.user.id = :userId", { userId });
+                .leftJoinAndSelect('favorite.item', 'item') // item relation
+                .leftJoin('favorite.user', 'user')         // user relation for filtering
+                .where('user.id = :userId', { userId });
 
 
             const total = await baseQuery.getCount();
@@ -496,6 +497,8 @@ export class UserService {
                 limit,
             }
         } catch (error) {
+            console.log(error);
+
             if (error instanceof HttpException) {
                 throw error;
             } else {
@@ -506,6 +509,7 @@ export class UserService {
             }
         }
     }
+
 
     // *helper
 
@@ -778,5 +782,31 @@ export class UserService {
             }
         }
     }
+    async isItemFavorited(userId: string, itemId: string): Promise<boolean> {
+        if (!userId) return false;
 
+        const fav = await this.favoriteRepository.findOne({
+            where: {
+                user: { id: userId },
+                item: { id: itemId }
+            }
+        });
+
+        return !!fav;
+    }
+    async getFavoriteItemIds(userId: string): Promise<string[]> {
+        if (!userId) return [];
+
+        const favorites = await this.favoriteRepository.find({
+            where: { user: { id: userId } },
+            relations: ['item'],
+            select: {
+                item: {
+                    id: true
+                }
+            }
+        });
+
+        return favorites.map(f => f.item.id);
+    }
 }

@@ -20,8 +20,8 @@ export class RateLimitGuard implements CanActivate {
 
 
         const userId = req?.user && req.user['id']
+        const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.socket.remoteAddress;
 
-        const ip = req.ip;
         const rawUA = req.headers['user-agent'] || '';
         const ua = parseUserAgent(rawUA);
 

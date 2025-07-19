@@ -133,49 +133,49 @@ export class OrderService {
   }
 
   async getAllOrders(
-  paginationDto: PaginationDto,
-  response: Response
-): Promise<Response> {
-  try {
-    const { limit = 10, page = 1 } = paginationDto;
+    paginationDto: PaginationDto,
+    response: Response
+  ): Promise<Response> {
+    try {
+      const { limit = 10, page = 1 } = paginationDto;
 
-    const baseQuery = this.orderRepository
-      .createQueryBuilder("order")
-      .leftJoinAndSelect("order.user", "user")
-      .leftJoinAndSelect("order.address", "address")
-      .leftJoinAndSelect("order.items", "items")
-      .leftJoinAndSelect("items.item", "item")
-      .leftJoinAndSelect("order.payments", "payments");
+      const baseQuery = this.orderRepository
+        .createQueryBuilder("order")
+        .leftJoinAndSelect("order.user", "user")
+        .leftJoinAndSelect("order.address", "address")
+        .leftJoinAndSelect("order.items", "items")
+        .leftJoinAndSelect("items.item", "item")
+        .leftJoinAndSelect("order.payments", "payments");
 
-    const total = await baseQuery.getCount();
+      const total = await baseQuery.getCount();
 
-    const data = await baseQuery
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getMany();
+      const data = await baseQuery
+        .skip((page - 1) * limit)
+        .take(limit)
+        .getMany();
 
-      
-    return response.status(HttpStatus.OK).json({
-      data,
-      total,
-      page,
-      limit,
-      statusCode: HttpStatus.OK,
-    });
 
-  } catch (error) {
-    console.log(error);
+      return response.status(HttpStatus.OK).json({
+        data,
+        total,
+        page,
+        limit,
+        statusCode: HttpStatus.OK,
+      });
 
-    if (error instanceof HttpException) {
-      throw error;
-    } else {
-      throw new HttpException(
-        INTERNAL_SERVER_ERROR_MESSAGE,
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException(
+          INTERNAL_SERVER_ERROR_MESSAGE,
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
     }
   }
-}
 
 
   async getUserOrders(
@@ -208,7 +208,7 @@ export class OrderService {
         page,
         limit,
       }
-      
+
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -219,6 +219,22 @@ export class OrderService {
         );
       }
     }
+  }
+
+
+  async getOrderWithItems(orderId: string): Promise<OrderEntity> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: {
+        items: { item: true },
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException("Order not found");
+    }
+
+    return order;
   }
 
 

@@ -12,13 +12,15 @@ import { SwaggerConfigInit } from './common/config/swagger/swagger.config';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.use(cookieParser())
+  app.use(cookieParser());
 
   app.use(helmet());
 
   app.setGlobalPrefix('v1');
 
   app.enableVersioning({ type: VersioningType.URI });
+
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   app.enableCors({ credentials: true, origin: true });
 

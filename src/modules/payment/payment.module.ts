@@ -7,6 +7,7 @@ import { GatewayModule } from "../gateway/gateway.module";
 import { UserModule } from "../user/user.module";
 import { CartModule } from "../cart/cart.module";
 import { OrderModule } from "../order/order.module";
+import { ItemModule } from "../item/item.module";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { OrderModule } from "../order/order.module";
     CartModule,
     OrderModule,
     GatewayModule,
+    ItemModule,
     TypeOrmModule.forFeature([PaymentEntity]),
   ],
   providers: [PaymentService],

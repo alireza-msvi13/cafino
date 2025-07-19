@@ -7,11 +7,13 @@ import { ItemEntity } from './entities/item.entity';
 import { CategoryModule } from '../category/category.module';
 import { ItemImageEntity } from './entities/item-image.entity';
 import { UserModule } from '../user/user.module';
+import { OrderModule } from '../order/order.module';
 
 @Module({
   imports: [
     StorageModule,
     UserModule,
+    OrderModule,
     forwardRef(() => CategoryModule),
     TypeOrmModule.forFeature([ItemEntity, ItemImageEntity])],
   controllers: [ItemController],

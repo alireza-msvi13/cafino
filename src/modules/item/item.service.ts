@@ -17,6 +17,7 @@ import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { SortItemDto } from './dto/sort-item.dto';
 import { SortByOption } from 'src/common/enums/sort-by-option.enum';
 import { UserService } from '../user/user.service';
+import { OrderService } from '../order/order.service';
 
 
 @Injectable()
@@ -31,6 +32,8 @@ export class ItemService {
     private categoryService: CategoryService,
     @Inject(forwardRef(() => UserService))
     private userService: UserService,
+    private orderService: OrderService,
+
   ) { }
 
   // *primary
@@ -210,7 +213,8 @@ export class ItemService {
 
       if (minPrice !== undefined) baseQuery.andWhere("item.price >= :minPrice", { minPrice });
       if (maxPrice !== undefined) baseQuery.andWhere("item.price <= :maxPrice", { maxPrice });
-      if (availableOnly) baseQuery.andWhere("item.quantity > 0");
+      if (availableOnly === true) baseQuery.andWhere("item.quantity > 0");
+
 
       switch (sortBy) {
         case SortByOption.LowestPrice:
@@ -304,10 +308,9 @@ export class ItemService {
 
 
       if (minPrice !== undefined) baseQuery.andWhere("item.price >= :minPrice", { minPrice });
-
       if (maxPrice !== undefined) baseQuery.andWhere("item.price <= :maxPrice", { maxPrice });
+      if (availableOnly === true) baseQuery.andWhere("item.quantity > 0");
 
-      if (availableOnly) baseQuery.andWhere("item.quantity > 0");
 
 
       switch (sortBy) {
@@ -530,7 +533,9 @@ export class ItemService {
   }
   async checkItemQuantity(
     itemId: string,
-    count: number = 1
+    count: number = 1,
+    title?: string,
+    response?: Response
   ): Promise<void> {
     try {
       const item = await this.checkItemExist(itemId)
@@ -538,6 +543,16 @@ export class ItemService {
       const remainingItem = item?.quantity - count;
 
       if (remainingItem < 0) {
+        if (title) {
+          throw response
+            .status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .json({
+              message: `unfortunately, the ${title} stock is less than the quantity you requested`,
+              statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+              item: title,
+              available_qunatity: item?.quantity
+            })
+        }
         throw new HttpException(
           "unfortunately, the item stock is less than the quantity you requested",
           HttpStatus.UNPROCESSABLE_ENTITY
@@ -613,6 +628,20 @@ export class ItemService {
           HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
+    }
+  }
+  async decreaseItemsQuantity(orderId: string): Promise<void> {
+    const order = await this.orderService.getOrderWithItems(orderId);
+
+    console.log(order);
+
+
+    for (const orderItem of order.items) {
+      await this.itemRepository.decrement(
+        { id: orderItem.item.id },
+        "quantity",
+        orderItem.count
+      );
     }
   }
 

@@ -11,6 +11,7 @@ import { generateInvoiceNumber } from "src/common/utils/generate-invoice-number"
 import { INTERNAL_SERVER_ERROR_MESSAGE } from "src/common/constants/error.constant";
 import { UserService } from "../user/user.service";
 import { OrderStatus } from "src/common/enums/order-status.enum";
+import { ItemService } from "../item/item.service";
 
 
 @Injectable()
@@ -25,6 +26,8 @@ export class PaymentService {
     private zarinpalService: ZarinpalService,
     private orderService: OrderService,
     private userService: UserService,
+    private itemService: ItemService,
+
   ) { }
 
   async paymentGatewat(paymentDto: PaymentDto, userId: string, response: Response) {
@@ -33,6 +36,10 @@ export class PaymentService {
       const { addressId, description } = paymentDto;
       const user = await this.userService.findUserById(userId);
       const cart = await this.cartService.getUserCart(userId);
+      for (const cartItem of cart.cartItems) {
+        await this.itemService.checkItemQuantity(cartItem.itemId, cartItem.count, cartItem.title, response);
+      }
+
       const order = await this.orderService.create(cart, userId, addressId, description);
 
       const payment = this.paymentRepository.create({
@@ -82,14 +89,14 @@ export class PaymentService {
     try {
       const payment = await this.paymentRepository.findOne({
         where: { authority },
-        relations: { order: true , user: true},
+        relations: { order: true, user: true },
       })
 
       if (!payment) throw new NotFoundException();
       if (payment.status) throw new ConflictException();
 
       if (status !== "OK") {
-        await this.orderService.changeOrderStatus(payment.order.id,OrderStatus.Failed);
+        await this.orderService.changeOrderStatus(payment.order.id, OrderStatus.Failed);
         return response.redirect(`${this.frontendUrl}/payment?status=failed`)
       }
 
@@ -105,7 +112,8 @@ export class PaymentService {
       payment.ref_id = ref_id
       await this.paymentRepository.save(payment);
 
-      await this.orderService.changeOrderStatus(payment.order.id,OrderStatus.Processing);
+      await this.orderService.changeOrderStatus(payment.order.id, OrderStatus.Processing);
+      await this.itemService.decreaseItemsQuantity(payment.order.id);
       await this.cartService.clearUserCart(payment.user.id);
 
       return response.redirect(`${this.frontendUrl}/payment?status=success`)

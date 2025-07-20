@@ -1,5 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNumberString, IsOptional, IsString, IsUUID, Length, MaxLength } from "class-validator";
+import { Transform, Type } from "class-transformer";
+import {
+    IsArray,
+    ArrayMaxSize,
+    IsBoolean,
+    IsInt,
+    IsOptional,
+    IsString,
+    IsUUID,
+    MaxLength,
+    Max,
+    Min
+} from "class-validator";
 export class CreateItemDto {
 
     @ApiProperty()
@@ -7,32 +19,41 @@ export class CreateItemDto {
     @MaxLength(100)
     title: string;
 
+
     @ApiPropertyOptional({ isArray: true, type: String })
     @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(20)
     @IsString({ each: true })
-    @Length(0, 50, { each: true })
+    @MaxLength(50, { each: true })
     ingredients?: string[];
+
 
     @ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    @Length(0, 1000)
+    @MaxLength(1000)
     description?: string;
 
     @ApiProperty({ default: 1000 })
-    @IsNumberString()
-    @MaxLength(10)
-    price: string;
+    @Type(() => Number)
+    @IsInt()
+    @Min(0)
+    price: number;
 
     @ApiProperty({ default: 0 })
-    @IsNumberString()
-    @Length(1, 3)
-    discount: string;
+    @Type(() => Number)
+    @IsInt()
+    @Min(0)
+    @Max(100)
+    discount: number;
 
     @ApiProperty({ default: 1 })
-    @IsNumberString()
-    @MaxLength(100)
-    quantity: string;
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
+    quantity: number;
+
 
     @ApiPropertyOptional({ format: 'binary' })
     @IsOptional()
@@ -44,7 +65,12 @@ export class CreateItemDto {
     category: string;
 
     @ApiProperty({ type: "boolean", default: true })
-    @Length(4, 5)
+    @Transform(({ value }) => {
+        if (typeof value === 'boolean') return value;
+        if (typeof value === 'string') return value.trim().toLowerCase() === 'true';
+        return false;
+    })
+    @IsBoolean()
     show: boolean;
 
 }

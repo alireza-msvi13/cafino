@@ -1,17 +1,22 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, MaxLength } from "class-validator";
+import { IsString, MaxLength, IsNotEmpty } from "class-validator";
 
 export class CreateAddressDto {
-    @ApiProperty()
-    @IsString()
-    @MaxLength(100)
-    province: string
-    @ApiProperty()
-    @IsString()
-    @MaxLength(100)
-    city: string
-    @ApiProperty()
-    @IsString()
-    @MaxLength(500)
-    address: string
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  province: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  city: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(300)
+  address: string;
 }

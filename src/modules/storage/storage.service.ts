@@ -29,6 +29,14 @@ export class StorageService {
                 })
             )
         } catch (error) {
+            if (error?.hostname?.includes('liara.space')) {
+                throw new HttpException(
+                    'Error connecting to Liara. Please try again later.',
+                    HttpStatus.SERVICE_UNAVAILABLE
+                );
+            }
+
+
             if (error instanceof HttpException) {
                 throw error;
             } else {
@@ -58,6 +66,14 @@ export class StorageService {
             )
             await Promise.all(storageQueries);
         } catch (error) {
+            if (error?.hostname?.includes('liara.space')) {
+                throw new HttpException(
+                    'Error connecting to Liara. Please try again later.',
+                    HttpStatus.SERVICE_UNAVAILABLE
+                );
+            }
+
+
             if (error instanceof HttpException) {
                 throw error;
             } else {
@@ -81,7 +97,17 @@ export class StorageService {
                 })
             )
         } catch (error) {
+            if (error?.hostname?.includes('liara.space')) {
+                throw new HttpException(
+                    'Error connecting to Liara. Please try again later.',
+                    HttpStatus.SERVICE_UNAVAILABLE
+                );
+            }
+
+
             if (error instanceof HttpException) {
+                console.log("i m here");
+
                 throw error;
             } else {
                 throw new HttpException(
@@ -96,5 +122,5 @@ export class StorageService {
         const basePath = process.env.S3_FILE_PATH_URL;
         return `${basePath}/${folder}/${filename}`;
     }
-    
+
 }

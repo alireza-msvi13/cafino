@@ -4,7 +4,7 @@ import { Response } from 'express';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResendCodeDto } from './dto/resend-code.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import { VerfiyOtpDto } from './dto/verfiy-otp.dto';
+import { VerifyOtpDto } from './dto/verfiy-otp.dto';
 import { RefreshGuard } from './guards/refresh-token.guard';
 import { JwtGuard } from './guards/access-token.guard';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
@@ -35,14 +35,14 @@ export class AuthController {
     @RateLimit({ max: 10, duration: 1 })
     @Post('verfiy-otp')
     @ApiOperation({ summary: "verfiy otp" })
-    @ApiBody({ type: VerfiyOtpDto, required: true })
+    @ApiBody({ type: VerifyOtpDto, required: true })
     async verfiyOtp(
-        @Body() verfiyOtpDto: VerfiyOtpDto,
+        @Body() VerifyOtpDto: VerifyOtpDto,
         @Res() response: Response,
     ): Promise<Response> {
         return this.authService.verfiyOtp(
-            verfiyOtpDto.phone,
-            verfiyOtpDto.otpCode,
+            VerifyOtpDto.phone,
+            VerifyOtpDto.otpCode,
             response
         )
     }

@@ -8,6 +8,7 @@ import * as compression from 'compression'
 import { AllowOrigins } from './common/constants/allow-origins.constant';
 import { CompressionConfig } from './common/constants/compression.constant';
 import { SwaggerConfigInit } from './common/config/swagger/swagger.config';
+import { SanitizePipe } from './common/pipes/sanitize.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -22,13 +23,20 @@ async function bootstrap() {
 
   app.enableVersioning({ type: VersioningType.URI });
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true
+  }));
 
   app.enableCors({ credentials: true, origin: true });
 
   SwaggerConfigInit(app);
 
-  app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalPipes(
+    new ValidationPipe(),
+    new SanitizePipe()
+  )
 
   app.use(compression(CompressionConfig));
 

@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { ItemService } from '../item/item.service';
 import { CartDiscountDto } from './dto/cart-discount.dto';
 import { DiscountService } from '../discount/discount.service';
+import { MultiCartDto } from './dto/multi-cart.dto';
 
 @Injectable()
 export class CartService {
@@ -367,6 +368,83 @@ export class CartService {
             }
         }
     }
+    async addMultipleToCart(
+        multiCartDto: MultiCartDto,
+        userId: string,
+        response: Response
+    ): Promise<Response> {
+        const items = multiCartDto.items;
+
+        const addedItems: { itemId: string; itemName: string }[] = [];
+        const updatedItems: { itemId: string; itemName: string }[] = [];
+        const skippedItems: { itemId: string; itemName: string; reason: string }[] = [];
+
+        try {
+            for (const { itemId, count } of items) {
+                try {
+                    const item = await this.itemService.findVisibleItem(itemId);
+
+                    if (!item) {
+                        skippedItems.push({ itemId, itemName: 'Unknown', reason: 'Item not exist or hidden' });
+                        continue;
+                    }
+
+                    const existingItem = await this.cartRepository.findOne({
+                        where: {
+                            user: { id: userId },
+                            item: { id: itemId },
+                        },
+                    });
+
+                    const totalCount = existingItem ? existingItem.count + count : count;
+
+                    const isAvailable = await this.itemService.hasSufficientStock(itemId, totalCount);
+                    if (!isAvailable) {
+                        skippedItems.push({ itemId, itemName: item.title, reason: 'Not enough stock' });
+                        continue;
+                    }
+
+
+                    if (existingItem) {
+                        existingItem.count += count;
+                        await this.cartRepository.save(existingItem);
+                        updatedItems.push({ itemId, itemName: item.title });
+                    } else {
+                        const cartItem = this.cartRepository.create({
+                            user: { id: userId },
+                            item: { id: itemId },
+                            count,
+                        });
+                        await this.cartRepository.save(cartItem);
+                        addedItems.push({ itemId, itemName: item.title });
+                    }
+
+                } catch (innerError) {
+                    skippedItems.push({ itemId, itemName: 'Unknown', reason: 'Unexpected error' });
+                }
+            }
+
+
+            await this.cartRepository.update({ user: { id: userId } }, {
+                discount: null,
+            });
+
+            return response.status(HttpStatus.OK).json({
+                message: 'Cart update completed',
+                statusCode: HttpStatus.OK,
+                addedItems,
+                updatedItems,
+                skippedItems,
+            });
+
+        } catch (error) {
+            throw new HttpException(
+                'Something went wrong while updating the cart',
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
 
     // *helper
     async getUserCart(

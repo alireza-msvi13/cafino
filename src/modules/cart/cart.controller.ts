@@ -6,6 +6,7 @@ import { JwtGuard } from '../auth/guards/access-token.guard';
 import { CartDto } from './dto/cart.dto';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { CartDiscountDto } from './dto/cart-discount.dto';
+import { MultiCartDto } from './dto/multi-cart.dto';
 
 @Controller('cart')
 @ApiTags('Cart')
@@ -29,6 +30,20 @@ export class CartController {
       userId,
       response
     )
+  }
+
+  @Post('add-multiple')
+  @ApiOperation({ summary: 'Add multiple items to cart after login' })
+  async addMultipleToCart(
+    @Body() multiCartDto: MultiCartDto,
+    @Res() response: Response,
+    @GetUser('id') userId: string
+  ): Promise<Response> {
+    return this.cartService.addMultipleToCart(
+      multiCartDto,
+      userId,
+      response
+    );
   }
 
   @Get()

@@ -645,4 +645,30 @@ export class ItemService {
     }
   }
 
+  async hasSufficientStock(itemId: string, count: number): Promise<boolean> {
+    try {
+      const item = await this.itemRepository.findOneBy({ id: itemId });
+      return item.quantity >= count;
+    } catch (error) {
+      return false
+    }
+  }
+  async findVisibleItem(itemId: string): Promise<ItemEntity | null> {
+    try {
+      const item = await this.itemRepository
+        .createQueryBuilder('item')
+        .leftJoinAndSelect('item.category', 'category')
+        .where('item.id = :itemId', { itemId })
+        .andWhere('item.show = true')
+        .andWhere('category.show = true')
+        .getOne();
+
+      return item || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+
+
 }

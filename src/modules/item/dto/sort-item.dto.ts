@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsBoolean, IsEnum, IsNumber, IsOptional } from "class-validator";
+import { IsBoolean, IsEnum, IsNumber, IsOptional, IsUUID } from "class-validator";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { SortByOption } from "src/common/enums/sort-by-option.enum";
 import { Transform, Type } from "class-transformer";
@@ -31,4 +31,12 @@ export class SortItemDto extends PaginationDto {
   })
   @IsBoolean()
   availableOnly?: boolean;
+
+
+  @ApiPropertyOptional({ description: "Category ID to filter items by category" })
+  @IsOptional()
+  @Type(() => String)
+  @IsUUID('4', { message: "itemId is not valid" })
+  categoryId?: string;
+
 }

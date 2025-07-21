@@ -128,11 +128,12 @@ export class ItemService {
       });
       if (!item) throw new NotFoundException("item not found");
 
+      const updateObject: DeepPartial<ItemEntity> = {};
+
       if (categoryId) {
         await this.categoryService.findOneById(categoryId);
+        updateObject.category = { id: categoryId };
       }
-
-      const updateObject: DeepPartial<ItemEntity> = {};
       if (title) updateObject.title = title;
       if (ingredients) updateObject.ingredients = ingredients;
       if (description) updateObject.description = description;
@@ -200,6 +201,7 @@ export class ItemService {
         sortBy = SortByOption.Newest,
         minPrice,
         maxPrice,
+        categoryId,
         availableOnly = false
       } = sortItemDto;
 
@@ -214,7 +216,7 @@ export class ItemService {
       if (minPrice !== undefined) baseQuery.andWhere("item.price >= :minPrice", { minPrice });
       if (maxPrice !== undefined) baseQuery.andWhere("item.price <= :maxPrice", { maxPrice });
       if (availableOnly === true) baseQuery.andWhere("item.quantity > 0");
-
+      if (categoryId) baseQuery.andWhere("category.id = :categoryId", { categoryId });
 
       switch (sortBy) {
         case SortByOption.LowestPrice:

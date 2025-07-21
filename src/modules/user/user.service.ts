@@ -455,10 +455,19 @@ export class UserService {
         itemId: string
     ): Promise<void> {
         try {
-            await this.favoriteRepository.delete({
-                user: { id: userId },
-                item: { id: itemId }
-            })
+            const favorite = await this.favoriteRepository.findOne({
+                where: {
+                    user: { id: userId },
+                    item: { id: itemId }
+                }
+            });
+
+            if (!favorite) {
+                throw new NotFoundException("Favorite item not found");
+            }
+
+            await this.favoriteRepository.remove(favorite);
+            
         } catch (error) {
             if (error instanceof HttpException) {
                 throw error;

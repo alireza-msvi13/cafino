@@ -13,6 +13,7 @@ import { UploadFileAws } from 'src/common/interceptors/upload-file.interceptor';
 import { MulterFileType } from 'src/common/types/multer.file.type';
 import { UpdateImageDto } from './dto/update-image-dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 
 @Controller('profile')
 @ApiTags('Profile')
@@ -40,7 +41,7 @@ export class ProfileController {
     @Put('orders/:id')
     @ApiOperation({ summary: " cancel order " })
     async cancelOrder(
-        @Query("id") orderId: string,
+        @Query("id", UUIDValidationPipe) orderId: string,
         @Res() response: Response
     ): Promise<Response> {
         return await this.profileService.cancelOrder(
@@ -82,7 +83,7 @@ export class ProfileController {
     async updateAddress(
         @Res() response: Response,
         @Body() updateAddressDto: UpdateAddressDto,
-        @Param('id') addressId: string
+        @Param('id', UUIDValidationPipe) addressId: string
     ): Promise<Response> {
         return await this.profileService.updateAddress(
             addressId,
@@ -95,7 +96,7 @@ export class ProfileController {
     @ApiOperation({ summary: "delete user address by address-id" })
     async deleteAddress(
         @Res() response: Response,
-        @Param('id') addressId: string
+        @Param('id', UUIDValidationPipe) addressId: string
     ): Promise<Response> {
         return await this.profileService.deleteAddress(
             addressId,
@@ -151,7 +152,7 @@ export class ProfileController {
     async addToFavorite(
         @GetUser('id') userId: string,
         @Res() response: Response,
-        @Query("itemId") itemId: string
+        @Query("itemId", UUIDValidationPipe) itemId: string
     ): Promise<Response> {
         return this.profileService.addToFavorite(
             userId,
@@ -165,11 +166,11 @@ export class ProfileController {
     async removeFromFavorite(
         @GetUser('id') userId: string,
         @Res() response: Response,
-        @Query("ItemId") ItemId: string
+        @Query("itemId", UUIDValidationPipe) itemId: string
     ): Promise<Response> {
         return this.profileService.removeFromFavorite(
             userId,
-            ItemId,
+            itemId,
             response
         );
     }

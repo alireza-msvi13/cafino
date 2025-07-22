@@ -20,10 +20,10 @@ export class ItemEntity extends BaseEntity {
     @Column({ type: 'text', nullable: true })
     description: string;
 
-    @Column({ type: 'numeric', precision: 10, scale: 2 })
+    @Column({ type: 'integer', default: 0 })
     price: number;
 
-    @Column({ type: 'numeric', precision: 5, scale: 2, default: 0 })
+    @Column({ type: 'integer', default: 0 })
     discount: number;
 
     @Column({ type: 'integer', default: 1 })

@@ -25,7 +25,7 @@ export class VerifyOtpDto {
 
   @IsNotEmpty({ message: "otp code is required" })
   @Length(5, 5, { message: "otp code must be exactly 5 digits" })
-  @Matches(/^\d+$/, { message: "otp code must be numeric" })
+  @Matches(/^\d+$/, { message: "otp code must be number" })
   @ApiProperty({
     type: "string",
     example: "12345",

@@ -126,7 +126,7 @@ export class CartController {
     )
   }
   @Delete("remove-discount")
-  @ApiOperation({ summary: "add discount to cart" })
+  @ApiOperation({ summary: "remove discount to cart" })
   async removeDiscount(
     @Body() cartDiscountDto: CartDiscountDto,
     @Res() response: Response,

@@ -126,11 +126,9 @@ export class ItemController {
   @Get("search/:search")
   @ApiOperation({ summary: "search item" })
   async searchItem(
-    @Param('search') searchQuery: string,
+    @Query('search') searchQuery: string,
     @Res() response: Response,
   ): Promise<Response> {
-    console.log(searchQuery);
-
     return this.itemService.searchItem(
       searchQuery,
       response

@@ -37,7 +37,7 @@ export class PaymentService {
       const user = await this.userService.findUserById(userId);
       const cart = await this.cartService.getUserCart(userId);
       for (const cartItem of cart.cartItems) {
-        await this.itemService.checkItemQuantity(cartItem.itemId, cartItem.count, cartItem.title, response);
+        await this.itemService.checkItemQuantity(cartItem.itemId, response, cartItem.count);
       }
 
       const order = await this.orderService.create(cart, userId, addressId, description);

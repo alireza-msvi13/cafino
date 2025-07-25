@@ -6,7 +6,7 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { MulterFileType } from 'src/common/types/multer.file.type';
 import { Folder } from 'src/common/enums/folder.enum';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial,Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 import { CategoryService } from '../category/category.service';
 import { UpdateItemDto } from './dto/update-item.dto';
@@ -542,30 +542,23 @@ export class ItemService {
   }
   async checkItemQuantity(
     itemId: string,
-    count: number = 1,
-    title?: string,
-    response?: Response
+    response: Response,
+    count: number = 1
   ): Promise<void> {
     try {
       const item = await this.checkItemExist(itemId)
 
       const remainingItem = item?.quantity - count;
 
-      if (remainingItem < 0) {
-        if (title) {
-          throw response
-            .status(HttpStatus.UNPROCESSABLE_ENTITY)
-            .json({
-              message: `unfortunately, the ${title} stock is less than the quantity you requested`,
-              statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-              item: title,
-              available_qunatity: item?.quantity
-            })
-        }
-        throw new HttpException(
-          "unfortunately, the item stock is less than the quantity you requested",
-          HttpStatus.UNPROCESSABLE_ENTITY
-        )
+      if (remainingItem <= 0) {
+        throw response
+          .status(HttpStatus.UNPROCESSABLE_ENTITY)
+          .json({
+            message: `unfortunately, the ${item?.title} stock is less than the quantity you requested`,
+            statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+            item: item?.title,
+            available_qunatity: item?.quantity
+          })
       }
     } catch (error) {
       if (error instanceof HttpException) {

@@ -41,7 +41,9 @@ export class CartService {
             });
             if (cartItem) throw new ConflictException("item is already in your cart");
 
-            await this.itemService.checkItemQuantity(itemId, response)
+            let count = cartItem ? cartItem.count : 1
+
+            await this.itemService.checkItemQuantity(itemId, response, count)
             // await this.itemService.decrementItemQuantity(itemId)
 
             cartItem = this.cartRepository.create({
@@ -91,7 +93,8 @@ export class CartService {
             if (!cartItem) throw new NotFoundException("item is not exist in your cart");
 
 
-            await this.itemService.checkItemQuantity(itemId, response)
+            let count = cartItem?.count
+            await this.itemService.checkItemQuantity(itemId, response, count)
 
             // await this.itemService.decrementItemQuantity(itemId)
             cartItem.count += 1
@@ -186,7 +189,7 @@ export class CartService {
             if (!cartItem) throw new NotFoundException("item is not exist in your cart");
 
             await this.cartRepository.remove(cartItem);
-            await this.itemService.incrementItemQuantity(itemId, cartItem.count)
+            // await this.itemService.incrementItemQuantity(itemId, cartItem.count)
 
             return response
                 .status(HttpStatus.OK)

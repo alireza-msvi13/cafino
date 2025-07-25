@@ -1,13 +1,12 @@
 import { HttpException, HttpStatus, Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
 import { Response } from 'express';
-// import { UserService } from '../user/user.service';
 import { StorageService } from '../storage/storage.service';
 import { ItemEntity } from './entities/item.entity';
 import { CreateItemDto } from './dto/create-item.dto';
 import { MulterFileType } from 'src/common/types/multer.file.type';
 import { Folder } from 'src/common/enums/folder.enum';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial,Repository } from 'typeorm';
 import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 import { CategoryService } from '../category/category.service';
 import { UpdateItemDto } from './dto/update-item.dto';
@@ -202,7 +201,8 @@ export class ItemService {
         minPrice,
         maxPrice,
         categoryId,
-        availableOnly = false
+        availableOnly = false,
+        search
       } = sortItemDto;
 
       const baseQuery = this.itemRepository
@@ -217,6 +217,13 @@ export class ItemService {
       if (maxPrice !== undefined) baseQuery.andWhere("item.price <= :maxPrice", { maxPrice });
       if (availableOnly === true) baseQuery.andWhere("item.quantity > 0");
       if (categoryId) baseQuery.andWhere("category.id = :categoryId", { categoryId });
+      if (search) {
+        baseQuery.andWhere(
+          "(LOWER(item.title) LIKE :search OR LOWER(item.description) LIKE :search OR LOWER(item.ingredients) LIKE :search)",
+          { search: `%${search.toLowerCase()}%` }
+        );
+      }
+
 
       switch (sortBy) {
         case SortByOption.LowestPrice:
@@ -670,6 +677,22 @@ export class ItemService {
       return null;
     }
   }
+
+  async updateItemRating(itemId: string, rating: number, ratingCount: number): Promise<void> {
+    try {
+      await this.itemRepository.update(itemId, {
+        rate: rating,
+        rate_count: ratingCount,
+      });
+    } catch (error) {
+      throw new HttpException(
+        INTERNAL_SERVER_ERROR_MESSAGE,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+
 
 
 

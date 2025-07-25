@@ -8,6 +8,8 @@ import { Response } from 'express';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
+import { SortCommentDto } from './dto/sort-comment.dto';
+import { Roles } from 'src/common/enums/role.enum';
 
 
 
@@ -23,10 +25,24 @@ export class CommentController {
   createComment(
     @Body() createCommentDto: CreateCommentDto,
     @Res() response: Response,
+    @GetUser("role") role: Roles,
     @GetUser("id") userId: string,
   ) {
-    return this.commentService.createComment(createCommentDto, response, userId);
+    return this.commentService.createComment(createCommentDto, response, userId, role);
   }
+
+
+  @Get(":id/comments")
+  @ApiOperation({ summary: "get comments for menu item" })
+  async getItemComments(
+    @Param("id") itemId: string,
+    @Query() query: SortCommentDto,
+    @Res() response: Response
+  ) {
+    return await this.commentService.getCommentsForItem(itemId, query, response);
+  }
+
+
   @Get("/")
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: "see all comments by admin" })

@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsOptional, IsString, IsUUID, MaxLength, MinLength } from "class-validator";
-
+import { Type } from "class-transformer";
+import { IsOptional, IsString, IsUUID, MaxLength, MinLength, Min, Max, IsInt } from "class-validator";
 
 export class CreateCommentDto {
   @ApiProperty()
@@ -16,5 +16,13 @@ export class CreateCommentDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsUUID('4', { message: "parentId is not valid" })
-  parentId: string;
+  parentId?: string;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5, default: 5, type: Number })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  star?: number;
 }

@@ -39,4 +39,11 @@ export class SortItemDto extends PaginationDto {
   @IsUUID('4', { message: "itemId is not valid" })
   categoryId?: string;
 
+  @ApiPropertyOptional({ description: "Search keyword for title or description or ingredients" })
+  @Transform(({ value }) => typeof value === 'string' ? value.replace(/[^a-zA-Z0-9آ-ی ]/g, '') : value)
+  @IsOptional()
+  @Type(() => String)
+  search?: string;
+
+
 }

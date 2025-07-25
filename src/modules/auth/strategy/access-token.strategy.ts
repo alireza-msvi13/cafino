@@ -4,6 +4,7 @@ import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { UserService } from '../../user/user.service';
 import { JwtPayload } from "src/common/types/jwt-payload-type";
+import { Roles } from "src/common/enums/role.enum";
 
 
 @Injectable()
@@ -24,19 +25,21 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     }
     async validate(
         payload: JwtPayload
-    ): Promise<{ phone: string, id: string }> {
+    ): Promise<{ phone: string, id: string , role: Roles }> {
         if (!payload || !payload?.phone?.startsWith("09")) {
             throw new UnauthorizedException("token is not valid")
         }
         const {
             phone,
-            id
+            id,
+            role
         } = await this.userService.findUser(
             payload.phone
         )
         return {
             id,
-            phone
+            phone,
+            role: role as Roles
         };
     }
 }

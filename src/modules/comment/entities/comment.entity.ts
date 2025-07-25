@@ -11,6 +11,8 @@ export class CommentEntity extends BaseEntity {
     text: string;
     @Column({ type: 'boolean', default: false })
     accept: boolean;
+    @Column({ type: "integer", nullable: true })
+    star: number;
     @ManyToOne(() => UserEntity, user => user.comments, { onDelete: "CASCADE" })
     @JoinColumn({ name: "user_id" })
     user: UserEntity;

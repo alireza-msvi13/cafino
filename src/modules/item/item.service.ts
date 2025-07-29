@@ -12,12 +12,10 @@ import { CategoryService } from '../category/category.service';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { isBoolean, toBoolean } from 'src/common/utils/boolean.utils';
 import { ItemImageEntity } from './entities/item-image.entity';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { SortItemDto } from './dto/sort-item.dto';
 import { SortByOption } from 'src/common/enums/sort-by-option.enum';
 import { UserService } from '../user/user.service';
 import { OrderService } from '../order/order.service';
-import { log } from 'util';
 
 
 @Injectable()

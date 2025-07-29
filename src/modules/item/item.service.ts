@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
 import { Response } from 'express';
 import { StorageService } from '../storage/storage.service';
 import { ItemEntity } from './entities/item.entity';
@@ -17,6 +17,7 @@ import { SortItemDto } from './dto/sort-item.dto';
 import { SortByOption } from 'src/common/enums/sort-by-option.enum';
 import { UserService } from '../user/user.service';
 import { OrderService } from '../order/order.service';
+import { log } from 'util';
 
 
 @Injectable()
@@ -546,11 +547,16 @@ export class ItemService {
     count: number = 1
   ): Promise<void> {
     try {
+
+      if (count < 1) {
+        throw new BadRequestException("Invalid quantity requested");
+      }
+
       const item = await this.checkItemExist(itemId)
 
       const remainingItem = item?.quantity - count;
 
-      if (remainingItem <= 0) {
+      if (remainingItem < 0) {
         throw response
           .status(HttpStatus.UNPROCESSABLE_ENTITY)
           .json({

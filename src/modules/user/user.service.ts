@@ -345,8 +345,8 @@ export class UserService {
     async deleteAddress(
         addressId: string
     ): Promise<void> {
-        try {
-            await this.userRepository.delete({ id: addressId })
+        try {            
+            await this.addressRepository.delete({ id: addressId })
         } catch (error) {
             if (error instanceof HttpException) {
                 throw error;

@@ -16,6 +16,7 @@ import { ProfileModule } from './modules/profile/profile.module';
 import { GatewayModule } from './modules/gateway/gateway.module';
 import { OrderModule } from './modules/order/order.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { ContactModule } from './modules/contact/contact.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { PaymentModule } from './modules/payment/payment.module';
     ProfileModule,
     OrderModule,
     PaymentModule,
-    GatewayModule
+    GatewayModule,
+    ContactModule
     
   ],
   controllers: [],

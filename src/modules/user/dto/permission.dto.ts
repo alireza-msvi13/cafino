@@ -1,21 +1,17 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsPhoneNumber, IsUUID, Length } from "class-validator";
+import { IsEnum, IsNotEmpty, Matches } from "class-validator";
+import { PHONE_ERROR_MESSAGE } from "src/common/constants/error.constant";
 import { Roles } from "src/common/enums/role.enum";
-
-const errorMessage = "phone number is not correct";
-
+import { normalizePhoneNumber } from "src/common/utils/phone.util";
 
 export class UserPermissionDto {
 
-    @IsNotEmpty({ message: errorMessage })
-    @Transform(({ value }) =>
-        value.replace(/\s+/g, '').replace(/^(\+98|0098|98)/, '0')
-    )
-    @IsPhoneNumber('IR', { message: errorMessage })
-    @Length(11, 11, { message: "phone number must be 11 digits" })
+    @IsNotEmpty({ message: PHONE_ERROR_MESSAGE })
+    @Transform(({ value }) => normalizePhoneNumber(value))
+    @Matches(/^09\d{9}$/, { message: PHONE_ERROR_MESSAGE })
     @ApiProperty({
-        title: "enter phone number for login",
+        title: "enter phone number for change permission",
         example: "09375012365",
         nullable: false
     })

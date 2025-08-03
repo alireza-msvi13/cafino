@@ -1,21 +1,17 @@
 import { ApiProperty } from "@nestjs/swagger";
 import {
   IsNotEmpty,
-  IsPhoneNumber,
   Length,
   Matches,
 } from "class-validator";
 import { Transform } from "class-transformer";
-
-const errorMessage = "phone number is not correct";
+import { PHONE_ERROR_MESSAGE } from "src/common/constants/error.constant";
+import { normalizePhoneNumber } from "src/common/utils/phone.util";
 
 export class VerifyOtpDto {
-  @IsNotEmpty({ message: errorMessage })
-  @Transform(({ value }) =>
-    value.replace(/\s+/g, "").replace(/^(\+98|0098|98)/, "0")
-  )
-  @IsPhoneNumber("IR", { message: errorMessage })
-  @Length(11, 11, { message: "phone number must be 11 digits" })
+  @IsNotEmpty({ message: PHONE_ERROR_MESSAGE })
+  @Transform(({ value }) => normalizePhoneNumber(value))
+  @Matches(/^09\d{9}$/, { message: PHONE_ERROR_MESSAGE })
   @ApiProperty({
     title: "enter phone number for login",
     example: "09375012365",

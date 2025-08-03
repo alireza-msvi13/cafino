@@ -13,5 +13,7 @@ export enum EntityName {
     Order = "orders",
     OrderItem = "order_items",
     Payment = "payments",
+    Contact = "contacts",
+    ContactReplay = "contacts_replies",
     RateLimitRecord = "rate_limit_records",
 }

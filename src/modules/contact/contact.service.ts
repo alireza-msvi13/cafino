@@ -5,7 +5,6 @@ import { Contact } from './entities/contact.entity';
 import { Repository } from 'typeorm';
 import { Reply } from './entities/reply.entity';
 import { ReplyContactDto } from './dto/reply-contact.dto';
-import { BaseResponseDto } from 'src/common/dto/base-response.dto';
 import { ContactQueryDto } from './dto/sort-contact.dto';
 
 @Injectable()
@@ -30,7 +29,7 @@ export class ContactService {
     };
   }
 
-  async findAll(query: ContactQueryDto): Promise<BaseResponseDto<Contact[]>> {
+  async findAll(query: ContactQueryDto) {
     const { sortBy, order, hasReply, name, email, phone } = query;
 
 
@@ -91,7 +90,7 @@ export class ContactService {
     };
   }
 
-  async getReplies(contactId: string): Promise<BaseResponseDto<Reply[]>> {
+  async getReplies(contactId: string) {
     const contact = await this.contactRepository.findOne({
       where: { id: contactId },
       relations: ['replies'],

@@ -4,9 +4,13 @@ import { ContactController } from './contact.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Contact } from './entities/contact.entity';
 import { Reply } from './entities/reply.entity';
+import { RateLimitModule } from '../rate-limit/rate-limit.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Contact, Reply])],
+  imports: [
+    RateLimitModule,
+    TypeOrmModule.forFeature([Contact, Reply])
+  ],
   controllers: [ContactController],
   providers: [ContactService],
 })

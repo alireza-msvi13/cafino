@@ -17,12 +17,17 @@ import { GatewayModule } from './modules/gateway/gateway.module';
 import { OrderModule } from './modules/order/order.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ContactModule } from './modules/contact/contact.module';
+import { WinstonModule } from 'nest-winston';
+import { winstonLogger } from './common/logger/winston.logger';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: join(process.cwd(), '.env')
+    }),
+    WinstonModule.forRoot({
+      transports: winstonLogger.transports,
     }),
     TypeOrmModule.forRoot(TypeOrmConfig()),
     UserModule,
@@ -39,7 +44,7 @@ import { ContactModule } from './modules/contact/contact.module';
     PaymentModule,
     GatewayModule,
     ContactModule
-    
+
   ],
   controllers: [],
   providers: [],

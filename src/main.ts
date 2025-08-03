@@ -9,6 +9,8 @@ import { AllowOrigins } from './common/constants/allow-origins.constant';
 import { CompressionConfig } from './common/constants/compression.constant';
 import { SwaggerConfigInit } from './config/swagger/swagger.config';
 import { SanitizePipe } from './common/pipes/sanitize.pipe';
+import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -28,6 +30,11 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
     transform: true
   }));
+
+
+  const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
+  app.useLogger(logger);
+  app.useGlobalFilters(new GlobalExceptionFilter(logger));
 
   app.enableCors({ credentials: true, origin: true });
 

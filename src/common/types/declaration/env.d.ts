@@ -37,5 +37,9 @@ namespace NodeJS {
         ZARINPAL_VERIFY_URL: string
         ZARINPAL_MERCHANT_ID: string
         ZARINPAL_CALLBACK_URL: string
+
+        // Telegram
+        TELEGRAM_BOT_TOKEN: string
+        TELEGRAM_CHAT_ID: string
     }
 }

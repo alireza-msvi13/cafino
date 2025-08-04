@@ -93,7 +93,7 @@ export class ContactService {
   async getReplies(contactId: string) {
     const contact = await this.contactRepository.findOne({
       where: { id: contactId },
-      relations: ['repliess'],
+      relations: ['replies'],
     });
 
     if (!contact) {

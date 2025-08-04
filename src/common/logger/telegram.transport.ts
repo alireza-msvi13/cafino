@@ -19,8 +19,6 @@ export class TelegramTransport extends Transport {
   async log(info: any, callback: () => void) {
     setImmediate(() => this.emit('logged', info));
 
-    console.log(this.chatId, this.botToken);
-
     const {
       level = 'error',
       message,
@@ -68,7 +66,6 @@ ${stack
         text: html,
         parse_mode: 'HTML',
       });
-      console.log('✅ Sent')
     } catch (err) {
       console.error('❌ Failed to send log to Telegram:', err.message);
     }

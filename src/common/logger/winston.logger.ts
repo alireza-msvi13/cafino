@@ -16,7 +16,7 @@ const transports: winston.transport[] = [
   }),
 ];
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'production') {
   transports.push(
     new TelegramTransport({
       level: 'error',

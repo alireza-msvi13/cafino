@@ -41,7 +41,7 @@ export class CartService {
             });
             if (cartItem) throw new ConflictException("Item is already in your cart");
 
-            await this.itemService.checkItemQuantity(itemId, response, 1)
+            await this.itemService.checkItemQuantity(itemId, 1)
 
             cartItem = this.cartRepository.create({
                 user: { id: userId },
@@ -73,45 +73,36 @@ export class CartService {
     async incrementItem(
         incrementItem: CartDto,
         userId: string,
-        response: Response
-    ): Promise<Response> {
-        try {
-            const { itemId } = incrementItem
+    ): Promise<any> {
 
-            await this.itemService.checkItemExist(itemId);
+        const { itemId } = incrementItem;
 
-            let cartItem = await this.cartRepository.findOne({
-                where: {
-                    user: { id: userId },
-                    item: { id: itemId },
-                },
-            });
+        await this.itemService.checkItemExist(itemId);
 
-            if (!cartItem) throw new NotFoundException("Item is not exist in your cart");
+        let cartItem = await this.cartRepository.findOne({
+            where: {
+                user: { id: userId },
+                item: { id: itemId },
+            },
+        });
 
-            let count = cartItem?.count + 1
-            await this.itemService.checkItemQuantity(itemId, response, count)
-
-            cartItem.count += 1
-            await this.cartRepository.save(cartItem);
-
-            return response
-                .status(HttpStatus.OK)
-                .json({
-                    message: "Item Incremented Successfully",
-                    statusCode: HttpStatus.OK
-                })
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
+        if (!cartItem) {
+            throw new NotFoundException("Item is not exist in your cart");
         }
+
+        let count = cartItem.count + 1;
+        await this.itemService.checkItemQuantity(itemId, count);
+
+        cartItem.count += 1;
+        await this.cartRepository.save(cartItem);
+
+        return {
+            message: "Item Incremented Successfully",
+            statusCode: HttpStatus.OK
+        };
+
     }
+
     async decrementItem(
         decrementItem: CartDto,
         userId: string,

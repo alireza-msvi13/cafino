@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, HttpStatus, Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Inject, Injectable, NotFoundException, UnprocessableEntityException, forwardRef } from '@nestjs/common';
 import { Response } from 'express';
 import { StorageService } from '../storage/storage.service';
 import { ItemEntity } from './entities/item.entity';
@@ -541,40 +541,28 @@ export class ItemService {
   }
   async checkItemQuantity(
     itemId: string,
-    response: Response,
     count: number = 1
   ): Promise<void> {
-    try {
 
-      if (count < 1) {
-        throw new BadRequestException("Invalid quantity requested");
-      }
-
-      const item = await this.checkItemExist(itemId)
-
-      const remainingItem = item?.quantity - count;
-
-      if (remainingItem < 0) {
-        throw response
-          .status(HttpStatus.UNPROCESSABLE_ENTITY)
-          .json({
-            message: `unfortunately, the ${item?.title} stock is less than the quantity you requested`,
-            statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-            item: item?.title,
-            available_qunatity: item?.quantity
-          })
-      }
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
+    if (count < 1) {
+      throw new BadRequestException("Invalid quantity requested");
     }
+
+    const item = await this.checkItemExist(itemId);
+
+    const remainingItem = item?.quantity - count;
+
+    if (remainingItem < 0) {
+      throw new UnprocessableEntityException({
+        message: `Unfortunately, the ${item?.title} stock is less than the quantity you requested`,
+        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        item: item?.title,
+        available_quantity: item?.quantity
+      });
+    }
+
   }
+
   async incrementItemQuantity(
     itemId: string,
     count: number = 1

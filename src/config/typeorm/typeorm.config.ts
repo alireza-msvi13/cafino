@@ -11,7 +11,7 @@ export function TypeOrmConfig(): TypeOrmModuleOptions {
     database: DB_NAME,
     autoLoadEntities: true,
     synchronize: true,
-    ssl: true,
+    ssl: process.env.NODE_ENV === "production",
     entities: [
       "dist/**/**/**/*.entity{.ts,.js}",
       "dist/**/**/*.entity{.ts,.js}"

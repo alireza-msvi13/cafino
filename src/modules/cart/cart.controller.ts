@@ -62,13 +62,11 @@ export class CartController {
   @ApiOperation({ summary: "increment item quantity" })
   async incrementItem(
     @Body() cartDto: CartDto,
-    @Res() response: Response,
     @GetUser("id") userId: string
   ): Promise<Response> {
     return this.cartService.incrementItem(
       cartDto,
-      userId,
-      response
+      userId
     )
   }
 

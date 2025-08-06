@@ -14,49 +14,48 @@ import { parseUserAgent } from 'src/modules/rate-limit/utils/user-agent.utils';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+
   constructor(
     @Inject(WINSTON_MODULE_NEST_PROVIDER)
     private readonly logger: LoggerService,
   ) { }
 
-  catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = INTERNAL_SERVER_ERROR_MESSAGE;
+    const isHttpException = exception instanceof HttpException;
 
+    const status = isHttpException
+      ? exception.getStatus()
+      : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const userId = request?.user && request.user['id']
-    const ip = (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || request.socket.remoteAddress;
-    const rawUA = request.headers['user-agent'] || '';
-    const ua = parseUserAgent(rawUA);
-    const identifier = userId ?? `${ip}:${ua.browser}:${ua.os}:${ua.device}`;
-    
+    const message = isHttpException
+      ? this.extractMessage(exception)
+      : INTERNAL_SERVER_ERROR_MESSAGE;
 
-    if (exception instanceof HttpException) {
-      status = exception.getStatus();
-      const res = exception.getResponse();
-      message =
-        typeof res === 'string'
-          ? res
-          : (res as any)?.message || INTERNAL_SERVER_ERROR_MESSAGE;
-    }
+    const ip =
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      request.socket.remoteAddress;
 
-    if (status >= 500 || process.env.NODE_ENV === 'development') {
-      this.logger.error({
-        path: request.url,
-        method: request.method,
-        message: exception instanceof Error ? exception.message : message,
-        stack: exception instanceof Error ? exception.stack : null,
-        statusCode: status,
-        ip,
-        userAgent: ua,
-        userId,
-        identifier,
-      });
-    }
+    const rawUserAgent = request.headers['user-agent'] || '';
+    const userAgent = parseUserAgent(rawUserAgent);
+
+    const userId = request.user?.['id'];
+    const identifier = userId ?? `${ip}:${userAgent.browser}:${userAgent.os}:${userAgent.device}`;
+
+    this.logger.error({
+      path: request.url,
+      method: request.method,
+      message: exception instanceof Error ? exception.message : String(message),
+      stack: exception instanceof Error ? exception.stack : undefined,
+      statusCode: status,
+      ip,
+      userAgent,
+      userId,
+      identifier,
+    });
 
     response.status(status).json({
       statusCode: status,
@@ -64,5 +63,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
     });
+  }
+
+  private extractMessage(exception: HttpException): string {
+    const response = exception.getResponse();
+    if (typeof response === 'string') return response;
+    if (Array.isArray((response as any)?.message)) {
+      return (response as any).message.join(', ');
+    }
+    return (response as any)?.message || INTERNAL_SERVER_ERROR_MESSAGE;
   }
 }

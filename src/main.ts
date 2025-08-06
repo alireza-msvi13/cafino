@@ -13,7 +13,9 @@ import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: false,
+  });
 
   app.set('trust proxy', true);
 

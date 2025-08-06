@@ -1,5 +1,6 @@
 import * as Transport from 'winston-transport';
 import axios from 'axios';
+import { isShouldSendToTelegram } from './should-send-to-telegram';
 
 interface TelegramTransportOptions extends Transport.TransportStreamOptions {
   botToken: string;
@@ -18,7 +19,11 @@ export class TelegramTransport extends Transport {
 
   async log(info: any, callback: () => void) {
     setImmediate(() => this.emit('logged', info));
-
+    
+    if (!isShouldSendToTelegram(info)) {
+      return callback();
+    }
+    
     const {
       level = 'error',
       message,

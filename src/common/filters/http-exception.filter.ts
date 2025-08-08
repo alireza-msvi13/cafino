@@ -35,27 +35,32 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       ? this.extractMessage(exception)
       : INTERNAL_SERVER_ERROR_MESSAGE;
 
-    const ip =
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-      request.socket.remoteAddress;
 
-    const rawUserAgent = request.headers['user-agent'] || '';
-    const userAgent = parseUserAgent(rawUserAgent);
+    if (status >= 500 || process.env.NODE_ENV === 'development') {
+      const ip =
+        (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+        request.socket.remoteAddress;
 
-    const userId = request.user?.['id'];
-    const identifier = userId ?? `${ip}:${userAgent.browser}:${userAgent.os}:${userAgent.device}`;
+      const rawUserAgent = request.headers['user-agent'] || '';
+      const userAgent = parseUserAgent(rawUserAgent);
 
-    this.logger.error({
-      path: request.url,
-      method: request.method,
-      message: exception instanceof Error ? exception.message : String(message),
-      stack: exception instanceof Error ? exception.stack : undefined,
-      statusCode: status,
-      ip,
-      userAgent,
-      userId,
-      identifier,
-    });
+      const userId = request.user?.['id'];
+      const identifier = userId ?? `${ip}:${userAgent.browser}:${userAgent.os}:${userAgent.device}`;
+
+      this.logger.error({
+        path: request.url,
+        method: request.method,
+        message: exception instanceof Error ? exception.message : String(message),
+        stack: exception instanceof Error ? exception.stack : undefined,
+        statusCode: status,
+        ip,
+        userAgent,
+        userId,
+        identifier,
+      });
+    }
+
+
 
     response.status(status).json({
       statusCode: status,
@@ -65,12 +70,19 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     });
   }
 
-  private extractMessage(exception: HttpException): string {
+  private extractMessage(exception: HttpException): string | string[] {
     const response = exception.getResponse();
     if (typeof response === 'string') return response;
-    if (Array.isArray((response as any)?.message)) {
-      return (response as any).message.join(', ');
+
+    const resMessage = (response as any)?.message;
+
+    if (Array.isArray(resMessage)) {
+      return resMessage;
     }
-    return (response as any)?.message || INTERNAL_SERVER_ERROR_MESSAGE;
+
+    return resMessage || INTERNAL_SERVER_ERROR_MESSAGE;
   }
+
+
+
 }

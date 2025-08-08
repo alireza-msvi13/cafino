@@ -36,29 +36,27 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       : INTERNAL_SERVER_ERROR_MESSAGE;
 
 
-    if (status >= 500 || process.env.NODE_ENV === 'development') {
-      const ip =
-        (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-        request.socket.remoteAddress;
+    const ip =
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      request.socket.remoteAddress;
 
-      const rawUserAgent = request.headers['user-agent'] || '';
-      const userAgent = parseUserAgent(rawUserAgent);
+    const rawUserAgent = request.headers['user-agent'] || '';
+    const userAgent = parseUserAgent(rawUserAgent);
 
-      const userId = request.user?.['id'];
-      const identifier = userId ?? `${ip}:${userAgent.browser}:${userAgent.os}:${userAgent.device}`;
+    const userId = request.user?.['id'];
+    const identifier = userId ?? `${ip}:${userAgent.browser}:${userAgent.os}:${userAgent.device}`;
 
-      this.logger.error({
-        path: request.url,
-        method: request.method,
-        message: exception instanceof Error ? exception.message : String(message),
-        stack: exception instanceof Error ? exception.stack : undefined,
-        statusCode: status,
-        ip,
-        userAgent,
-        userId,
-        identifier,
-      });
-    }
+    this.logger.error({
+      path: request.url,
+      method: request.method,
+      message: exception instanceof Error ? exception.message : String(message),
+      stack: exception instanceof Error ? exception.stack : undefined,
+      statusCode: status,
+      ip,
+      userAgent,
+      userId,
+      identifier,
+    });
 
 
 

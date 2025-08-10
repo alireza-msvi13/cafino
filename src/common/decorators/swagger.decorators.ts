@@ -1,0 +1,48 @@
+import { applyDecorators } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiForbiddenResponse,
+  ApiConflictResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiGoneResponse,
+  ApiNotFoundResponse,
+  ApiBody,
+  ApiUnauthorizedResponse,
+  ApiTooManyRequestsResponse,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
+import { VerifyOtpDto } from 'src/modules/auth/dto/verfiy-otp.dto';
+
+export function SendOtpDoc() {
+  return applyDecorators(
+    ApiForbiddenResponse({ description: "Unfortunately, you are in the blacklist" }),
+    ApiConflictResponse({ description: "Your previous OTP Code is still valid. Please use it before requesting a new one." }),
+    ApiTooManyRequestsResponse({ description: "You have reached the maximum number of OTP requests. Please try again later." }),
+    ApiOkResponse({ description: "Code sent successfully" }),
+    ApiOperation({ summary: "send otp" }),
+  );
+}
+export function VerfiyOtpDoc() {
+  return applyDecorators(
+    ApiNotFoundResponse({ description: "No account is registered with this phone number." }),
+    ApiForbiddenResponse({ description: "Unfortunately, you are in the blacklist" }),
+    ApiConflictResponse({ description: "This OTP code has already been used. Please request a new code." }),
+    ApiGoneResponse({ description: "Your OTP code has expired. Please request a new one." }),
+    ApiUnprocessableEntityResponse({ description: "The OTP code you entered is incorrect. Please try again." }),
+    ApiTooManyRequestsResponse({ description: "You have reached the maximum number of OTP requests. Please try again later." }),
+    ApiOkResponse({ description: "You login successfully" }),
+    ApiOperation({ summary: "verfiy otp" }),
+    ApiBody({ type: VerifyOtpDto, required: true }),
+  );
+}
+export function ResendOtpDoc() {
+  return applyDecorators(
+    ApiNotFoundResponse({ description: "No account is registered with this phone number." }),
+    ApiForbiddenResponse({ description: "Unfortunately, you are in the blacklist" }),
+    ApiConflictResponse({ description: "Your previous OTP Code is still valid. Please use it before requesting a new one." }),
+    ApiTooManyRequestsResponse({ description: "You have reached the maximum number of OTP requests. Please try again later." }),
+    ApiOperation({ summary: "resend otp code" }),
+    ApiOkResponse({ description: "Code sent successfully" }),
+  );
+}

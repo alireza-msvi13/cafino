@@ -13,7 +13,6 @@ import { UpdateAddressDto } from '../profile/dto/update-address-dto';
 import { FavoriteEntity } from './entities/favorite.entity';
 import { UserPermissionDto } from './dto/permission.dto';
 import { UserDto } from './dto/user.dto';
-import { Roles } from 'src/common/enums/role.enum';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Injectable()
@@ -114,7 +113,6 @@ export class UserService {
             }
         }
     }
-
     async changeUserPermission(userPermissionDto: UserPermissionDto, response: Response) {
         try {
 
@@ -345,7 +343,7 @@ export class UserService {
     async deleteAddress(
         addressId: string
     ): Promise<void> {
-        try {            
+        try {
             await this.addressRepository.delete({ id: addressId })
         } catch (error) {
             if (error instanceof HttpException) {
@@ -467,7 +465,7 @@ export class UserService {
             }
 
             await this.favoriteRepository.remove(favorite);
-            
+
         } catch (error) {
             if (error instanceof HttpException) {
                 throw error;
@@ -523,88 +521,44 @@ export class UserService {
     // *helper
 
     async findUser(phone: string, relations: string[] = []): Promise<UserEntity> {
-        try {
-            const user = await this.userRepository.findOne({
-                where: { phone },
-                relations,
-            });
+        const user = await this.userRepository.findOne({
+            where: { phone },
+            relations,
+        });
 
-            if (!user) {
-                throw new NotFoundException("user not found")
-            }
-            return user;
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
+        if (!user) {
+            throw new NotFoundException("User not found")
         }
+        return user;
     }
     async findUserById(id: string, relations: string[] = []): Promise<UserEntity> {
-        try {
-            const user = await this.userRepository.findOne({
-                where: { id },
-                relations,
-            });
+        const user = await this.userRepository.findOne({
+            where: { id },
+            relations,
+        });
 
-            if (!user) {
-                throw new NotFoundException(
-                    "user not found"
-                );
-            }
-            return user;
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
+        if (!user) {
+            throw new NotFoundException(
+                "user not found"
+            );
         }
+        return user;
     }
-    async createUser(
-        phone: string
-    ): Promise<UserEntity> {
-        try {
-            let user = await this.userRepository.findOne({
-                where: { phone },
-            });
-
-            if (user && user.status === UserStatus.Block) {
-                throw new NotFoundException(
-                    "unfortunately you are in the blacklist",
-                )
-            }
-
-            if (user) return user
-
-            user = this.userRepository.create({
-                username: `user_${crypto.randomUUID().split('-')[0]}`,
-                phone
-            });
-
-            const userCount = await this.userRepository.count();
-            if (!userCount) user.role = Roles.Admin;
-
-            await this.userRepository.save(user)
-
-            return user
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
+    async findByPhoneWithOtp(phone: string) {
+        const user = await this.userRepository.findOne({
+            where: { phone },
+            relations: ['otp'],
+        });
+        return user;
+    }
+    async createUser(data: Partial<UserEntity>): Promise<UserEntity> {
+        const user = this.userRepository.create(data);
+        await this.userRepository.save(user);
+        return user;
+    }
+    async countUsers() {
+        const usersCount = await this.userRepository.count();
+        return usersCount;
     }
     async saveOtp(
         code: string,
@@ -612,184 +566,111 @@ export class UserService {
         userId: string,
         phone: string
     ): Promise<void> {
-        try {
-            let otp = await this.otpRepository.findOne({
-                where: { user: { id: userId } },
+        const now = new Date();
+        let otp = await this.otpRepository.findOne({
+            where: { user: { id: userId } },
+        });
+
+        const LIMIT = 10;
+        const WINDOW = 1 * 60 * 1000;
+
+        if (otp) {
+            if (otp.last_requested_at && now.getTime() - otp.last_requested_at.getTime() < WINDOW) {
+                if ((otp.request_count || 0) >= LIMIT) {
+                    throw new HttpException(
+                        'You have reached the maximum number of OTP requests. Please try again later.',
+                        HttpStatus.TOO_MANY_REQUESTS
+                    );
+                }
+                otp.request_count += 1;
+            } else {
+                otp.request_count = 1;
+            }
+
+            otp.code = code;
+            otp.expires_in = expireIn;
+            otp.is_used = false;
+            otp.last_requested_at = now;
+        } else {
+            otp = this.otpRepository.create({
+                code,
+                expires_in: expireIn,
+                is_used: false,
+                user: { id: userId },
+                phone,
+                request_count: 1,
+                last_requested_at: now
             });
-
-            if (otp) {
-                otp.code = code,
-                    otp.expires_in = expireIn
-            } else {
-                otp = this.otpRepository.create({
-                    code,
-                    expires_in: expireIn,
-                    user: { id: userId },
-                    phone
-                })
-            }
-            await this.otpRepository.save(otp)
-
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
         }
+        await this.otpRepository.save(otp)
+    }
+    async changeOtpStatusToUsed(
+        otpId: string,
+    ): Promise<void> {
+        await this.otpRepository.update(
+            { id: otpId },
+            {
+                is_used: true
+            }
+        )
     }
     async saveRefreshToken(
         phone: string,
         refreshToken: string
     ): Promise<void> {
-        try {
-            await this.userRepository.update(
-                { phone },
-                {
-                    rt_hash: refreshToken
-                }
-            )
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
+        await this.userRepository.update(
+            { phone },
+            {
+                rt_hash: refreshToken
             }
-        }
-    }
-    async updateOtpCode(phone: string, otpCode: string, expireIn: Date) {
-        try {
-            const user = await this.findUser(phone, ['otp']);
-
-            if (user && user.status === UserStatus.Block) {
-                throw new NotFoundException(
-                    "unfortunately you are in the blacklist",
-                )
-            }
-
-            if (!user.otp) {
-                throw new BadRequestException("previous code not found");
-            }
-
-            const now = new Date();
-
-
-            if (now < user.otp.expires_in) {
-                throw new BadRequestException(
-                    "code is not expird yet"
-                )
-            }
-
-            user.otp.code = otpCode
-            user.otp.expires_in = expireIn
-
-            await this.otpRepository.save(user.otp);
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
+        )
     }
     async removeRefreshToken(
-        phone: string
+        phone?: string
     ): Promise<void> {
-        try {
-            await this.userRepository.update(
-                { phone },
-                {
-                    rt_hash: null
-                }
-            )
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
+        if (!phone) return;
+        await this.userRepository.update(
+            { phone },
+            {
+                rt_hash: null
             }
-        }
+        )
     }
     async checkUsernameExist(
         username: string,
     ): Promise<void> {
-        try {
-            const isDuplicateUsername = await this.userRepository.findOne({
-                where: { username }
-            })
-            if (isDuplicateUsername) {
-                throw new ConflictException(
-                    "username already used"
-                )
-            }
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
+        const isDuplicateUsername = await this.userRepository.findOne({
+            where: { username }
+        })
+        if (isDuplicateUsername) {
+            throw new ConflictException(
+                "Username already used"
+            )
         }
     }
     async checkAddressExist(
         addressId: string,
     ): Promise<void> {
-        try {
-            const address = await this.addressRepository.findOne({
-                where: { id: addressId }
-            })
-            if (!address) {
-                throw new NotFoundException(
-                    "address not found",
-                );
-            }
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
+        const address = await this.addressRepository.findOne({
+            where: { id: addressId }
+        })
+        if (!address) {
+            throw new NotFoundException(
+                "Address not found",
+            );
         }
     }
     async findUserByAddress(userId: string, addressId: string): Promise<AddressEntity> {
-        try {
-            const address = await this.addressRepository.findOne({
-                where: {
-                    id: addressId,
-                    user: { id: userId }
-                }
-            })
-
-            if (!address) throw new NotFoundException("address not found")
-
-            return address;
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
+        const address = await this.addressRepository.findOne({
+            where: {
+                id: addressId,
+                user: { id: userId }
             }
-        }
+        })
+
+        if (!address) throw new NotFoundException("Address not found")
+
+        return address;
     }
     async isItemFavorited(userId: string, itemId: string): Promise<boolean> {
         if (!userId) return false;

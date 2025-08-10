@@ -42,9 +42,8 @@ export class UserEntity extends BaseEntity {
 
     @Column({ nullable: true })
     rt_hash: string;
-    @OneToOne(() => OtpEntity, otp => otp.user, { onDelete: "CASCADE" })
-    @JoinColumn({ name: "otp_id" })
-    otp: OtpEntity
+    @OneToOne(() => OtpEntity, otp => otp.user)
+    otp: OtpEntity;
     @OneToMany(() => AddressEntity, (address) => address.user)
     addressList: AddressEntity[];
     @OneToMany(() => CommentEntity, (comment) => comment.user)

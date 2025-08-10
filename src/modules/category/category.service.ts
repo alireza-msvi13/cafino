@@ -201,14 +201,15 @@ export class CategoryService {
         }
       }
       if (title) updateObject.title = title;
-      if (show && isBoolean(show)) {
+      
+      if (isBoolean(show)) {
         const showStatus = toBoolean(show)
         updateObject.show = showStatus
         await this.itemService.updateItemShowStatusByCategoryId(id, showStatus)
       };
       if (slug) {
         const category = await this.categoryRepository.findOneBy({ slug });
-        if (category) throw new NotFoundException("not found category by this id");
+        if (category) throw new ConflictException("Slug already exists");
         updateObject.slug = slug;
       }
 

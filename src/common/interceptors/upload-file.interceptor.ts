@@ -31,7 +31,7 @@ export function UploadFileAws(fieldName: string) {
 export function UploadMultiFilesAws(fieldName: string) {
     return FilesInterceptor(
         fieldName,
-        10,
+        5,
         {
             limits: {
                 fileSize: 5 * 1024 * 1024

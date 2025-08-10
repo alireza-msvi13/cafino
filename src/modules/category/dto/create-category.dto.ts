@@ -13,7 +13,7 @@ export class CreateCategoryDto {
   @IsString()
   @IsNotEmpty({ message: "slug is required" })
   @MaxLength(100, { message: "slug is too long" })
-  @Matches(/^[a-z0-9-]+$/, { message: "slug must be lowercase letters, numbers, and hyphens only" })
+  @Matches(/^[a-z0-9-]+$/, { message: "slug can only include lowercase letters, numbers, and hyphens." })
   slug: string;
 
   @ApiProperty({ format: "binary" })

@@ -143,7 +143,7 @@ export class ItemService {
 
       if (images.length > 0) {
         await Promise.all([
-          item.images.map(async (img) => {
+          ...item.images.map(async (img) => {
             await this.storageService.deleteFile(img.image, Folder.Item);
             await this.itemImageRepository.delete({ id: img.id });
           }),
@@ -258,6 +258,7 @@ export class ItemService {
           "item.rate_count",
           "category.title",
           "item.createdAt",
+          "itemImage.id",
           "itemImage.image",
           "itemImage.imageUrl",
         ])
@@ -283,7 +284,7 @@ export class ItemService {
         statusCode: HttpStatus.OK
       });
 
-
+      
     } catch (error) {
       console.log(error);
 

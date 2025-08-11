@@ -2,7 +2,7 @@
 import { BaseEntity } from "src/common/abstracts/base.entity";
 import { EntityName } from "src/common/enums/entity.enum";
 import { CartEntity } from "src/modules/cart/entity/cart.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany } from "typeorm";
 
 @Entity(EntityName.Discount)
 export class DiscountEntity extends BaseEntity {
@@ -29,4 +29,7 @@ export class DiscountEntity extends BaseEntity {
 
   @OneToMany(() => CartEntity, (cart) => cart.discount)
   carts: CartEntity[];
+
+  @CreateDateColumn()
+  created_at: Date
 }

@@ -9,8 +9,7 @@ import {
   UploadedFile,
   Query,
   UseGuards,
-  Put,
-  Res,
+  Put
 } from "@nestjs/common";
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
@@ -20,7 +19,6 @@ import { SwaggerContentTypes } from "src/common/enums/swagger.enum";
 import { JwtGuard } from "../auth/guards/access-token.guard";
 import { UploadFileAws } from "src/common/interceptors/upload-file.interceptor";
 import { MulterFileType } from "src/common/types/multer.file.type";
-import { Response } from "express";
 import { AdminGuard } from "../auth/guards/admin.guard";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
@@ -35,68 +33,51 @@ export class CategoryController {
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadFileAws('image'))
   @ApiConsumes(SwaggerContentTypes.MULTIPART)
-  @ApiOperation({ summary: "create new category by admin" })
-  create(
-    @UploadedFile() image: MulterFileType,
-    @Body() createCategoryDto: CreateCategoryDto,
-    @Res() response: Response
-  ) {
-    return this.categoryService.create(createCategoryDto, image, response);
+  @ApiOperation({ summary: "Create new category by admin." })
+  create(@UploadedFile() image: MulterFileType, @Body() createCategoryDto: CreateCategoryDto) {
+    return this.categoryService.create(createCategoryDto, image);
   }
 
   @Get("/pagination")
-  @ApiOperation({ summary: "get categories by pagination" })
-  findByPagination(
-    @Query() pagination: PaginationDto,
-    @Res() response: Response,
-  ) {
-    return this.categoryService.findByPagination(pagination, response);
+  @ApiOperation({ summary: "Get categories by pagination." })
+  findByPagination(@Query() pagination: PaginationDto) {
+    return this.categoryService.findByPagination(pagination);
   }
 
   @Get()
-  @ApiOperation({ summary: "get all categories" })
-  findAll(
-    @Res() response: Response,
-  ) {
-    return this.categoryService.findAll(response);
+  @ApiOperation({ summary: "Get all categories." })
+  findAll() {
+    return this.categoryService.findAll();
   }
 
   @Get('admin')
-  @ApiOperation({ summary: "get all categories by admin, including categories that are not allowed to be shown" })
-  findAllByAdmin(
-    @Query() pagination: PaginationDto,
-    @Res() response: Response,
-  ) {
-    return this.categoryService.findByPaginationByAdmin(pagination, response);
+  @ApiOperation({ summary: "Get all categories by admin, including categories that are not allowed to be shown." })
+  findAllByAdmin(@Query() pagination: PaginationDto) {
+    return this.categoryService.findByPaginationByAdmin(pagination);
   }
 
   @Get("/by-slug/:slug")
-  @ApiOperation({ summary: "find category by slug" })
-  findBySlug(
-    @Param("slug") slug: string,
-    @Res() response: Response
-  ) {
-    return this.categoryService.findBySlug(slug, response);
+  @ApiOperation({ summary: "Find category by slug." })
+  findBySlug(@Param("slug") slug: string) {
+    return this.categoryService.findBySlug(slug);
   }
 
   @Put(":id")
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadFileAws('image'), EmptyStringToUndefindInterceptor)
   @ApiConsumes(SwaggerContentTypes.MULTIPART)
-  @ApiOperation({ summary: "update new category by admin" })
+  @ApiOperation({ summary: "Update new category by admin." })
   update(
     @Param("id", UUIDValidationPipe) categoryId: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
     @UploadedFile() image: MulterFileType,
-    @Res() response: Response
-
   ) {
-    return this.categoryService.update(categoryId, updateCategoryDto, image, response);
+    return this.categoryService.update(categoryId, updateCategoryDto, image);
   }
 
   @Delete(":id")
-  @ApiOperation({ summary: "delete a category by admin" })
-  delete(@Param("id", UUIDValidationPipe) categoryId: string, @Res() response: Response) {
-    return this.categoryService.delete(categoryId, response);
+  @ApiOperation({ summary: "Delete a category by admin." })
+  delete(@Param("id", UUIDValidationPipe) categoryId: string) {
+    return this.categoryService.delete(categoryId);
   }
 }

@@ -25,7 +25,7 @@ export class AuthController {
     @SendOtpDoc()
     async sendOtp(
         @Body() loginUserDto: LoginUserDto,
-    ): Promise<ServerResponse> {
+    ) {
         return this.authService.sendOtp(
             loginUserDto.phone,
         );
@@ -38,7 +38,7 @@ export class AuthController {
     async verfiyOtp(
         @Body() VerifyOtpDto: VerifyOtpDto,
         @Res({ passthrough: true }) res: Response
-    ): Promise<ServerResponse> {
+    ) {
         return this.authService.verfiyOtp(
             VerifyOtpDto.phone,
             VerifyOtpDto.otpCode,
@@ -52,18 +52,18 @@ export class AuthController {
     @ResendOtpDoc()
     async resendOtp(
         @Body() resendCodeDto: ResendCodeDto
-    ): Promise<ServerResponse> {
+    ) {
         return this.authService.resendOtp(resendCodeDto);
     }
 
     @Get('refresh')
     @UseGuards(RefreshGuard)
-    @ApiOperation({ summary: "generate new refresh & access token" })
+    @ApiOperation({ summary: "Generate new Tokens." })
     async refreshToken(
         @GetUser("phone") phone: string,
         @GetUser("id") userId: string,
         @Res({ passthrough: true }) res: Response
-    ): Promise<ServerResponse> {
+    ) {
         return await this.authService.refreshToken(
             res,
             userId,
@@ -73,11 +73,11 @@ export class AuthController {
 
     @Get('logout')
     @UseGuards(JwtGuard)
-    @ApiOperation({ summary: "logout user" })
+    @ApiOperation({ summary: "Logout user." })
     async logout(
         @GetUser("phone") phone: string,
         @Res({ passthrough: true }) res: Response
-    ): Promise<ServerResponse> {
+    ) {
         return await this.authService.logout(phone, res);
     }
 

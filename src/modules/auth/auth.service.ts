@@ -43,7 +43,7 @@ export class AuthService {
     const existingUser = await this.userService.findByPhoneWithOtp(phone);
 
     if (existingUser?.status === UserStatus.Block) {
-      throw new ForbiddenException("Unfortunately, you are in the blacklist");
+      throw new ForbiddenException("Unfortunately, you are in the blacklist.");
     }
 
     const now = new Date();
@@ -72,7 +72,7 @@ export class AuthService {
     // const smsOptions: SmsType = { phone, code: otpCode };
     // await this.smsService.sendSms(smsOptions);
 
-    return new ServerResponse(HttpStatus.OK, 'Code sent successfully', { otpCode });
+    return new ServerResponse(HttpStatus.OK, 'Code sent successfully.', { otpCode });
   }
   async verfiyOtp(
     phone: string,
@@ -87,7 +87,7 @@ export class AuthService {
     }
 
     if (user.status === UserStatus.Block) {
-      throw new ForbiddenException("Unfortunately, you are in the blacklist");
+      throw new ForbiddenException("Unfortunately, you are in the blacklist.");
     }
 
     if (user.otp.is_used) {
@@ -111,7 +111,7 @@ export class AuthService {
 
     await this.userService.changeOtpStatusToUsed(user.otp.id);
 
-    return new ServerResponse(HttpStatus.OK, 'You login successfully', { tokens });
+    return new ServerResponse(HttpStatus.OK, 'You login successfully.', { tokens });
 
   }
   async refreshToken(
@@ -144,7 +144,7 @@ export class AuthService {
     }
 
     if (user.status === UserStatus.Block) {
-      throw new ForbiddenException("Unfortunately, you are in the blacklist");
+      throw new ForbiddenException("Unfortunately, you are in the blacklist.");
     }
 
     const now = new Date();
@@ -160,7 +160,7 @@ export class AuthService {
     // const smsOptions: SmsType = { phone, code: otpCode };
     // await this.smsService.sendSms(smsOptions);
 
-    return new ServerResponse(HttpStatus.OK, 'Code send successfully', { otpCode });
+    return new ServerResponse(HttpStatus.OK, 'Code send successfully.', { otpCode });
 
   }
   async logout(phone: string, res: Response): Promise<ServerResponse> {
@@ -180,7 +180,7 @@ export class AuthService {
     delete res?.req?.headers.cookie;
     await this.userService.removeRefreshToken(phone);
 
-    return new ServerResponse(HttpStatus.OK, 'You logout successfully');
+    return new ServerResponse(HttpStatus.OK, 'You logout successfully.');
 
   }
 
@@ -215,12 +215,12 @@ export class AuthService {
       refreshToken,
       rt_hash,
     );
-    if (!isTokensEqual) throw new UnauthorizedException('Token is not valid');
+    if (!isTokensEqual) throw new UnauthorizedException('Token is not valid.');
 
     const isTokenValid = await this.jwtService.verify(refreshToken, {
       secret: process.env.REFRESH_TOKEN_SECRET,
     });
-    if (!isTokenValid) throw new UnauthorizedException('Token is not valid');
+    if (!isTokenValid) throw new UnauthorizedException('Token is not valid.');
 
     return { phone, id };
   }

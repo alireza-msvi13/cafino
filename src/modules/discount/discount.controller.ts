@@ -5,17 +5,19 @@ import {
   Get,
   Param,
   Post,
-  Res,
+  Put,
+  Query,
   UseGuards
 } from "@nestjs/common";
 import { ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { DiscountDto } from "./dto/discount.dto";
 import { DiscountService } from "./discount.service";
-import { SwaggerContentTypes } from "src/common/enums/swagger.enum";
 import { JwtGuard } from "../auth/guards/access-token.guard";
 import { AdminGuard } from "../auth/guards/admin.guard";
-import { Response } from "express";
 import { UUIDValidationPipe } from "src/common/pipes/uuid-validation.pipe";
+import { DiscountQueryDto } from "./dto/sort-discount.dto";
+import { UpdateDiscountDto } from "./dto/update-dicount.dto";
+import { SwaggerContentTypes } from "src/common/enums/swagger.enum";
 @Controller("discount")
 @ApiTags('Discount')
 @UseGuards(JwtGuard, AdminGuard)
@@ -23,23 +25,29 @@ export class DiscountController {
   constructor(private discountService: DiscountService) { }
 
   @Post()
-  @ApiOperation({ summary: "generate new discount code by admin" })
-  generate(
-    @Body() discountDto: DiscountDto,
-    @Res() response: Response,
-  ) {
-    return this.discountService.generate(discountDto, response);
+  @ApiOperation({ summary: "Generate new discount code by admin." })
+  generate(@Body() discountDto: DiscountDto) {
+    return this.discountService.generate(discountDto);
   }
 
   @Get()
-  @ApiOperation({ summary: "get all discount code by admin " })
-  findAll(@Res() response: Response) {
-    return this.discountService.findAll(response);
+  @ApiOperation({ summary: "Get all discount code by admin." })
+  findAll(@Query() query: DiscountQueryDto) {
+    return this.discountService.findAll(query);
+  }
+
+  @Put('/:id')
+  @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
+  @ApiOperation({ summary: "Change discount status." })
+  update(
+    @Param("id",UUIDValidationPipe) id: string,
+    @Body() body: UpdateDiscountDto) {
+    return this.discountService.updateActivityStatus(id, body.status);
   }
 
   @Delete("/:id")
-  @ApiOperation({ summary: " delete discount code by admin" })
-  remove(@Param("id", UUIDValidationPipe) id: string, @Res() response: Response) {
-    return this.discountService.delete(id, response);
+  @ApiOperation({ summary: "Delete discount code by admin." })
+  remove(@Param("id", UUIDValidationPipe) id: string) {
+    return this.discountService.delete(id);
   }
 }

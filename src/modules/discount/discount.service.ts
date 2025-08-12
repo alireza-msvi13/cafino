@@ -55,7 +55,13 @@ export class DiscountService {
 
   }
   async findAll(query: DiscountQueryDto): Promise<ServerResponse> {
-    const { sortBy = 'created_at', order = 'DESC', isActive } = query;
+    const {
+      sortBy = 'created_at',
+      order = 'DESC',
+      isActive,
+      page = 1,
+      limit = 10,
+    } = query;
     const now = new Date();
 
     await this.discountRepository
@@ -74,9 +80,19 @@ export class DiscountService {
 
     qb.orderBy(`discount.${sortBy}`, order);
 
-    const discounts = await qb.getMany();
+    const total = await qb.getCount();
 
-    return new ServerResponse(HttpStatus.OK, 'Discounts fetched successfully.', { discounts });
+    const discounts = await qb
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+
+    return new ServerResponse(HttpStatus.OK, 'Discounts fetched successfully.', {
+      total,
+      page,
+      limit,
+      discounts
+    });
   }
 
   async delete(id: string): Promise<ServerResponse> {

@@ -19,6 +19,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { WinstonModule } from 'nest-winston';
 import { winstonLogger } from './common/logger/winston.logger';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -46,7 +47,7 @@ import { winstonLogger } from './common/logger/winston.logger';
     ContactModule
 
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule { }

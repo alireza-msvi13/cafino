@@ -119,7 +119,7 @@ export class ItemService {
     if (price) updateObject.price = +price;
     if (discount) updateObject.discount = +discount;
     if (quantity) updateObject.quantity = +quantity
-    if (show && isBoolean(show)) updateObject.show = toBoolean(show);
+    if (isBoolean(show)) updateObject.show = toBoolean(show);
 
 
     if (images.length > 0) {
@@ -307,6 +307,7 @@ export class ItemService {
         "item.description",
         "item.price",
         "item.discount",
+        "item.show",
         "item.quantity",
         "item.rate",
         "item.rate_count",

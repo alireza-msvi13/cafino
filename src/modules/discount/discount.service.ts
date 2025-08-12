@@ -87,11 +87,31 @@ export class DiscountService {
   }
   async updateActivityStatus(id: string, status: boolean): Promise<ServerResponse> {
     const discount = await this.discountRepository.findOneBy({ id });
-    if (!discount) throw new NotFoundException("Discount Not Found");
-    await this.discountRepository.update({ id }, {
-      active: status
-    });
-    return new ServerResponse(HttpStatus.OK, `Discount status updated to ${status ? 'active' : 'inactive'}.`);
+
+    if (!discount) {
+      throw new NotFoundException("Discount Not Found.");
+    }
+
+    if (discount.active === status) {
+      throw new ConflictException(`Discount is already ${status ? "active" : "inactive"}.`);
+    }
+
+    const now = Date.now();
+
+    if (discount.limit !== null && discount.limit !== undefined && discount.limit <= discount.usage) {
+      throw new BadRequestException("Discount code expired.");
+    }
+
+    if (discount.expires_in && discount.expires_in.getTime() <= now) {
+      throw new BadRequestException("Discount code expired.");
+    }
+
+    await this.discountRepository.update({ id }, { active: status });
+
+    return new ServerResponse(
+      HttpStatus.OK,
+      `Discount status updated to ${status ? "active" : "inactive"}.`
+    );
   }
 
   // * helper

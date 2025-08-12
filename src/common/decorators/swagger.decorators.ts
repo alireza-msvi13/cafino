@@ -11,8 +11,10 @@ import {
   ApiUnauthorizedResponse,
   ApiTooManyRequestsResponse,
   ApiUnprocessableEntityResponse,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { VerifyOtpDto } from 'src/modules/auth/dto/verfiy-otp.dto';
+import { SwaggerContentTypes } from '../enums/swagger.enum';
 
 export function SendOtpDoc() {
   return applyDecorators(
@@ -44,5 +46,15 @@ export function ResendOtpDoc() {
     ApiTooManyRequestsResponse({ description: "You have reached the maximum number of OTP requests. Please try again later." }),
     ApiOperation({ summary: "Resend otp code." }),
     ApiOkResponse({ description: "Code sent successfully" }),
+  );
+}
+export function UpdateActivityStatusDoc() {
+  return applyDecorators(
+    ApiNotFoundResponse({ description: "Discount Not Found." }),
+    ApiConflictResponse({ description: "Discount is already active || inactive." }),
+    ApiBadRequestResponse({description: "Discount code expired."}),
+    ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON),
+    ApiOperation({ summary: "Change discount status." }),
+    ApiOkResponse({ description: "Discount status updated to active || inactive" }),
   );
 }

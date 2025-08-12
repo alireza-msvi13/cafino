@@ -18,6 +18,7 @@ import { UUIDValidationPipe } from "src/common/pipes/uuid-validation.pipe";
 import { DiscountQueryDto } from "./dto/sort-discount.dto";
 import { UpdateDiscountDto } from "./dto/update-dicount.dto";
 import { SwaggerContentTypes } from "src/common/enums/swagger.enum";
+import { UpdateActivityStatusDoc } from "src/common/decorators/swagger.decorators";
 @Controller("discount")
 @ApiTags('Discount')
 @UseGuards(JwtGuard, AdminGuard)
@@ -37,10 +38,9 @@ export class DiscountController {
   }
 
   @Put('/:id')
-  @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED, SwaggerContentTypes.JSON)
-  @ApiOperation({ summary: "Change discount status." })
+  @UpdateActivityStatusDoc()
   update(
-    @Param("id",UUIDValidationPipe) id: string,
+    @Param("id", UUIDValidationPipe) id: string,
     @Body() body: UpdateDiscountDto) {
     return this.discountService.updateActivityStatus(id, body.status);
   }

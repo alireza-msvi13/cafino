@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import * as compression from 'compression'
@@ -23,7 +23,12 @@ async function bootstrap() {
 
   app.use(helmet());
 
-  app.setGlobalPrefix('v1');
+  app.setGlobalPrefix('v1', {
+    exclude: [
+      { path: '/', method: RequestMethod.GET },
+      { path: '/', method: RequestMethod.HEAD }
+    ],
+  });
 
   app.enableVersioning({ type: VersioningType.URI });
 

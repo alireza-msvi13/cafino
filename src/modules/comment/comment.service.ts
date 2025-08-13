@@ -1,15 +1,13 @@
-import { BadRequestException, forwardRef, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, forwardRef, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CommentEntity } from './entities/comment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ItemService } from '../item/item.service';
-import e, { response, Response } from 'express';
-import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
-import { SortCommentDto } from './dto/sort-comment.dto';
-import { SortCommentOption } from 'src/common/enums/sort-comment-option.enum';
+import { SortAdminCommentDto, SortCommentDto } from './dto/sort-comment.dto';
+import { SortCommentOption } from './enum/comment.enum';
 import { Roles } from 'src/common/enums/role.enum';
+import { ServerResponse } from 'src/common/dto/server-response.dto';
 
 @Injectable()
 export class CommentService {
@@ -24,119 +22,118 @@ export class CommentService {
   // *primary
   async createComment(
     createCommentDto: CreateCommentDto,
-    response: Response,
     userId: string,
     role: Roles
-  )
-    : Promise<Response> {
-    try {
+  ): Promise<ServerResponse> {
 
-      const { parentId, text, itemId, star } = createCommentDto;
+    const { parentId, text, itemId, star } = createCommentDto;
 
-      const item = await this.itemService.checkItemExist(itemId);
-      if (!item) throw new NotFoundException("item not found");
+    const item = await this.itemService.checkItemExist(itemId);
+    if (!item) throw new NotFoundException("Item not found.");
 
-      let parent = null;
-      if (parentId) {
-        parent = await this.commentRepository.findOneBy({ id: parentId });
-      }
-
-      const starValue = parent?.id ? null : (star ?? 5);
-
-      const newComment = this.commentRepository.create({
-        text,
-        star: starValue,
-        item: { id: itemId },
-        parent: parent ? { id: parentId } : null,
-        user: { id: userId },
-        accept: role === Roles.Admin ? true : false
-      });
-
-      await this.commentRepository.save(newComment);
-
-
-      return response.status(HttpStatus.CREATED).json({
-        message: "Comment Created Successfully",
-        statusCode: HttpStatus.CREATED,
-      });
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
+    let parent = null;
+    if (parentId) {
+      parent = await this.commentRepository.findOneBy({ id: parentId });
     }
+
+    const starValue = parent?.id ? null : (star ?? 5);
+
+    const newComment = this.commentRepository.create({
+      text,
+      star: starValue,
+      item: { id: itemId },
+      parent: parent ? { id: parentId } : null,
+      user: { id: userId },
+      accept: role === Roles.Admin ? true : false
+    });
+
+    await this.commentRepository.save(newComment);
+
+    return new ServerResponse(HttpStatus.CREATED, "Comment created successfully.")
+
   }
   async getAllComment(
-    paginationDto: PaginationDto,
-    response: Response
-  ): Promise<Response> {
-    try {
-      const { limit = 10, page = 1 } = paginationDto;
+    sortDto: SortAdminCommentDto,
+  ): Promise<ServerResponse> {
 
-      const baseQuery = this.commentRepository
-        .createQueryBuilder("comment")
-        .leftJoin("comment.user", "user")
-        .leftJoin("comment.parent", "parent")
-        .leftJoin("comment.item", "item")
+    const {
+      limit = 10,
+      page = 1,
+      sortBy = SortCommentOption.Newest,
+      accept,
+      itemId,
+      userId,
+      phone,
+    } = sortDto;
 
-      const total = await baseQuery.getCount();
 
+    const baseQuery = this.commentRepository
+      .createQueryBuilder("comment")
+      .leftJoinAndSelect("comment.user", "user")
+      .leftJoinAndSelect("comment.parent", "parent")
+      .leftJoinAndSelect("comment.item", "item");
 
-      const data = await baseQuery
-        .select([
-          "comment.id",
-          "comment.text",
-          "comment.accept",
-          "comment.created_at",
-          "user.id",
-          "user.first_name",
-          "user.last_name",
-          "user.username",
-          "user.phone",
-          "user.email",
-          "item.id",
-          "item.title",
-          "parent.id"
-        ])
-        .skip((page - 1) * limit)
-        .take(limit)
-        .getMany();
-
-      const responseData = data.map(comment => ({
-        ...comment,
-        is_reply: !!comment.parent
-      }));
-
-      return response.status(HttpStatus.OK).json({
-        data: responseData,
-        total,
-        page,
-        limit,
-        statusCode: HttpStatus.OK
-      });
-
-    } catch (error) {
-      console.log(error);
-
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
+    if (accept !== undefined) {
+      baseQuery.andWhere("comment.accept = :accept", { accept });
     }
+
+    if (itemId) {
+      baseQuery.andWhere("item.id = :itemId", { itemId });
+    }
+
+    if (userId) {
+      baseQuery.andWhere("user.id = :userId", { userId });
+    }
+
+    if (phone) {
+      baseQuery.andWhere("user.phone = :phone", { phone });
+    }
+
+    if (sortBy === SortCommentOption.HighestRated || sortBy === SortCommentOption.LowestRated) {
+      baseQuery.andWhere("comment.parent IS NULL");
+    }
+
+    baseQuery.orderBy(`comment.${this.getOrderColumn(sortBy)}`, this.getOrderDirection(sortBy))
+
+    const total = await baseQuery.getCount();
+
+    const data = await baseQuery
+      .skip((page - 1) * limit)
+      .take(limit)
+      .select([
+        "comment.id",
+        "comment.text",
+        "comment.accept",
+        "comment.star",
+        "comment.created_at",
+        "user.id",
+        "user.first_name",
+        "user.last_name",
+        "user.username",
+        "user.phone",
+        "item.id",
+        "item.title",
+        "parent.id"
+      ])
+      .getMany();
+
+    const comments = data.map(comment => ({
+      ...comment,
+      is_reply: !!comment.parent
+    }));
+
+    return new ServerResponse(HttpStatus.OK, 'Comments fetched successfully.', {
+      total,
+      page,
+      limit,
+      comments
+    });
+
   }
   async getCommentsForItem(
     itemId: string,
-    query: SortCommentDto,
-    response: Response
-  ) {
+    query: SortCommentDto
+  ): Promise<ServerResponse> {
 
     const { page = 1, limit = 10, sortBy = SortCommentOption.Newest } = query;
     const skip = (page - 1) * limit;
@@ -190,82 +187,54 @@ export class CommentService {
       .getCount();
 
 
-    return response.status(HttpStatus.OK).json({
-      data: {
-        comments,
-        total,
-        page,
-        lastPage: Math.ceil(total / limit),
-      },
-      statusCode: HttpStatus.OK,
+    return new ServerResponse(HttpStatus.OK, 'Comments fetched successfully.', {
+      total,
+      page,
+      limit,
+      comments
     });
+
+
   }
-  async acceptComment(id: string, response: Response): Promise<Response> {
-    try {
-      const comment = await this.getCommentById(id);
+  async acceptComment(id: string): Promise<ServerResponse> {
 
-      if (comment.accept) throw new BadRequestException("Comment is Already Accepted");
+    const comment = await this.getCommentById(id);
 
-      comment.accept = true;
-      await this.commentRepository.save(comment);
-
-      let itemId = comment.item?.id
-
-      if (comment.star !== null && itemId) {
-        const { avg, count } = await this.commentRepository
-          .createQueryBuilder("comment")
-          .select("AVG(comment.star)", "avg")
-          .addSelect("COUNT(comment.id)", "count")
-          .where("comment.item_id = :itemId", { itemId })
-          .andWhere("comment.accept = true")
-          .andWhere("comment.star IS NOT NULL")
-          .getRawOne();
-
-        const rating = parseFloat((parseFloat(avg) || 0).toFixed(1));
-        const ratingCount = parseInt(count, 10) || 0;
-
-        await this.itemService.updateItemRating(itemId, rating, ratingCount);
-
-      }
+    if (!comment.accept) throw new BadRequestException("Comment is already accepted.");
 
 
-      return response.status(HttpStatus.OK).json({
-        message: "Comment Status Changed To Accept Successfully",
-        statusCode: HttpStatus.OK,
-      });
-    } catch (error) {
-      console.log(error);
+    comment.accept = true;
+    await this.commentRepository.save(comment);
 
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
+    let itemId = comment.item?.id
+
+    if (comment.star !== null && itemId) {
+      const { avg, count } = await this.commentRepository
+        .createQueryBuilder("comment")
+        .select("AVG(comment.star)", "avg")
+        .addSelect("COUNT(comment.id)", "count")
+        .where("comment.item_id = :itemId", { itemId })
+        .andWhere("comment.accept = true")
+        .andWhere("comment.star IS NOT NULL")
+        .getRawOne();
+
+      const rating = parseFloat((parseFloat(avg) || 0).toFixed(1));
+      const ratingCount = parseInt(count, 10) || 0;
+
+      await this.itemService.updateItemRating(itemId, rating, ratingCount);
+
     }
+
+    return new ServerResponse(HttpStatus.OK, 'Comment status changed to accept successfully.');
+
   }
-  async rejectComment(id: string, response: Response): Promise<Response> {
-    try {
-      const comment = await this.getCommentById(id);
-      if (!comment.accept) throw new BadRequestException("Comment is Already Rejected");
-      comment.accept = false;
-      await this.commentRepository.save(comment);
-      return response.status(HttpStatus.OK).json({
-        message: "Comment Status Changed To Reject Successfully",
-        statusCode: HttpStatus.OK,
-      });
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
-    }
+  async rejectComment(id: string): Promise<ServerResponse> {
+
+    const comment = await this.getCommentById(id);
+    if (!comment.accept) throw new BadRequestException("Comment is already rejected.");
+    comment.accept = false;
+    await this.commentRepository.save(comment);
+    return new ServerResponse(HttpStatus.OK, 'Comment status changed to reject successfully.');
   }
 
   // *helper
@@ -283,7 +252,7 @@ export class CommentService {
       },
     });
 
-    if (!comment) throw new NotFoundException("comment not found");
+    if (!comment) throw new NotFoundException("Comment not found");
     return comment;
   }
   private getOrderColumn(sortBy: SortCommentOption): string {

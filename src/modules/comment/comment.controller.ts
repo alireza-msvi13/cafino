@@ -1,18 +1,13 @@
-import { Body, Controller, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { JwtGuard } from '../auth/guards/access-token.guard';
-import { Response } from 'express';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
-import { SortCommentDto } from './dto/sort-comment.dto';
+import { SortAdminCommentDto, SortCommentDto } from './dto/sort-comment.dto';
 import { Roles } from 'src/common/enums/role.enum';
-
-
-
 
 @Controller('comment')
 @ApiTags('Comment')
@@ -21,51 +16,46 @@ export class CommentController {
   constructor(private commentService: CommentService) { }
 
   @Post("/")
-  @ApiOperation({ summary: "create new comment for menu item" })
+  @ApiOperation({ summary: "Create new comment for menu item." })
   createComment(
     @Body() createCommentDto: CreateCommentDto,
-    @Res() response: Response,
     @GetUser("role") role: Roles,
     @GetUser("id") userId: string,
   ) {
-    return this.commentService.createComment(createCommentDto, response, userId, role);
+    return this.commentService.createComment(createCommentDto, userId, role);
   }
-
 
   @Get(":id/comments")
-  @ApiOperation({ summary: "get comments for menu item" })
+  @ApiOperation({ summary: "Get comments for menu item." })
   async getItemComments(
     @Param("id") itemId: string,
-    @Query() query: SortCommentDto,
-    @Res() response: Response
+    @Query() query: SortCommentDto
   ) {
-    return await this.commentService.getCommentsForItem(itemId, query, response);
+    return await this.commentService.getCommentsForItem(itemId, query);
   }
-
 
   @Get("/")
   @UseGuards(AdminGuard)
-  @ApiOperation({ summary: "see all comments by admin" })
+  @ApiOperation({ summary: "See all comments by admin." })
   getAllComment(
-    @Query() paginationDto: PaginationDto,
-    @Res() response: Response,
+    @Query() query: SortAdminCommentDto
   ) {
-    return this.commentService.getAllComment(paginationDto, response)
+    return this.commentService.getAllComment(query)
   }
+
   @Put("/accept/:id")
   @UseGuards(AdminGuard)
-  @ApiOperation({ summary: "accept comment for menu item by admin" })
+  @ApiOperation({ summary: "Accept comment for menu item by admin." })
   acceptComment(
-    @Param("id", UUIDValidationPipe) id: string,
-    @Res() response: Response) {
-    return this.commentService.acceptComment(id, response)
+    @Param("id", UUIDValidationPipe) id: string) {
+    return this.commentService.acceptComment(id)
   }
+
   @Put("/reject/:id")
   @UseGuards(AdminGuard)
-  @ApiOperation({ summary: "reject comment for menu item by admin" })
+  @ApiOperation({ summary: "Reject comment for menu item by admin." })
   rejectComment(
-    @Param("id", UUIDValidationPipe) id: string,
-    @Res() response: Response) {
-    return this.commentService.rejectComment(id, response)
+    @Param("id", UUIDValidationPipe) id: string) {
+    return this.commentService.rejectComment(id)
   }
 }

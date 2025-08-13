@@ -6,6 +6,7 @@ import { BlockStatus } from 'src/modules/rate-limit/enums/block-status.enum';
 import { BlockUserDto, RateLimitQueryDto } from './dto/rate-limit-query.dto';
 import { Response } from 'express';
 import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
+import { ServerResponse } from 'src/common/dto/server-response.dto';
 
 @Injectable()
 export class RateLimitService {
@@ -94,212 +95,145 @@ export class RateLimitService {
     // * Admin Routes
 
     async getRateLimitRecords(
-        query: RateLimitQueryDto,
-        response: Response
-    ): Promise<Response> {
-        try {
-            const { limit = 10, page = 1, identifier, endpoint, blockStatus } = query;
+        query: RateLimitQueryDto
+    ): Promise<ServerResponse> {
+        const { limit = 10, page = 1, identifier, endpoint, blockStatus } = query;
 
-            const baseQuery = this.rateLimitRepository
-                .createQueryBuilder('record')
-                .orderBy('record.updated_at', 'DESC')
-                .select([
-                    'record.id',
-                    'record.identifier',
-                    'record.endpoint',
-                    'record.violation_count',
-                    'record.window_start_at',
-                    'record.requests_in_window',
-                    'record.block_status',
-                    'record.block_expires_at',
-                    'record.violation_count_reset_at',
-                    'record.created_at',
-                    'record.updated_at',
-                ]);
+        const baseQuery = this.rateLimitRepository
+            .createQueryBuilder('record')
+            .orderBy('record.updated_at', 'DESC')
+            .select([
+                'record.id',
+                'record.identifier',
+                'record.endpoint',
+                'record.violation_count',
+                'record.window_start_at',
+                'record.requests_in_window',
+                'record.block_status',
+                'record.block_expires_at',
+                'record.violation_count_reset_at',
+                'record.created_at',
+                'record.updated_at',
+            ]);
 
-            if (identifier) baseQuery.andWhere('record.identifier = :identifier', { identifier });
+        if (identifier) baseQuery.andWhere('record.identifier = :identifier', { identifier });
 
 
-            if (endpoint) baseQuery.andWhere('record.endpoint = :endpoint', { endpoint });
+        if (endpoint) baseQuery.andWhere('record.endpoint = :endpoint', { endpoint });
 
 
-            if (blockStatus) baseQuery.andWhere('record.block_status = :blockStatus', { blockStatus });
+        if (blockStatus) baseQuery.andWhere('record.block_status = :blockStatus', { blockStatus });
 
 
-            const total = await baseQuery.getCount();
+        const total = await baseQuery.getCount();
 
-            const records = await baseQuery
-                .skip((page - 1) * limit)
-                .take(limit)
-                .getMany();
+        const records = await baseQuery
+            .skip((page - 1) * limit)
+            .take(limit)
+            .getMany();
 
-            return response.status(HttpStatus.OK).json({
-                data: records,
-                total,
-                page,
-                limit,
-                statusCode: HttpStatus.OK,
-            });
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
-    }
-
-    async findById(id: string, response: Response): Promise<Response> {
-        try {
-            const record = await this.rateLimitRepository.findOne({ where: { id } });
-            if (!record) {
-                throw new NotFoundException('Rate-limit record not found');
-            }
-            return response.status(HttpStatus.OK).json({
-                data: record,
-                statusCode: HttpStatus.OK,
-            });
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
+        return new ServerResponse(HttpStatus.OK, 'Rate Limits record fetched successfully.', {
+            total,
+            page,
+            limit,
+            records
+        });
 
     }
 
-    async blockManually(id: string, dto: BlockUserDto, response: Response): Promise<Response> {
-        try {
-            const now = new Date();
-            const { permanent } = dto;
-
-            const record = await this.rateLimitRepository.findOne({ where: { id } });
-
-            if (!record) {
-                throw new NotFoundException('Rate-limit record not found');
-            }
-
-            record.violation_count += 1;
-            record.requests_in_window = 0;
-            record.violation_count_reset_at = new Date(now.getTime() + this.RESET_INTERVAL_MS);
-            record.block_status = permanent ? BlockStatus.PERMANENT : BlockStatus.TEMPORARY;
-            record.block_expires_at = permanent ? null : new Date(now.getTime() + this.MANUAL_BLOCK_DURATION_MS);
-
-            await this.rateLimitRepository.save(record);
-
-            return response.status(HttpStatus.OK).json({
-                data: record,
-                block_type: permanent ? 'permanent' : 'temporary',
-                message: permanent
-                    ? 'User has been permanently blocked.'
-                    : 'User has been temporarily blocked for 1 day.',
-                statusCode: HttpStatus.OK,
-            });
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            throw new HttpException(INTERNAL_SERVER_ERROR_MESSAGE, HttpStatus.INTERNAL_SERVER_ERROR);
+    async findById(id: string): Promise<ServerResponse> {
+        const record = await this.rateLimitRepository.findOne({ where: { id } });
+        if (!record) {
+            throw new NotFoundException('Rate-limit record not found.');
         }
+        return new ServerResponse(HttpStatus.OK, 'Category fetched successfully.', { record });
     }
 
-    async unblockManually(id: string, response: Response): Promise<Response> {
-        try {
-            const record = await this.rateLimitRepository.findOne({ where: { id } });
+    async blockManually(id: string, dto: BlockUserDto): Promise<ServerResponse> {
 
-            if (!record) {
-                throw new NotFoundException('Rate-limit record not found');
-            }
+        const now = new Date();
+        const { permanent } = dto;
 
-            record.block_status = BlockStatus.NONE;
-            record.block_expires_at = null;
-            record.window_start_at = new Date();
-            record.requests_in_window = 0;
+        const record = await this.rateLimitRepository.findOne({ where: { id } });
 
-            await this.rateLimitRepository.save(record);
-
-            return response.status(HttpStatus.OK).json({
-                message: 'User has been unblocked.',
-                data: record,
-                statusCode: HttpStatus.OK,
-            });
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            throw new HttpException(INTERNAL_SERVER_ERROR_MESSAGE, HttpStatus.INTERNAL_SERVER_ERROR);
+        if (!record) {
+            throw new NotFoundException('Rate-limit record not found.');
         }
+
+        record.violation_count += 1;
+        record.requests_in_window = 0;
+        record.violation_count_reset_at = new Date(now.getTime() + this.RESET_INTERVAL_MS);
+        record.block_status = permanent ? BlockStatus.PERMANENT : BlockStatus.TEMPORARY;
+        record.block_expires_at = permanent ? null : new Date(now.getTime() + this.MANUAL_BLOCK_DURATION_MS);
+
+        await this.rateLimitRepository.save(record);
+
+        const message = permanent
+            ? 'User has been permanently blocked.'
+            : 'User has been temporarily blocked for 1 day.'
+
+        return new ServerResponse(HttpStatus.OK, message, {
+            block_type: permanent ? 'permanent' : 'temporary',
+            record
+        });
     }
 
-    async getStats(response: Response): Promise<Response> {
-        try {
-            const total = await this.rateLimitRepository.count();
-            const blockedTemp = await this.rateLimitRepository.count({
-                where: { block_status: BlockStatus.TEMPORARY },
-            });
-            const blockedPermanent = await this.rateLimitRepository.count({
-                where: { block_status: BlockStatus.PERMANENT },
-            });
+    async unblockManually(id: string): Promise<ServerResponse> {
 
-            return response.status(HttpStatus.OK).json({
-                total_records: total,
-                temporarily_blocked: blockedTemp,
-                permanently_blocked: blockedPermanent,
-                active_blocked: blockedTemp + blockedPermanent,
-                statusCode: HttpStatus.OK,
-            });
+        const record = await this.rateLimitRepository.findOne({ where: { id } });
 
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
+        if (!record) {
+            throw new NotFoundException('Rate-limit record not found.');
         }
+
+        record.block_status = BlockStatus.NONE;
+        record.block_expires_at = null;
+        record.window_start_at = new Date();
+        record.requests_in_window = 0;
+
+        await this.rateLimitRepository.save(record);
+
+        return new ServerResponse(HttpStatus.OK, 'User has been unblocked.', { record });
+
     }
 
-    async resetById(id: string, response: Response): Promise<Response> {
-        try {
+    async getStats(): Promise<ServerResponse> {
 
-            const record = await this.rateLimitRepository.findOne({ where: { id } });
-
-            if (!record) {
-                throw new NotFoundException('Rate-limit record not found');
-            }
-
-            record.requests_in_window = 0;
-            record.violation_count = 0;
-            record.violation_count_reset_at = null;
-            record.block_status = BlockStatus.NONE;
-            record.block_expires_at = null;
-            record.window_start_at = new Date();
-
-            await this.rateLimitRepository.save(record);
+        const total = await this.rateLimitRepository.count();
+        const blockedTemp = await this.rateLimitRepository.count({
+            where: { block_status: BlockStatus.TEMPORARY },
+        });
+        const blockedPermanent = await this.rateLimitRepository.count({
+            where: { block_status: BlockStatus.PERMANENT },
+        });
 
 
-            return response.status(HttpStatus.OK).json({
-                message: `Rate-limit record ${id} has been reset.`,
-                statusCode: HttpStatus.OK,
-            });
+        return new ServerResponse(HttpStatus.OK, 'Rate-limit stats fetched successfully.', {
+            total_records: total,
+            temporarily_blocked: blockedTemp,
+            permanently_blocked: blockedPermanent,
+            active_blocked: blockedTemp + blockedPermanent,
+        })
+    }
 
-        } catch (error) {
-            console.log(error);
+    async resetById(id: string): Promise<ServerResponse> {
 
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
+        const record = await this.rateLimitRepository.findOne({ where: { id } });
+
+        if (!record) {
+            throw new NotFoundException('Rate-limit record not found.');
         }
+
+        record.requests_in_window = 0;
+        record.violation_count = 0;
+        record.violation_count_reset_at = null;
+        record.block_status = BlockStatus.NONE;
+        record.block_expires_at = null;
+        record.window_start_at = new Date();
+
+        await this.rateLimitRepository.save(record);
+
+        return new ServerResponse(HttpStatus.OK, `Rate - limit record ${id} has been reset.`);
     }
 
 
@@ -311,13 +245,13 @@ export class RateLimitService {
 
         const is_permanently_blocked = record.block_status === BlockStatus.PERMANENT
 
+        const message = is_permanently_blocked
+            ? 'You are permanently blocked. Contact support.'
+            : 'You are temporarily blocked. Please try again later.'
+
         throw new HttpException(
             {
-                statusCode: HttpStatus.TOO_MANY_REQUESTS,
-                error: 'Too Many Requests',
-                message: is_permanently_blocked
-                    ? 'You are permanently blocked. Contact support.'
-                    : 'You are temporarily blocked. Please try again later.',
+                message,
                 block_type: is_permanently_blocked ? 'permanent' : 'temporary',
             },
             HttpStatus.TOO_MANY_REQUESTS,

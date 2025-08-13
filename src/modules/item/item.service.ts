@@ -46,7 +46,7 @@ export class ItemService {
       price,
       discount,
       quantity,
-      show,
+      show = true,
       category: categoryId,
     } = createItemDto;
 
@@ -121,6 +121,12 @@ export class ItemService {
     if (quantity) updateObject.quantity = +quantity
     if (isBoolean(show)) updateObject.show = toBoolean(show);
 
+    const hasTextDataToUpdate = Object.keys(updateObject).length > 0;
+    const hasNewImages = images.length > 0;
+
+    if (!hasTextDataToUpdate && !hasNewImages) {
+      return new ServerResponse(HttpStatus.OK, "No changes were provided.");
+    }
 
     if (images.length > 0) {
       await Promise.all([
@@ -128,8 +134,10 @@ export class ItemService {
           await this.storageService.deleteFile(img.image, Folder.Item);
           await this.itemImageRepository.delete({ id: img.id });
         }),
-        this.storageService.uploadMultiFile(images, Folder.Item)
       ]);
+
+      await this.storageService.uploadMultiFile(images, Folder.Item);
+
 
       const imageEntities = images.map(image => ({
         image: image.filename,
@@ -137,12 +145,10 @@ export class ItemService {
         item: { id: itemId },
       }));
 
-      await Promise.all([
-        this.itemImageRepository.save(imageEntities),
-        this.itemRepository.update({ id: itemId }, updateObject)
-      ])
+      await this.itemImageRepository.save(imageEntities);
+    }
 
-    } else {
+    if (hasTextDataToUpdate) {
       await this.itemRepository.update({ id: itemId }, updateObject);
     }
 
@@ -160,7 +166,7 @@ export class ItemService {
       minPrice,
       maxPrice,
       categoryId,
-      availableOnly = false,
+      availableOnly,
       search
     } = sortItemDto;
 
@@ -313,6 +319,7 @@ export class ItemService {
         "item.rate_count",
         "category.title",
         "item.createdAt",
+        "itemImage.id",
         "itemImage.image",
         "itemImage.imageUrl",
       ])
@@ -490,4 +497,6 @@ export class ItemService {
       rate_count: ratingCount,
     });
   }
+
+
 }

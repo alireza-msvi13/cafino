@@ -30,7 +30,7 @@ export class CategoryService {
     image: MulterFileType,
   ): Promise<ServerResponse> {
 
-    let { title, slug, show } = createCategoryDto;
+    let { title, slug, show = true } = createCategoryDto;
 
     const category = await this.categoryRepository.findOne({
       where: [{ slug }, { title }],
@@ -64,7 +64,7 @@ export class CategoryService {
     return new ServerResponse(HttpStatus.CREATED, 'Category created successfully.');
 
   }
-  async findByPagination(paginationDto: PaginationDto) : Promise<ServerResponse>{
+  async findByPagination(paginationDto: PaginationDto): Promise<ServerResponse> {
     const { limit = 10, page = 1 } = paginationDto;
 
     const queryBuilder = this.categoryRepository
@@ -123,6 +123,13 @@ export class CategoryService {
     const category = await this.categoryRepository.findOneBy({ id });
     if (!category) throw new NotFoundException("Category not found.");
     const updateObject: DeepPartial<CategoryEntity> = {};
+
+    if (slug) {
+      const category = await this.categoryRepository.findOneBy({ slug });
+      if (category) throw new ConflictException("Slug already exists.");
+      updateObject.slug = slug;
+    }
+
     if (image) {
       const imageUrl = this.storageService.getFileLink(
         image.filename,
@@ -147,10 +154,10 @@ export class CategoryService {
       updateObject.show = showStatus
       await this.itemService.updateItemShowStatusByCategoryId(id, showStatus)
     };
-    if (slug) {
-      const category = await this.categoryRepository.findOneBy({ slug });
-      if (category) throw new ConflictException("Slug already exists.");
-      updateObject.slug = slug;
+
+    const hasTextDataToUpdate = Object.keys(updateObject).length > 0;
+    if (!hasTextDataToUpdate && !image) {
+      return new ServerResponse(HttpStatus.OK, "No changes were provided.");
     }
 
     await this.categoryRepository.update({ id }, updateObject);
@@ -164,7 +171,7 @@ export class CategoryService {
     });
 
     if (!category) throw new NotFoundException("Category not found.");
-    
+
     return new ServerResponse(HttpStatus.OK, 'Categorory fetched successfully.', { category });
 
   }

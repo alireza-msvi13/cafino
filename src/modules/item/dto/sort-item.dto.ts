@@ -25,9 +25,10 @@ export class SortItemDto extends PaginationDto {
   @ApiPropertyOptional({ type: 'boolean', default: false })
   @IsOptional()
   @Transform(({ value }) => {
-    if (typeof value === 'boolean') return value;
-    if (typeof value === 'string') return value.trim().toLowerCase() === 'true';
-    return false;
+    if (typeof value === 'string') {
+      return value.trim().toLowerCase() === 'true';
+    }
+    return value;
   })
   @IsBoolean()
   availableOnly?: boolean;

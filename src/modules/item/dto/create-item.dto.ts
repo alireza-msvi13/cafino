@@ -66,9 +66,10 @@ export class CreateItemDto {
 
     @ApiProperty({ type: "boolean", default: true })
     @Transform(({ value }) => {
-        if (typeof value === 'boolean') return value;
-        if (typeof value === 'string') return value.trim().toLowerCase() === 'true';
-        return false;
+        if (typeof value === 'string') {
+            return value.trim().toLowerCase() === 'true';
+        }
+        return value;
     })
     @IsBoolean()
     show: boolean;

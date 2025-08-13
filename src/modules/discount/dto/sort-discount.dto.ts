@@ -26,9 +26,10 @@ export class DiscountQueryDto extends PaginationDto {
 
     @ApiPropertyOptional({ type: 'boolean' })
     @Transform(({ value }) => {
-        if (typeof value === 'boolean') return value;
-        if (typeof value === 'string') return value.trim().toLowerCase() === 'true';
-        return false;
+        if (typeof value === 'string') {
+            return value.trim().toLowerCase() === 'true';
+        }
+        return value;
     })
     @IsOptional()
     @IsBoolean()

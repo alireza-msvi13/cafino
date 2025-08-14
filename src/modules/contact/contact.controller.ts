@@ -16,27 +16,25 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) { }
 
 
-  @UseGuards(RateLimitGuard)
-  @RateLimit({ max: 10, duration: 1 })
   @Post()
-  @ApiOperation({ summary: 'Create a new contact message' })
+  @RateLimit({ max: 10, duration: 1 })
+  @UseGuards(RateLimitGuard)
+  @ApiOperation({ summary: 'Create a new contact message.' })
   async create(@Body() createContactDto: CreateContactDto) {
     return this.contactService.create(createContactDto);
   }
 
-
   @Get()
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: 'Get all contact messages with filters' })
-  async findAll(
-    @Query() query: ContactQueryDto
-  ) {
+  @ApiOperation({ summary: 'Get all contact messages with filters.' })
+  async findAll(@Query() query: ContactQueryDto) {
     return this.contactService.findAll(query);
   }
 
   @Post(':id/reply')
+  @RateLimit({ max: 10, duration: 1 })
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: 'Reply to a contact message' })
+  @ApiOperation({ summary: 'Reply to a contact message.' })
   async replyMessage(
     @Param('id', UUIDValidationPipe) id: string,
     @Body() dto: ReplyContactDto,
@@ -46,7 +44,7 @@ export class ContactController {
 
   @Get(':id/replies')
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: 'Get all replies for a contact message' })
+  @ApiOperation({ summary: 'Get all replies for a contact message.' })
   async getReplies(@Param('id', UUIDValidationPipe) id: string) {
     return this.contactService.getReplies(id);
   }

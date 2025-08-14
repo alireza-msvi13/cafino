@@ -20,6 +20,7 @@ import { ContactModule } from './modules/contact/contact.module';
 import { WinstonModule } from 'nest-winston';
 import { winstonLogger } from './common/logger/winston.logger';
 import { AppController } from './app.controller';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -44,7 +45,8 @@ import { AppController } from './app.controller';
     OrderModule,
     PaymentModule,
     GatewayModule,
-    ContactModule
+    ContactModule,
+    MailModule
 
   ],
   controllers: [AppController],

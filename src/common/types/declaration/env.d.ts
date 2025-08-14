@@ -5,7 +5,7 @@ namespace NodeJS {
         PORT: number
         NODE_ENV: string
         FRONTEND_URL: string
-        
+
         //Database
         DB_PORT: number
         DB_NAME: string
@@ -41,5 +41,13 @@ namespace NodeJS {
         // Telegram
         TELEGRAM_BOT_TOKEN: string
         TELEGRAM_CHAT_ID: string
+
+        // SMTP
+        SMTP_HOST: string
+        SMTP_PORT: string
+        SMTP_USER: string
+        SMTP_PASS: string
+        SMTP_FROM: string
+
     }
 }

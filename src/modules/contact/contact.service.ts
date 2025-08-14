@@ -6,7 +6,8 @@ import { Repository } from 'typeorm';
 import { Reply } from './entities/reply.entity';
 import { ReplyContactDto } from './dto/reply-contact.dto';
 import { ContactQueryDto } from './dto/sort-contact.dto';
-
+import { ServerResponse } from 'src/common/dto/server-response.dto';
+import { MailService } from '../mail/mail.service';
 @Injectable()
 export class ContactService {
 
@@ -15,18 +16,16 @@ export class ContactService {
     private contactRepository: Repository<Contact>,
     @InjectRepository(Reply)
     private replyRepository: Repository<Reply>,
+    private readonly mailService: MailService
   ) { }
 
 
-  async create(createContactDto: CreateContactDto) {
+  async create(createContactDto: CreateContactDto): Promise<ServerResponse> {
     const { name, email, phone, message } = createContactDto;
     const contact = this.contactRepository.create({ name, email, phone, message });
     await this.contactRepository.save(contact);
 
-    return {
-      statusCode: HttpStatus.CREATED,
-      message: "Your message was sent successfully",
-    };
+    return new ServerResponse(HttpStatus.CREATED, "Your message was sent successfully.");
   }
 
   async findAll(query: ContactQueryDto) {
@@ -67,27 +66,21 @@ export class ContactService {
 
     const contacts = await qb.getMany();
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Contact messages fetched successfully',
-      data: contacts,
-    };
+    return new ServerResponse(HttpStatus.OK, "Contact messages fetched successfully.", { contacts });
   }
 
   async reply(contactId: string, dto: ReplyContactDto) {
     const { subject, message } = dto
     const contact = await this.contactRepository.findOneBy({ id: contactId });
-    if (!contact) throw new NotFoundException('Contact not found');
+    if (!contact) throw new NotFoundException('Contact not found.');
 
     const reply = this.replyRepository.create({ message, contact, subject });
     await this.replyRepository.save(reply);
 
-    // await this.mailerService.sendReplyEmail(contact.email, subject, message);
+    await this.mailService.sendReplyEmail(contact.email, subject, message);
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: "Your message was sent successfully",
-    };
+    return new ServerResponse(HttpStatus.OK, "Your message was sent successfully.");
+
   }
 
   async getReplies(contactId: string) {
@@ -97,14 +90,10 @@ export class ContactService {
     });
 
     if (!contact) {
-      throw new NotFoundException('Contact not found');
+      throw new NotFoundException('Contact not found.');
     }
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: "Contact messages fetched successfully",
-      data: contact.replies
-    };
+    return new ServerResponse(HttpStatus.OK, "Contact messages fetched successfully.", { replies: contact.replies });
   }
 
 

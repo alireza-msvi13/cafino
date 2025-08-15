@@ -1,5 +1,5 @@
 
-import { Request } from 'express';
+import { query, Request } from 'express';
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ItemService } from './item.service';
@@ -16,6 +16,7 @@ import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 import { SortItemDto } from './dto/sort-item.dto';
 import { OptionalJwtGuard } from '../auth/guards/optional-token.guard';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
+import { SearchItemDto } from './dto/search-item.dto';
 
 @Controller('item')
 @ApiTags('Item')
@@ -114,10 +115,10 @@ export class ItemController {
   @Get("search/:search")
   @ApiOperation({ summary: "Search items." })
   async searchItem(
-    @Query('search') searchQuery: string,
+    @Query('search') query: SearchItemDto,
   ) {
     return this.itemService.searchItem(
-      searchQuery,
+      query,
     )
   }
 }

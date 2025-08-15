@@ -26,7 +26,6 @@ export class ContactQueryDto extends PaginationDto {
     order?: SortOrder = SortOrder.DESC;
 
     @ApiPropertyOptional({ description: 'Filter by name' })
-    @Transform(({ value }) => typeof value === 'string' ? value.replace(/[^a-zA-Z0-9آ-ی ]/g, '') : value)
     @IsOptional()
     @IsString()
     @MinLength(2)

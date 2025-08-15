@@ -5,7 +5,7 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { MulterFileType } from 'src/common/types/multer.file.type';
 import { Folder } from 'src/common/enums/folder.enum';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, Repository } from 'typeorm';
+import { Brackets, DeepPartial, Repository } from 'typeorm';
 import { CategoryService } from '../category/category.service';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { isBoolean, toBoolean } from 'src/common/utils/boolean.utils';
@@ -15,6 +15,7 @@ import { SortByOption } from 'src/common/enums/sort-by-option.enum';
 import { UserService } from '../user/user.service';
 import { OrderService } from '../order/order.service';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
+import { SearchItemDto } from './dto/search-item.dto';
 
 
 @Injectable()
@@ -392,20 +393,36 @@ export class ItemService {
 
     return new ServerResponse(HttpStatus.OK, 'Menu item delete successfully.');
   }
-  async searchItem(searchQuery: string): Promise<ServerResponse> {
-    const items = await this.itemRepository
+  async searchItem(query: SearchItemDto): Promise<ServerResponse> {
+
+    const { page = 1, limit = 10, search = '' } = query;
+
+    const [items, total] = await this.itemRepository
       .createQueryBuilder('item')
       .leftJoinAndSelect('item.category', 'category')
       .leftJoinAndSelect('item.images', 'images')
       .where("category.show = :show", { show: true })
       .andWhere("item.show = :show", { show: true })
-      .andWhere('item.title ILIKE :search', { search: `%${searchQuery}%` })
-      .orWhere('item.description ILIKE :search', { search: `%${searchQuery}%` })
-      .getMany();
+      .andWhere(
+        new Brackets(qb => {
+          qb.where('item.title ILIKE :search', { search: `%${search}%` })
+            .orWhere('item.description ILIKE :search', { search: `%${search}%` });
+        })
+      )
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
 
     if (!items.length) {
       throw new NotFoundException("No items found matching the search query.");
     }
+
+    return new ServerResponse(HttpStatus.OK, 'Search done successfully.', {
+      total,
+      page,
+      limit,
+      items,
+    });
 
     return new ServerResponse(HttpStatus.OK, 'Search done successfully.', { items });
   }

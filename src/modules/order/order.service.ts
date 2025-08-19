@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  HttpException,
   HttpStatus,
   Injectable,
   NotFoundException,
@@ -11,11 +10,12 @@ import { DeepPartial, Repository } from "typeorm";
 import { OrderItemEntity } from "./entity/order-items.entity";
 import { UserService } from "../user/user.service";
 import { OrderStatus } from "src/common/enums/order-status.enum";
-import { INTERNAL_SERVER_ERROR_MESSAGE } from "src/common/constants/error.constant";
 import { OrderDto } from "./dto/order.dto";
 import { AllowdOrderStatus } from "src/common/constants/order-status.constant";
-import { Response } from "express";
 import { PaginationDto } from "src/common/dto/pagination.dto";
+import { ServerResponse } from "src/common/dto/server-response.dto";
+import { OrderQueryDto } from "./dto/sort-order.dto";
+import { OrderSortField } from "./enum/order.enum";
 
 @Injectable()
 export class OrderService {
@@ -27,201 +27,163 @@ export class OrderService {
     private userService: UserService
   ) { }
 
-  async create(cart: OrderDto, userId: string, addressId: string, description: string) {
-    try {
 
-      await this.userService.findUserByAddress(userId, addressId)
+  // * primary
 
-      const { cartItems, totalAmount, paymentAmount, totalDiscount } = cart;
+  async changeOrderStatusByAdmin(orderId: string, status: string): Promise<ServerResponse> {
+    await this.changeOrderStatus(orderId, status)
+    return new ServerResponse(HttpStatus.OK, `Order status changed to ${status} successfully.`);
+  }
+  async getAllOrders(query: OrderQueryDto): Promise<ServerResponse> {
+    const {
+      limit = 10,
+      page = 1,
+      sortBy = OrderSortField.CREATED_AT,
+      order = "DESC",
+      status,
+    } = query;
 
-      let order = this.orderRepository.create({
-        total_amount: totalAmount,
-        description,
-        discount_amount: totalDiscount,
-        payment_amount: paymentAmount,
-        status: OrderStatus.Pending,
-        user: { id: userId },
-        address: { id: addressId }
-      });
+    const baseQuery = this.orderRepository
+      .createQueryBuilder("order")
+      .leftJoinAndSelect("order.user", "user")
+      .leftJoinAndSelect("order.address", "address")
+      .leftJoinAndSelect("order.items", "items")
+      .leftJoinAndSelect("items.item", "item")
+      .leftJoinAndSelect("order.payments", "payments")
+      .select([
 
-      order = await this.orderRepository.save(order);
+        "order.id",
+        "order.payment_amount",
+        "order.discount_amount",
+        "order.total_amount",
+        "order.status",
+        "order.created_at",
 
+        "user.id",
+        "user.first_name",
+        "user.last_name",
+        "user.phone",
 
-      let orderItems: DeepPartial<OrderItemEntity>[] = [];
+        "address.id",
+        "address.province",
+        "address.city",
+        "address.address",
 
-      for (const cartItem of cartItems) {
-        orderItems.push({
-          count: cartItem.count,
-          item: { id: cartItem.itemId },
-          order: { id: order.id }
-        });
-      }
+        "items.id",
+        "items.count",
+        "item.id",
+        "item.title",
+        "item.price",
 
-      if (!orderItems.length) throw new BadRequestException("cart is empty");
+        "payments.id",
+        "payments.status",
+        "payments.amount",
+        "payments.invoice_number",
+        "payments.ref_id",
+        "payments.created_at",
+      ]).orderBy(`order.${sortBy}`, order);
 
-      await this.orderItemRepository.insert(orderItems);
-
-      return order;
-
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
+    if (status) {
+      baseQuery.andWhere("order.status = :status", { status });
     }
+
+    const total = await baseQuery.getCount();
+
+    const orders = await baseQuery
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+
+    return new ServerResponse(HttpStatus.OK, "Orders fetched successfully.", {
+      total,
+      limit,
+      page,
+      orders,
+    });
+  }
+
+  // * helper
+
+  async create(cart: OrderDto, userId: string, addressId: string, description: string) {
+
+
+    await this.userService.findUserByAddress(userId, addressId)
+
+    const { cartItems, totalAmount, paymentAmount, totalDiscount } = cart;
+
+    let order = this.orderRepository.create({
+      total_amount: totalAmount,
+      description,
+      discount_amount: totalDiscount,
+      payment_amount: paymentAmount,
+      status: OrderStatus.Pending,
+      user: { id: userId },
+      address: { id: addressId }
+    });
+
+    order = await this.orderRepository.save(order);
+
+
+    let orderItems: DeepPartial<OrderItemEntity>[] = [];
+
+    for (const cartItem of cartItems) {
+      orderItems.push({
+        count: cartItem.count,
+        item: { id: cartItem.itemId },
+        order: { id: order.id }
+      });
+    }
+
+    if (!orderItems.length) throw new BadRequestException("Cart is empty.");
+
+    await this.orderItemRepository.insert(orderItems);
+
+    return order;
+
+
   }
   async findOne(id: string) {
-    try {
-      const order = await this.orderRepository.findOneBy({ id });
-      if (!order) throw new NotFoundException();
-      return order;
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
-    }
+    const order = await this.orderRepository.findOneBy({ id });
+    if (!order) throw new NotFoundException("Order not found.");
+    return order;
   }
   async changeOrderStatus(orderId: string, status: string) {
-    try {
-      if (!AllowdOrderStatus.includes(status)) {
-        throw new BadRequestException('invalid status')
-      }
-
-      await this.orderRepository.update({ id: orderId }, {
-        status
-      })
-
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
+    if (!AllowdOrderStatus.includes(status)) {
+      throw new BadRequestException('Invalid status.')
     }
+    await this.orderRepository.update({ id: orderId }, {
+      status
+    })
   }
-  async changeOrderStatusByAdmin(orderId: string, status: string, response: Response) {
-    try {
-      await this.changeOrderStatus(orderId, status)
-
-      return response.status(HttpStatus.OK).json({
-        message: `Order Status Changed To ${status} Successfully`,
-        statusCode: HttpStatus.OK,
-      });
-
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
-    }
-  }
-
-  async getAllOrders(
-    paginationDto: PaginationDto,
-    response: Response
-  ): Promise<Response> {
-    try {
-      const { limit = 10, page = 1 } = paginationDto;
-
-      const baseQuery = this.orderRepository
-        .createQueryBuilder("order")
-        .leftJoinAndSelect("order.user", "user")
-        .leftJoinAndSelect("order.address", "address")
-        .leftJoinAndSelect("order.items", "items")
-        .leftJoinAndSelect("items.item", "item")
-        .leftJoinAndSelect("order.payments", "payments");
-
-      const total = await baseQuery.getCount();
-
-      const data = await baseQuery
-        .skip((page - 1) * limit)
-        .take(limit)
-        .getMany();
-
-
-      return response.status(HttpStatus.OK).json({
-        data,
-        total,
-        page,
-        limit,
-        statusCode: HttpStatus.OK,
-      });
-
-    } catch (error) {
-      console.log(error);
-
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
-    }
-  }
-
-
   async getUserOrders(
     userId: string,
     paginationDto: PaginationDto
   ) {
-    try {
+    const { limit = 10, page = 1 } = paginationDto;
 
-      const { limit = 10, page = 1 } = paginationDto;
+    const baseQuery = this.orderRepository
+      .createQueryBuilder("order")
+      .leftJoinAndSelect("order.address", "address")
+      .leftJoinAndSelect("order.items", "items")
+      .leftJoinAndSelect("items.item", "item")
+      .leftJoinAndSelect("order.payments", "payments")
+      .where("order.user.id = :userId", { userId });
 
-      const baseQuery = this.orderRepository
-        .createQueryBuilder("order")
-        .leftJoinAndSelect("order.address", "address")
-        .leftJoinAndSelect("order.items", "items")
-        .leftJoinAndSelect("items.item", "item")
-        .leftJoinAndSelect("order.payments", "payments")
-        .where("order.user.id = :userId", { userId });
+    const total = await baseQuery.getCount();
 
-      const total = await baseQuery.getCount();
-
-      const data = await baseQuery
-        .skip((page - 1) * limit)
-        .take(limit)
-        .getMany();
+    const data = await baseQuery
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
 
 
-      return {
-        data,
-        total,
-        page,
-        limit,
-      }
-
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
+    return {
+      data,
+      total,
+      page,
+      limit,
     }
   }
-
-
   async getOrderWithItems(orderId: string): Promise<OrderEntity> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
@@ -229,11 +191,9 @@ export class OrderService {
         items: { item: true },
       },
     });
-
     if (!order) {
-      throw new NotFoundException("Order not found");
+      throw new NotFoundException("Order not found.");
     }
-
     return order;
   }
 

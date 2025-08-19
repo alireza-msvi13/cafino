@@ -1,7 +1,6 @@
-import { Body, Controller, Delete, Get, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { CartDto } from './dto/cart.dto';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
@@ -19,51 +18,41 @@ export class CartController {
 
 
   @Post("add")
-  @ApiOperation({ summary: "add item to cart" })
+  @ApiOperation({ summary: "Add item to cart." })
   async addToCart(
     @Body() cartDto: CartDto,
-    @Res() response: Response,
     @GetUser("id") userId: string
-  ): Promise<Response> {
+  ) {
     return this.cartService.addToCart(
       cartDto,
-      userId,
-      response
+      userId
     )
   }
 
   @Post('add-multiple')
-  @ApiOperation({ summary: 'Add multiple items to cart after login' })
+  @ApiOperation({ summary: 'Add multiple items to cart after login.' })
   async addMultipleToCart(
     @Body() multiCartDto: MultiCartDto,
-    @Res() response: Response,
     @GetUser('id') userId: string
-  ): Promise<Response> {
+  ) {
     return this.cartService.addMultipleToCart(
       multiCartDto,
-      userId,
-      response
+      userId
     );
   }
 
   @Get()
-  @ApiOperation({ summary: "get cart" })
-  async getCarts(
-    @Res() response: Response,
-    @GetUser("id") userId: string
-  ): Promise<Response> {
-    return this.cartService.getCart(
-      userId,
-      response
-    )
+  @ApiOperation({ summary: "Get cart." })
+  async getCarts(@GetUser("id") userId: string) {
+    return this.cartService.getCart(userId)
   }
 
   @Patch("inc-item")
-  @ApiOperation({ summary: "increment item quantity" })
+  @ApiOperation({ summary: "Increment item quantity." })
   async incrementItem(
     @Body() cartDto: CartDto,
     @GetUser("id") userId: string
-  ): Promise<Response> {
+  ) {
     return this.cartService.incrementItem(
       cartDto,
       userId
@@ -71,42 +60,36 @@ export class CartController {
   }
 
   @Patch("dec-item")
-  @ApiOperation({ summary: "decrement item quantity" })
+  @ApiOperation({ summary: "Decrement item quantity." })
   async decrementItem(
     @Body() cartDto: CartDto,
-    @Res() response: Response,
     @GetUser("id") userId: string
-  ): Promise<Response> {
+  ) {
     return this.cartService.decrementItem(
       cartDto,
-      userId,
-      response
+      userId
     )
   }
 
   @Delete("remove")
-  @ApiOperation({ summary: "remove item from cart" })
+  @ApiOperation({ summary: "Remove item from cart." })
   async removeFromCart(
     @Body() removeCartDto: CartDto,
-    @Res() response: Response,
     @GetUser("id") userId: string
-  ): Promise<Response> {
+  ) {
     return this.cartService.removeFromCart(
       removeCartDto,
       userId,
-      response
     )
   }
 
   @Delete()
-  @ApiOperation({ summary: "delete cart" })
+  @ApiOperation({ summary: "Delete cart." })
   async deleteCart(
-    @Res() response: Response,
     @GetUser("id") userId: string
-  ): Promise<Response> {
+  ) {
     return this.cartService.deleteCart(
-      userId,
-      response
+      userId
     )
   }
 
@@ -114,26 +97,22 @@ export class CartController {
   @ApiOperation({ summary: "add discount to cart" })
   async addDiscount(
     @Body() cartDiscountDto: CartDiscountDto,
-    @Res() response: Response,
     @GetUser("id") userId: string
-  ): Promise<Response> {
+  ) {
     return this.cartService.addDiscount(
       cartDiscountDto,
-      userId,
-      response
+      userId
     )
   }
   @Delete("remove-discount")
   @ApiOperation({ summary: "remove discount to cart" })
   async removeDiscount(
     @Body() cartDiscountDto: CartDiscountDto,
-    @Res() response: Response,
     @GetUser("id") userId: string
-  ): Promise<Response> {
+  ) {
     return this.cartService.removeDiscount(
       cartDiscountDto,
-      userId,
-      response
+      userId
     )
   }
 

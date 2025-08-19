@@ -1,12 +1,12 @@
-import { Body, Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { JwtGuard } from '../auth/guards/access-token.guard';
-import { Response } from 'express';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { OrderService } from './order.service';
 import { OrderStatusDto } from './dto/order-status.dto';
 import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
+import { OrderQueryDto } from './dto/sort-order.dto';
 
 
 
@@ -22,19 +22,15 @@ export class OrderController {
   @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED,SwaggerContentTypes.JSON)
   changeOrderStatusByAdmin(
     @Body() orderStatusDto: OrderStatusDto,
-    @Res() response: Response,
     @Query("id") orderId: string,
   ) {
-    return this.orderService.changeOrderStatusByAdmin(orderId, orderStatusDto.status, response);
+    return this.orderService.changeOrderStatusByAdmin(orderId, orderStatusDto.status);
   }
   @Get()
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: "get all orders by admin" })
-  getAllOrders(
-    @Query() paginationDto: PaginationDto,
-    @Res() response: Response,
-  ) {
-    return this.orderService.getAllOrders(paginationDto, response)
+  getAllOrders(@Query() qrderQueryDto: OrderQueryDto) {
+    return this.orderService.getAllOrders(qrderQueryDto)
   }
 
 }

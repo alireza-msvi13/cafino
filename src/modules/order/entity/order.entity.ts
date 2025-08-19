@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -31,6 +32,8 @@ export class OrderEntity extends BaseEntity {
   @Column({ nullable: true })
   description: string;
 
+  @CreateDateColumn()
+  created_at: Date
 
   @ManyToOne(() => UserEntity, (user) => user.orders, {
     onDelete: "CASCADE"
@@ -49,4 +52,5 @@ export class OrderEntity extends BaseEntity {
 
   @OneToMany(() => PaymentEntity, (payment) => payment.order)
   payments: PaymentEntity[];
+
 }

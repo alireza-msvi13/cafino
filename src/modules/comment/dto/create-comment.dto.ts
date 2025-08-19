@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsOptional, IsString, IsUUID, MaxLength, MinLength, Min, Max, IsInt } from "class-validator";
+import { IsOptional, IsString, IsUUID, MaxLength, MinLength, Min, Max, IsInt, IsNotEmpty } from "class-validator";
 
 export class CreateCommentDto {
   @ApiProperty()
@@ -10,6 +10,7 @@ export class CreateCommentDto {
   text: string;
 
   @ApiProperty()
+  @IsNotEmpty()
   @IsUUID('4', { message: "itemId is not valid" })
   itemId: string;
 

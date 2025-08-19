@@ -11,11 +11,11 @@ import { Roles } from 'src/common/enums/role.enum';
 
 @Controller('comment')
 @ApiTags('Comment')
-@UseGuards(JwtGuard)
 export class CommentController {
   constructor(private commentService: CommentService) { }
 
   @Post("/")
+  @UseGuards(JwtGuard)
   @ApiOperation({ summary: "Create new comment for menu item." })
   createComment(
     @Body() createCommentDto: CreateCommentDto,
@@ -35,7 +35,7 @@ export class CommentController {
   }
 
   @Get("/")
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "See all comments by admin." })
   getAllComment(
     @Query() query: SortAdminCommentDto
@@ -44,7 +44,7 @@ export class CommentController {
   }
 
   @Put("/accept/:id")
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "Accept comment for menu item by admin." })
   acceptComment(
     @Param("id", UUIDValidationPipe) id: string) {
@@ -52,7 +52,7 @@ export class CommentController {
   }
 
   @Put("/reject/:id")
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtGuard, AdminGuard)
   @ApiOperation({ summary: "Reject comment for menu item by admin." })
   rejectComment(
     @Param("id", UUIDValidationPipe) id: string) {

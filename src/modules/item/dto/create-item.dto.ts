@@ -10,7 +10,8 @@ import {
     IsUUID,
     MaxLength,
     Max,
-    Min
+    Min,
+    IsNotEmpty
 } from "class-validator";
 export class CreateItemDto {
 
@@ -61,6 +62,7 @@ export class CreateItemDto {
 
 
     @ApiProperty()
+    @IsNotEmpty()
     @IsUUID('4', { message: "categoryId is not valid" })
     category: string;
 

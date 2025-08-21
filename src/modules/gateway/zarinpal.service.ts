@@ -60,7 +60,7 @@ export class ZarinpalService {
       return response.data.data;
     } catch (error) {
       console.log(error);
-      throw new InternalServerErrorException('error in zarinpal request');
+      throw new InternalServerErrorException('Error in zarinpal request.');
     }
   }
 }

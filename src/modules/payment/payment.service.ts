@@ -1,4 +1,4 @@
-import { ConflictException, HttpException, HttpStatus, Injectable, NotFoundException, } from "@nestjs/common";
+import { ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException, } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Response } from "express";
 import { Repository } from "typeorm";
@@ -8,10 +8,11 @@ import { PaymentDto } from "./dto/payment.dto";
 import { PaymentEntity } from "./entity/payment.entity";
 import { CartService } from "../cart/cart.service";
 import { generateInvoiceNumber } from "src/common/utils/generate-invoice-number";
-import { INTERNAL_SERVER_ERROR_MESSAGE } from "src/common/constants/error.constant";
 import { UserService } from "../user/user.service";
 import { OrderStatus } from "src/common/enums/order-status.enum";
 import { ItemService } from "../item/item.service";
+import { ServerResponse } from "src/common/dto/server-response.dto";
+import { INTERNAL_SERVER_ERROR_MESSAGE } from "src/common/constants/error.constant";
 
 
 @Injectable()
@@ -30,15 +31,18 @@ export class PaymentService {
 
   ) { }
 
-  async paymentGatewat(paymentDto: PaymentDto, userId: string, response: Response) {
-
+  async paymentGatewat(paymentDto: PaymentDto, userId: string): Promise<ServerResponse> {
     try {
       const { addressId, description } = paymentDto;
+
       const user = await this.userService.findUserById(userId);
       const cart = await this.cartService.getUserCart(userId);
-      for (const cartItem of cart.cartItems) {
-        await this.itemService.checkItemQuantity(cartItem.itemId, cartItem.count);
-      }
+
+      await Promise.all(
+        cart.cartItems.map(item =>
+          this.itemService.checkItemQuantity(item.itemId, item.count)
+        )
+      );
 
       const order = await this.orderService.create(cart, userId, addressId, description);
 
@@ -50,8 +54,10 @@ export class PaymentService {
         invoice_number: generateInvoiceNumber(),
       });
 
-      if (!payment.status) {
+      console.log(cart.paymentAmount);
+      
 
+      if (!payment.status) {
         const { authority, code, gatewayURL } = await this.zarinpalService.sendRequest({
           amount: cart.paymentAmount,
           description: "PAYMENT ORDER",
@@ -59,31 +65,21 @@ export class PaymentService {
         });
 
         payment.authority = authority;
+
         await this.paymentRepository.save(payment);
 
-        return response.status(HttpStatus.OK).json({
-          gatewayURL,
-          statusCode: HttpStatus.OK,
-        })
+        return new ServerResponse(HttpStatus.OK, "Redirect user to payment gateway.", { gatewayURL });
       }
 
       await this.paymentRepository.save(payment);
 
-      return response.status(HttpStatus.OK).json({
-        data: "Payment Done Successfully",
-        statusCode: HttpStatus.OK,
-      })
-
+      return new ServerResponse(HttpStatus.OK, "Payment completed successfully. No gateway redirection required.");
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          INTERNAL_SERVER_ERROR_MESSAGE,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
+      console.error("Payment gateway error:", error);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException(INTERNAL_SERVER_ERROR_MESSAGE);
     }
+
   }
   async paymentVerify(authority: string, status: string, response: Response) {
     try {
@@ -92,8 +88,8 @@ export class PaymentService {
         relations: { order: true, user: true },
       })
 
-      if (!payment) throw new NotFoundException();
-      if (payment.status) throw new ConflictException();
+      if (!payment) throw new NotFoundException("Payment not found.");
+      if (payment.status) throw new ConflictException("Payment already verified.");
 
       if (status !== "OK") {
         await this.orderService.changeOrderStatus(payment.order.id, OrderStatus.Failed);

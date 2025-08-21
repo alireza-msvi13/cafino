@@ -322,8 +322,8 @@ export class CartService {
         let paymentAmount = 0;
 
         const cartItems = cart.map(({ item, count }) => {
-            const itemTotalPrice = item.price * count;
-            const itemDiscount = item.discount > 0 ? itemTotalPrice * (item.discount / 100) : 0;
+            const itemTotalPrice = Math.round(item.price * count);
+            const itemDiscount = Math.round(item.discount > 0 ? itemTotalPrice * (item.discount / 100) : 0);
 
             totalAmount += itemTotalPrice;
             totalDiscount += itemDiscount;

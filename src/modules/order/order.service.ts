@@ -57,6 +57,7 @@ export class OrderService {
         "order.discount_amount",
         "order.total_amount",
         "order.status",
+        "order.description",
         "order.created_at",
 
         "user.id",

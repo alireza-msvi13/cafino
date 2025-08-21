@@ -13,17 +13,16 @@ export class PaymentController {
   constructor(private paymentService: PaymentService) { }
 
   @Post("gateway")
-  @ApiOperation({ summary: "payment gateway" })
+  @ApiOperation({ summary: "Payment gateway." })
   paymentGatewat(
     @Body() paymentDto: PaymentDto,
     @GetUser('id') userId: string,
-    @Res() response: Response
   ) {
-    return this.paymentService.paymentGatewat(paymentDto, userId, response);
+    return this.paymentService.paymentGatewat(paymentDto, userId);
   }
 
   @Get("verify")
-  @ApiOperation({ summary: "payment verify" })
+  @ApiOperation({ summary: "Payment verify." })
   async paymentVerify(
     @Query("Authority") authority: string,
     @Query("Status") status: string,

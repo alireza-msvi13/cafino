@@ -1,4 +1,3 @@
-
 import { ProfileService } from './profile.service';
 import { Response } from 'express';
 import { Body, Controller, Delete, Get, Put, Param, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
@@ -25,96 +24,74 @@ export class ProfileController {
 
 
     @Get('orders')
-    @ApiOperation({ summary: " user orders " })
+    @ApiOperation({ summary: "User orders." })
     async getUserOrders(
         @Query() paginationDto: PaginationDto,
         @GetUser('id') userId: string,
-        @Res() response: Response
-    ): Promise<Response> {
+    ) {
         return await this.profileService.getUserOrders(
             userId,
             paginationDto,
-            response
         );
     }
 
     @Put('orders/:id')
-    @ApiOperation({ summary: " cancel order " })
-    async cancelOrder(
-        @Query("id", UUIDValidationPipe) orderId: string,
-        @Res() response: Response
-    ): Promise<Response> {
-        return await this.profileService.cancelOrder(
-            orderId,
-            response
-        );
+    @ApiOperation({ summary: "Cancel order." })
+    async cancelOrder(@Query("id", UUIDValidationPipe) orderId: string) {
+        return await this.profileService.cancelOrder(orderId);
     }
 
     @Put('update')
-    @ApiOperation({ summary: "update user profile " })
+    @ApiOperation({ summary: "Update user profile." })
     async updateUser(
         @Body() updateUserDto: UpdateUserDto,
         @GetUser('id') userId: string,
-        @Res() response: Response
-    ): Promise<Response> {
+    ) {
         return await this.profileService.updateUser(
             updateUserDto,
             userId,
-            response
         );
     }
 
     @Post('address')
-    @ApiOperation({ summary: "create new user address" })
+    @ApiOperation({ summary: "Create new user address." })
     async createAddress(
         @Body() createAddressDto: CreateAddressDto,
         @GetUser('id') userId: string,
-        @Res() response: Response,
-    ): Promise<Response> {
+    ) {
         return await this.profileService.createAddress(
             userId,
             createAddressDto,
-            response
         );
     }
 
     @Put('address/:id')
-    @ApiOperation({ summary: "update user address by address-id" })
+    @ApiOperation({ summary: "Update user address by address-id." })
     async updateAddress(
-        @Res() response: Response,
         @Body() updateAddressDto: UpdateAddressDto,
         @Param('id', UUIDValidationPipe) addressId: string
-    ): Promise<Response> {
+    ) {
         return await this.profileService.updateAddress(
             addressId,
-            response,
             updateAddressDto,
         );
     }
 
     @Delete('address/:id')
-    @ApiOperation({ summary: "delete user address by address-id" })
+    @ApiOperation({ summary: "Delete user address by address-id." })
     async deleteAddress(
-        @Res() response: Response,
         @Param('id', UUIDValidationPipe) addressId: string
-    ): Promise<Response> {
+    ) {
         return await this.profileService.deleteAddress(
             addressId,
-            response,
         );
     }
 
 
     @Get('address')
-    @ApiOperation({ summary: "get all user addresses" })
-    async getAddresses(
-        @GetUser('id') userId: string,
-        @Res() response: Response,
-    ): Promise<Response> {
-        return await this.profileService.getAddresses(
-            userId,
-            response
-        );
+    @ApiOperation({ summary: "Get all user addresses." })
+    async getAddresses(@GetUser('id') userId: string) {
+        return await this.profileService.getAddresses(userId);
     }
 
     @Patch('image')
@@ -125,64 +102,51 @@ export class ProfileController {
         @UploadedFile() image: MulterFileType,
         @Body() updateImageDto: UpdateImageDto,
         @GetUser('id') userId: string,
-        @Res() response: Response
     ) {
         return await this.profileService.updateImage(
             userId,
             image,
-            response
         )
     }
 
     @Delete('image')
-    @ApiOperation({ summary: "delete user image " })
-    async deleteImage(
-        @GetUser('id') userId: string,
-        @Res() response: Response
-    ) {
-        return await this.profileService.deleteImage(
-            userId,
-            response
-        )
+    @ApiOperation({ summary: "Delete user image." })
+    async deleteImage(@GetUser('id') userId: string,) {
+        return await this.profileService.deleteImage(userId)
     }
 
 
     @Post('favorite')
-    @ApiOperation({ summary: "add item to favorite item" })
+    @ApiOperation({ summary: "Add item to favorite item." })
     async addToFavorite(
         @GetUser('id') userId: string,
-        @Res() response: Response,
         @Query("itemId", UUIDValidationPipe) itemId: string
-    ): Promise<Response> {
+    ) {
         return this.profileService.addToFavorite(
             userId,
             itemId,
-            response
         );
     }
 
     @Delete('favorite')
-    @ApiOperation({ summary: "delete item from favorite item " })
+    @ApiOperation({ summary: "Delete item from favorite item." })
     async removeFromFavorite(
         @GetUser('id') userId: string,
-        @Res() response: Response,
         @Query("itemId", UUIDValidationPipe) itemId: string
-    ): Promise<Response> {
+    ) {
         return this.profileService.removeFromFavorite(
             userId,
-            itemId,
-            response
+            itemId
         );
     }
 
     @Get('favorites')
-    @ApiOperation({ summary: "get user favorites" })
+    @ApiOperation({ summary: "Get user favorites." })
     findUserFavorites(
         @GetUser('id') userId: string,
-        @Res() response: Response,
         @Query() paginationDto: PaginationDto,
     ) {
-        return this.profileService.findUserFavorites(userId, paginationDto, response);
+        return this.profileService.findUserFavorites(userId, paginationDto);
     }
 }
 

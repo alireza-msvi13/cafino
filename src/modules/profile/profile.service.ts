@@ -1,5 +1,4 @@
-import { BadRequestException, forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { Response } from 'express';
+import { BadRequestException, forwardRef, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { StorageService } from '../storage/storage.service';
 import { UpdateUserDto } from './dto/update-user-dto';
@@ -7,10 +6,10 @@ import { CreateAddressDto } from './dto/create-address-dto';
 import { UpdateAddressDto } from './dto/update-address-dto';
 import { Folder } from 'src/common/enums/folder.enum';
 import { ItemService } from '../item/item.service';
-import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 import { OrderService } from '../order/order.service';
 import { OrderStatus } from 'src/common/enums/order-status.enum';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ServerResponse } from 'src/common/dto/server-response.dto';
 
 
 @Injectable()
@@ -26,366 +25,157 @@ export class ProfileService {
 
     // * primary
 
-    async updateUser(
-        updateUserDto: UpdateUserDto,
-        userId: string,
-        response: Response
-    ): Promise<Response> {
-        try {
-
-            if (updateUserDto.username) {
-                await this.userService.checkUsernameExist(
-                    updateUserDto.username,
-                )
-            }
-
-            await this.userService.updateUser(updateUserDto, userId)
-
-            return response
-                .status(HttpStatus.CREATED)
-                .json({
-                    message: "User Info Updated Successfully",
-                    statusCode: HttpStatus.CREATED
-                })
-        } catch (error) {
-            console.log(error);
-
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
+    async updateUser(updateUserDto: UpdateUserDto, userId: string): Promise<ServerResponse> {
+        if (updateUserDto.username) {
+            await this.userService.checkUsernameExist(
+                updateUserDto.username,
+            )
         }
+
+        await this.userService.updateUser(updateUserDto, userId)
+
+        return new ServerResponse(HttpStatus.OK, "User info updated successfully.");
     }
-    async createAddress(
-        userId: string,
-        createAddressDto: CreateAddressDto,
-        response: Response
-    ): Promise<Response> {
-        try {
-            await this.userService.createAddress(
-                userId,
-                createAddressDto
-            );
-            return response
-                .status(HttpStatus.CREATED)
-                .json({
-                    message: "Address Created Successfully",
-                    statusCode: HttpStatus.CREATED
-                })
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
+    async createAddress(userId: string, createAddressDto: CreateAddressDto,): Promise<ServerResponse> {
+        await this.userService.createAddress(
+            userId,
+            createAddressDto
+        );
+        return new ServerResponse(HttpStatus.CREATED, "Address created successfully.");
     }
     async updateAddress(
         addressId: string,
-        response: Response,
         updateAddressDto: UpdateAddressDto,
-    ): Promise<Response> {
-        try {
-            await this.userService.checkAddressExist(addressId)
-            await this.userService.updateAddress(
-                addressId,
-                updateAddressDto,
-            );
-            return response
-                .status(HttpStatus.OK)
-                .json({
-                    message: "Address Updated Successfully",
-                    statusCode: HttpStatus.OK
-                })
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
+    ): Promise<ServerResponse> {
+        await this.userService.checkAddressExist(addressId)
+        await this.userService.updateAddress(
+            addressId,
+            updateAddressDto,
+        );
+
+        return new ServerResponse(HttpStatus.OK, "Address updated successfully.");
     }
     async deleteAddress(
         addressId: string,
-        response: Response
-    ): Promise<Response> {
-        try {
-            await this.userService.checkAddressExist(addressId)
-            await this.userService.deleteAddress(addressId);
-            return response
-                .status(HttpStatus.OK)
-                .json({
-                    message: "Address Deleted Successfully",
-                    statusCode: HttpStatus.OK
-                })
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
+    ): Promise<ServerResponse> {
+        await this.userService.checkAddressExist(addressId)
+        await this.userService.deleteAddress(addressId);
+        return new ServerResponse(HttpStatus.OK, "Address deleted successfully.");
     }
-    async getAddresses(
-        userId: string,
-        response: Response
-    ): Promise<Response> {
-        try {
-
-            const addresses = await this.userService.getAddresses(userId)
-
-            return response
-                .status(HttpStatus.OK)
-                .json({
-                    data: addresses,
-                    statusCode: HttpStatus.OK
-                })
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
+    async getAddresses(userId: string): Promise<ServerResponse> {
+        const addresses = await this.userService.getAddresses(userId)
+        return new ServerResponse(HttpStatus.OK, "User addresses fetched successfully.", { addresses });
     }
     async updateImage(
         userId: string,
         image: Express.Multer.File,
-        response: Response
-    ): Promise<Response> {
-        try {
-            const imageUrl = this.storageService.getFileLink(
-                image.filename,
-                Folder.ProfileImage
-            )
-            const storageQuery = this.storageService.uploadSingleFile(
-                image.filename,
-                image.buffer,
-                Folder.ProfileImage
-            )
-            const userQuery = this.userService.updateImage(
-                userId,
-                image.filename,
-                imageUrl
-            )
-            await Promise.all([
-                storageQuery,
-                userQuery
-            ])
-            return response
-                .status(HttpStatus.OK)
-                .json({
-                    message: "Profile Image Updated",
-                    statusCode: HttpStatus.OK
-                })
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
-    }
-    async deleteImage(
-        userId: string,
-        response: Response
-    ): Promise<Response> {
-        try {
-            const {
-                image
-            } = await this.userService.findUserById(
-                userId
-            );
-            if (!image) throw new BadRequestException("user dosnt have image profile")
+    ): Promise<ServerResponse> {
+        const imageUrl = this.storageService.getFileLink(
+            image.filename,
+            Folder.ProfileImage
+        )
+        const storageQuery = this.storageService.uploadSingleFile(
+            image.filename,
+            image.buffer,
+            Folder.ProfileImage
+        )
+        const userQuery = this.userService.updateImage(
+            userId,
+            image.filename,
+            imageUrl
+        )
+        await Promise.all([
+            storageQuery,
+            userQuery
+        ])
 
-            const storageQuery = this.storageService.deleteFile(
-                image,
-                Folder.ProfileImage
-            )
-            const userQuery = this.userService.deleteImage(
-                userId
-            )
-            await Promise.all([
-                storageQuery,
-                userQuery
-            ])
-            return response
-                .status(HttpStatus.OK)
-                .json({
-                    message: "User Profile Image Deleted",
-                    statusCode: HttpStatus.OK
-                })
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
+        return new ServerResponse(HttpStatus.OK, "Profile image updated successfully.");
+
+    }
+    async deleteImage(userId: string): Promise<ServerResponse> {
+        const {
+            image
+        } = await this.userService.findUserById(
+            userId
+        );
+        if (!image) throw new BadRequestException("User dosnt have image profile.")
+
+        const storageQuery = this.storageService.deleteFile(
+            image,
+            Folder.ProfileImage
+        )
+        const userQuery = this.userService.deleteImage(
+            userId
+        )
+        await Promise.all([
+            storageQuery,
+            userQuery
+        ])
+
+        return new ServerResponse(HttpStatus.OK, "User profile image deleted successfully.");
     }
     async addToFavorite(
         userId: string,
         itemId: string,
-        response: Response
-    ): Promise<Response> {
-        try {
-            await this.itemService.checkItemExist(itemId)
-            await this.userService.addToFavorite(userId, itemId);
-            return response
-                .status(HttpStatus.OK)
-                .json({
-                    message: "Item Added to Favorites",
-                    statusCode: HttpStatus.OK
-                })
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
+    ): Promise<ServerResponse> {
+        await this.itemService.checkItemExist(itemId)
+        await this.userService.addToFavorite(userId, itemId);
+        return new ServerResponse(HttpStatus.OK, "Item added to favorites successfully.");
     }
     async removeFromFavorite(
         userId: string,
         itemId: string,
-        response: Response
-    ): Promise<Response> {
-        try {
-            await this.userService.removeFromFavorite(
-                userId,
-                itemId
-            );
-            return response
-                .status(HttpStatus.OK)
-                .json({
-                    message: "Item Deleted from Favorites",
-                    statusCode: HttpStatus.OK
-                })
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
+    ): Promise<ServerResponse> {
+        await this.userService.removeFromFavorite(userId, itemId);
+        return new ServerResponse(HttpStatus.OK, "Item deleted from favorites successfully.");
     }
-    async findUserFavorites(userId: string, paginationDto: PaginationDto, response: Response) {
-        try {
-            const {
-                data,
-                total,
-                page,
-                limit,
-            }
-                = await this.userService.findUserFavorites(userId, paginationDto)
-            return response
-                .status(HttpStatus.OK)
-                .json({
-                    data,
-                    total,
-                    page,
-                    limit,
-                    statusCode: HttpStatus.OK
-                })
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
+    async findUserFavorites(userId: string, paginationDto: PaginationDto): Promise<ServerResponse> {
+        const {
+            data,
+            total,
+            page,
+            limit,
         }
+            = await this.userService.findUserFavorites(userId, paginationDto)
+
+        return new ServerResponse(HttpStatus.OK, "Item deleted from favorites successfully.", {
+            total,
+            page,
+            limit,
+            items: data,
+        });
     }
     async cancelOrder(
-        orderId: string,
-        response: Response
-    ): Promise<Response> {
-        try {
-            await this.orderService.changeOrderStatus(
-                orderId,
-                OrderStatus.Canceled
-            )
-            return response
-                .status(HttpStatus.OK)
-                .json({
-                    message: "Order Cancel Successfully",
-                    statusCode: HttpStatus.OK
-                })
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    INTERNAL_SERVER_ERROR_MESSAGE,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
+        orderId: string
+    ): Promise<ServerResponse> {
+        await this.orderService.changeOrderStatus(
+            orderId,
+            OrderStatus.Canceled
+        )
+
+        return new ServerResponse(HttpStatus.OK, "Order canceled successfully.");
+
     }
     async getUserOrders(
         userId: string,
-        paginationDto: PaginationDto,
-        response: Response
-    ): Promise<Response> {
-        try {
-            const {
-                data,
-                total,
-                page,
-                limit,
-            } = await this.orderService.getUserOrders(
-                userId,
-                paginationDto
-            )
-            return response
-                .status(HttpStatus.OK)
-                .json({
-                    data,
-                    total,
-                    page,
-                    limit,
-                    statusCode: HttpStatus.OK
-                })
-        } catch (error) {
-            if (error instanceof HttpException) {
-                throw error;
-            } else {
-                throw new HttpException(
-                    (error),
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
+        paginationDto: PaginationDto
+    ): Promise<ServerResponse> {
+        const {
+            data,
+            total,
+            page,
+            limit,
+        } = await this.orderService.getUserOrders(
+            userId,
+            paginationDto
+        )
+
+        return new ServerResponse(HttpStatus.OK, "Orders fetched successfully.", {
+            total,
+            page,
+            limit,
+            orders: data,
+        });
     }
 
 }

@@ -23,7 +23,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
+    const req = ctx.getRequest<Request>();
 
     const isHttpException = exception instanceof HttpException;
 
@@ -36,19 +36,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       : INTERNAL_SERVER_ERROR_MESSAGE;
 
 
-    const ip =
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-      request.socket.remoteAddress;
+    const ip = req.ip;
 
-    const rawUserAgent = request.headers['user-agent'] || '';
+    const rawUserAgent = req.headers['user-agent'] || '';
     const userAgent = parseUserAgent(rawUserAgent);
 
-    const userId = request.user?.['id'];
+    const userId = req.user?.['id'];
     const identifier = userId ?? `${ip}:${userAgent.browser}:${userAgent.os}:${userAgent.device}`;
 
     this.logger.error({
-      path: request.url,
-      method: request.method,
+      path: req.url,
+      method: req.method,
       message: exception instanceof Error ? exception.message : String(message),
       stack: exception instanceof Error ? exception.stack : undefined,
       statusCode: status,
@@ -64,7 +62,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       statusCode: status,
       message,
       timestamp: new Date().toISOString(),
-      path: request.url,
+      path: req.url,
     });
   }
 

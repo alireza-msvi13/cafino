@@ -272,6 +272,21 @@ export class UserService {
         }
     }
 
+    async countUserFavorites(userId: string) {
+        return this.favoriteRepository
+            .createQueryBuilder('favorite')
+            .leftJoin('favorite.user', 'user')
+            .where('user.id = :userId', { userId })
+            .getCount();
+    }
+    async countUserAddresses(userId: string) {
+        return this.addressRepository
+            .createQueryBuilder('address')
+            .leftJoin('address.user', 'user')
+            .where('user.id = :userId', { userId })
+            .getCount();
+    }
+
 
     // *helper
 

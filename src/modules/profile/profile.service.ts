@@ -177,5 +177,20 @@ export class ProfileService {
             orders: data,
         });
     }
+    async getOverview(userId: string): Promise<ServerResponse> {
+        const wishlistCount = await this.userService.countUserFavorites(userId);
+        const addressCount = await this.userService.countUserAddresses(userId);
+        const totalOrdersCount = await this.orderService.countUserOrders(userId);
+        const activeOrdersCount = await this.orderService.countUserOrdersByStatus(userId, [
+            OrderStatus.Pending,
+            OrderStatus.Processing,
+        ]);
 
+        return new ServerResponse(HttpStatus.OK, "User overview fetched successfully.", {
+            addresses: addressCount,
+            wishlist: wishlistCount,
+            activeOrders: activeOrdersCount,
+            totalOrders: totalOrdersCount,
+        });
+    }
 }

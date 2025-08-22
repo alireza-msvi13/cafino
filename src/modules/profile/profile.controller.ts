@@ -23,6 +23,12 @@ export class ProfileController {
     ) { }
 
 
+    @Get('overview')
+    @ApiOperation({ summary: "Get user dashboard overview." })
+    async getOverview(@GetUser('id') userId: string) {
+        return await this.profileService.getOverview(userId);
+    }
+
     @Get('orders')
     @ApiOperation({ summary: "User orders." })
     async getUserOrders(

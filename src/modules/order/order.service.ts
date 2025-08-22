@@ -197,6 +197,21 @@ export class OrderService {
     }
     return order;
   }
+  async countUserOrders(userId: string) {
+    return this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoin('order.user', 'user')
+      .where('user.id = :userId', { userId })
+      .getCount();
+  }
+  async countUserOrdersByStatus(userId: string, statuses: OrderStatus[]) {
+    return this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoin('order.user', 'user')
+      .where('user.id = :userId', { userId })
+      .andWhere('order.status IN (:...statuses)', { statuses })
+      .getCount();
+  }
 
 
 }

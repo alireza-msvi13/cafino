@@ -1,7 +1,8 @@
-import { Controller, Get, HttpStatus } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ServerResponse } from '../../common/dto/server-response.dto';
 import { AdminService } from './admin.service';
+import { SalesReportDto } from './dto/admin.dto';
 
 @ApiTags('Admin Overview')
 @Controller('admin/overview')
@@ -63,4 +64,15 @@ export class AdminController {
     const result = await this.adminService.getCommentOverview();
     return new ServerResponse(HttpStatus.OK, 'Comment overview fetched successfully.', result);
   }
+
+  @Get('sales-report')
+  @ApiOperation({ summary: 'Get sales report by date range' })
+  async getSalesReport(@Query() query: SalesReportDto) {
+    const startDate = query.start ? new Date(query.start) : undefined;
+    const endDate = query.end ? new Date(query.end) : undefined;
+
+    const result = await this.adminService.getRevenueByDateRange(startDate, endDate);
+    return new ServerResponse(HttpStatus.OK,'Sales report fetched successfully.',result);
+  }
+
 }

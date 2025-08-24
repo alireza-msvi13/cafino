@@ -117,4 +117,7 @@ export class AdminService {
 
     return { user, order, item, discount, revenue, message, comment };
   }
+  async getRevenueByDateRange(startDate?: Date, endDate?: Date) {
+    return this.orderService.getRevenueByDateRange(startDate, endDate);
+  }
 }

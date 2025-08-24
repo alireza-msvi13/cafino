@@ -20,6 +20,7 @@ export class CommentService {
 
 
   // *primary
+
   async createComment(
     createCommentDto: CreateCommentDto,
     userId: string,
@@ -238,6 +239,7 @@ export class CommentService {
   }
 
   // *helper
+
   async getCommentById(id: string) {
     const comment = await this.commentRepository.findOne({
       where: { id },
@@ -280,21 +282,17 @@ export class CommentService {
     }
   }
 
-  // * admin dashboard reports
-
+  // *admin dashboard reports
 
   async countComments(): Promise<number> {
     return this.commentRepository.count();
   }
-
   async countAcceptedComments(): Promise<number> {
     return this.commentRepository.count({ where: { accept: true } });
   }
-
   async countUnacceptedComments(): Promise<number> {
     return this.commentRepository.count({ where: { accept: false } });
   }
-
   async getlatestUnacceptedComments(): Promise<CommentEntity[]> {
     return this.commentRepository.find({
       order: { created_at: 'DESC' },

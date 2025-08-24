@@ -151,6 +151,7 @@ export class DiscountService {
         expires_in: Between(now, future),
         active: true,
       },
+      select: ['code', 'usage', 'active'],
       order: { expires_in: 'ASC' },
       take: 5,
     });

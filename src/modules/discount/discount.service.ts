@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  HttpException,
   HttpStatus,
   Injectable,
   NotFoundException,
@@ -9,7 +8,7 @@ import {
 import { DiscountDto } from "./dto/discount.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DiscountEntity } from "./entity/discount.entity";
-import { DeepPartial, Repository } from "typeorm";
+import { Between, DeepPartial, Repository } from "typeorm";
 import { ServerResponse } from "src/common/dto/server-response.dto";
 import { DiscountQueryDto } from "./dto/sort-discount.dto";
 
@@ -37,15 +36,12 @@ export class DiscountService {
       );
     }
     if (amount) discountObject.amount = amount;
-
     else if (percent) discountObject.percent = percent;
 
-
-    if (expires_in) {
-      const time = 1000 * 60 * 60 * 24 * expires_in;
-      discountObject.expires_in = new Date(new Date().getTime() + time);
-    }
     if (limit) discountObject.limit = limit;
+
+    const time = 1000 * 60 * 60 * 24 * expires_in;
+    discountObject.expires_in = new Date(new Date().getTime() + time);
 
     const discount = this.discountRepository.create(discountObject);
 
@@ -131,9 +127,43 @@ export class DiscountService {
   }
 
   // * helper
+
   async findOneByCode(code: string) {
     const discount = await this.discountRepository.findOneBy({ code });
     if (!discount) throw new NotFoundException("Discount Not Found");
     return discount;
   }
+
+  // * admin dashboard reports
+
+  async countActiveDiscounts() {
+    return this.discountRepository.count({
+      where: { active: true },
+    });
+  }
+  async getExpiringDiscounts(days: number = 7) {
+    const now = new Date();
+    const future = new Date();
+    future.setDate(now.getDate() + days);
+
+    return this.discountRepository.find({
+      where: {
+        expires_in: Between(now, future),
+        active: true,
+      },
+      order: { expires_in: 'ASC' },
+      take: 5,
+    });
+  }
+  async getTopDiscountCodes(limit: number = 5) {
+    return this.discountRepository.find({
+      select: ['code', 'usage', 'active'],
+      order: { usage: 'DESC' },
+      take: limit,
+    });
+  }
+
+
+
+
 }

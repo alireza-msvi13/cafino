@@ -27,7 +27,6 @@ export class ContactService {
 
     return new ServerResponse(HttpStatus.CREATED, "Your message was sent successfully.");
   }
-
   async findAll(query: ContactQueryDto) {
     const { sortBy, order, hasReply, name, email, phone } = query;
 
@@ -68,7 +67,6 @@ export class ContactService {
 
     return new ServerResponse(HttpStatus.OK, "Contact messages fetched successfully.", { contacts });
   }
-
   async reply(contactId: string, dto: ReplyContactDto) {
     const { subject, message } = dto
     const contact = await this.contactRepository.findOneBy({ id: contactId });
@@ -82,7 +80,6 @@ export class ContactService {
     return new ServerResponse(HttpStatus.OK, "Your message was sent successfully.");
 
   }
-
   async getReplies(contactId: string) {
     const contact = await this.contactRepository.findOne({
       where: { id: contactId },
@@ -95,6 +92,18 @@ export class ContactService {
 
     return new ServerResponse(HttpStatus.OK, "Contact messages fetched successfully.", { replies: contact.replies });
   }
+
+  // * admin dashboard reports
+
+  async countMessages(): Promise<number> {
+    return this.contactRepository.count();
+  }
+  async countUnrepliedMessages(): Promise<number> {
+    return this.contactRepository.count({
+      where: { replies: null },
+    });
+  }
+
 
 
 }

@@ -5,7 +5,7 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { MulterFileType } from 'src/common/types/multer.file.type';
 import { Folder } from 'src/common/enums/folder.enum';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, DeepPartial, Repository } from 'typeorm';
+import { Brackets, DeepPartial, LessThan, Repository } from 'typeorm';
 import { CategoryService } from '../category/category.service';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { isBoolean, toBoolean } from 'src/common/utils/boolean.utils';
@@ -514,6 +514,25 @@ export class ItemService {
       rate_count: ratingCount,
     });
   }
+  // * admin dashboard reports
+
+  async countActiveItems() {
+    return this.itemRepository
+      .createQueryBuilder("item")
+      .leftJoin("item.category", "category")
+      .where("category.show = :show", { show: true })
+      .andWhere("item.show = :show", { show: true })
+      .getCount();
+  }
+  async getLowStockItems(threshold: number, limit?: number) {
+    return this.itemRepository.find({
+      select: ['id', 'title', 'quantity'],
+      where: { quantity: LessThan(threshold) },
+      order: { quantity: 'ASC' },
+      take: limit,
+    });
+  }
+
 
 
 }

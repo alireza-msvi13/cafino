@@ -1,6 +1,5 @@
 import { ProfileService } from './profile.service';
-import { Response } from 'express';
-import { Body, Controller, Delete, Get, Put, Param, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Put, Param, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
@@ -24,13 +23,13 @@ export class ProfileController {
 
 
     @Get('overview')
-    @ApiOperation({ summary: "Get user dashboard overview." })
+    @ApiOperation({ summary: "Get user profile overview." })
     async getOverview(@GetUser('id') userId: string) {
         return await this.profileService.getOverview(userId);
     }
 
     @Get('orders')
-    @ApiOperation({ summary: "User orders." })
+    @ApiOperation({ summary: "Get user orders." })
     async getUserOrders(
         @Query() paginationDto: PaginationDto,
         @GetUser('id') userId: string,
@@ -42,7 +41,7 @@ export class ProfileController {
     }
 
     @Put('orders/:id')
-    @ApiOperation({ summary: "Cancel order." })
+    @ApiOperation({ summary: "Cancel user order." })
     async cancelOrder(@Query("id", UUIDValidationPipe) orderId: string) {
         return await this.profileService.cancelOrder(orderId);
     }

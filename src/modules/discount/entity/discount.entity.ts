@@ -15,7 +15,7 @@ export class DiscountEntity extends BaseEntity {
   @Column({ type: 'integer', nullable: true })
   amount: number;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamp'})
   expires_in: Date;
 
   @Column({ type: 'integer', nullable: true })

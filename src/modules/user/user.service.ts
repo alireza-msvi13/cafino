@@ -272,21 +272,6 @@ export class UserService {
         }
     }
 
-    async countUserFavorites(userId: string) {
-        return this.favoriteRepository
-            .createQueryBuilder('favorite')
-            .leftJoin('favorite.user', 'user')
-            .where('user.id = :userId', { userId })
-            .getCount();
-    }
-    async countUserAddresses(userId: string) {
-        return this.addressRepository
-            .createQueryBuilder('address')
-            .leftJoin('address.user', 'user')
-            .where('user.id = :userId', { userId })
-            .getCount();
-    }
-
 
     // *helper
 
@@ -469,4 +454,49 @@ export class UserService {
 
         return favorites.map(f => f.item.id);
     }
+
+    // * admin dashboard reports
+
+    async countUserFavorites(userId: string) {
+        return this.favoriteRepository
+            .createQueryBuilder('favorite')
+            .leftJoin('favorite.user', 'user')
+            .where('user.id = :userId', { userId })
+            .getCount();
+    }
+    async countUserAddresses(userId: string) {
+        return this.addressRepository
+            .createQueryBuilder('address')
+            .leftJoin('address.user', 'user')
+            .where('user.id = :userId', { userId })
+            .getCount();
+    }
+    async countUsersRegisteredThisMonth(): Promise<number> {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        return this.userRepository
+            .createQueryBuilder('user')
+            .where('user.created_at >= :startOfMonth', { startOfMonth })
+            .getCount();
+    }
+    async countUsersRegisteredThisWeek(): Promise<number> {
+        const now = new Date();
+        const firstDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay()))
+        firstDayOfWeek.setHours(0, 0, 0, 0);
+
+        return this.userRepository
+            .createQueryBuilder('user')
+            .where('user.created_at >= :firstDayOfWeek', { firstDayOfWeek })
+            .getCount();
+    }
+
+    async countBlockUsers() {
+        const blockedUsersCount = await this.userRepository.count({
+            where: { status: UserStatus.Block }
+        });
+        return blockedUsersCount;
+    }
+
 }

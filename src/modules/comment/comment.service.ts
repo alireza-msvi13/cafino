@@ -280,4 +280,26 @@ export class CommentService {
     }
   }
 
+  // * admin dashboard reports
+
+
+  async countComments(): Promise<number> {
+    return this.commentRepository.count();
+  }
+
+  async countAcceptedComments(): Promise<number> {
+    return this.commentRepository.count({ where: { accept: true } });
+  }
+
+  async countUnacceptedComments(): Promise<number> {
+    return this.commentRepository.count({ where: { accept: false } });
+  }
+
+  async getlatestUnacceptedComments(): Promise<CommentEntity[]> {
+    return this.commentRepository.find({
+      order: { created_at: 'DESC' },
+      take: 5,
+      where: { accept: false },
+    });
+  }
 }

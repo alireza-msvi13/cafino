@@ -1,10 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsNumber, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
 
 export class DiscountDto {
   @ApiProperty()
   @IsString()
+  @IsNotEmpty({ message: 'Code must not be empty' })
   @MaxLength(100, { message: 'Code must be at most 100 characters' })
   code: string;
 
@@ -25,7 +26,7 @@ export class DiscountDto {
   amount: number;
 
   @ApiPropertyOptional({ description: "expires in days", default: 20 })
-  @IsOptional()
+  @IsNotEmpty({ message: 'expires_in must not be empty' })
   @Type(() => Number)
   @IsNumber({}, { message: 'expires_in must be a number' })
   @Min(1, { message: 'expires_in must be at least 1 day' })

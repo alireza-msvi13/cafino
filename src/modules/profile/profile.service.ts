@@ -178,7 +178,7 @@ export class ProfileService {
         });
     }
     async getOverview(userId: string): Promise<ServerResponse> {
-        const wishlistCount = await this.userService.countUserFavorites(userId);
+        const favoritesCount = await this.userService.countUserFavorites(userId);
         const addressCount = await this.userService.countUserAddresses(userId);
         const totalOrdersCount = await this.orderService.countUserOrders(userId);
         const activeOrdersCount = await this.orderService.countUserOrdersByStatus(userId, [
@@ -187,10 +187,16 @@ export class ProfileService {
         ]);
 
         return new ServerResponse(HttpStatus.OK, "User overview fetched successfully.", {
-            addresses: addressCount,
-            wishlist: wishlistCount,
-            activeOrders: activeOrdersCount,
-            totalOrders: totalOrdersCount,
+            address: {
+                total: addressCount
+            },
+            favorite: {
+                total: favoritesCount
+            },
+            order: {
+                total: totalOrdersCount,
+                active: activeOrdersCount,
+            }
         });
     }
 }

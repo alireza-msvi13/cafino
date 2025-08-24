@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { OrderEntity } from "./entity/order.entity";
-import { DeepPartial, Repository } from "typeorm";
+import { DeepPartial, In, Repository } from "typeorm";
 import { OrderItemEntity } from "./entity/order-items.entity";
 import { UserService } from "../user/user.service";
 import { OrderStatus } from "src/common/enums/order-status.enum";
@@ -211,6 +211,151 @@ export class OrderService {
       .where('user.id = :userId', { userId })
       .andWhere('order.status IN (:...statuses)', { statuses })
       .getCount();
+  }
+  async countOrders() {
+    const orders = await this.orderRepository.count();
+    return orders;
+  }
+  async countOrdersByStatus(statuses: OrderStatus[]) {
+    return this.orderRepository.count({
+      where: { status: In(statuses) }
+    });
+  }
+  async countMonthlyActiveUsers(days = 30): Promise<number> {
+    const result = await this.orderRepository
+      .createQueryBuilder('order')
+      .select('COUNT(DISTINCT order.user)', 'count')
+      .where('order.created_at >= :date', { date: new Date(Date.now() - days * 24 * 60 * 60 * 1000) })
+      .getRawOne();
+
+    return Number(result.count) || 0;
+  }
+  async countOrdersGroupedByStatus(): Promise<Record<OrderStatus, number>> {
+    const result = await this.orderRepository
+      .createQueryBuilder('order')
+      .select('order.status', 'status')
+      .addSelect('COUNT(order.id)', 'count')
+      .groupBy('order.status')
+      .getRawMany();
+
+    const counts: Record<OrderStatus, number> = Object.values(OrderStatus).reduce(
+      (acc, status) => {
+        acc[status] = 0;
+        return acc;
+      },
+      {} as Record<OrderStatus, number>
+    );
+
+    result.forEach((row) => {
+      counts[row.status as OrderStatus] = Number(row.count);
+    });
+
+    return counts;
+  }
+  async countOrdersByDate(date: Date): Promise<number> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return this.orderRepository
+      .createQueryBuilder('order')
+      .where('order.created_at BETWEEN :start AND :end', {
+        start: startOfDay,
+        end: endOfDay,
+      })
+      .getCount();
+  }
+
+  async getTopSellingItems(limit: number): Promise<any[]> {
+    const items = await this.orderItemRepository
+      .createQueryBuilder('orderItem')
+      .leftJoin('orderItem.item', 'item')
+      .select('item.id', 'id')
+      .addSelect('item.title', 'title')
+      .addSelect('SUM(orderItem.count)', 'totalSold')
+      .groupBy('item.id')
+      .addGroupBy('item.title')
+      .orderBy('SUM(orderItem.count)', 'DESC')
+      .limit(limit)
+      .getRawMany();
+
+    return items.map(i => ({
+      ...i,
+      totalSold: Number(i.totalSold),
+    }));
+  }
+
+
+
+  // * admin dashboard reports
+
+
+  async getRevenueByDateRange(start?: Date, end?: Date): Promise<RevenueSummary> {
+    const query = this.orderRepository
+      .createQueryBuilder("order")
+      .select("SUM(order.total_amount)", "grossSales")
+      .addSelect("SUM(order.discount_amount)", "discounts")
+      .addSelect("SUM(order.payment_amount)", "netRevenue")
+      .where("order.status = :status", { status: OrderStatus.Done });
+
+    if (start && end) {
+      query.andWhere("order.created_at BETWEEN :start AND :end", { start, end });
+    }
+
+    const result = await query.getRawOne();
+
+    return {
+      grossSales: Number(result.grossSales) || 0,
+      discounts: Number(result.discounts) || 0,
+      netRevenue: Number(result.netRevenue) || 0,
+    };
+  }
+
+  async getTotalRevenue(): Promise<RevenueSummary> {
+    return this.getRevenueByDateRange();
+  }
+
+  async getTodayRevenue() {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    return this.getRevenueByDateRange(start, end);
+  }
+
+  async getWeeklyRevenue(): Promise<RevenueSummary> {
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(now.getDate() - now.getDay());
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+
+    return this.getRevenueByDateRange(start, end);
+  }
+
+  async getMonthlyRevenue(): Promise<RevenueSummary> {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    end.setHours(23, 59, 59, 999);
+
+    return this.getRevenueByDateRange(start, end);
+  }
+
+  async getAverageOrderValue() {
+    const { avg } = await this.orderRepository
+      .createQueryBuilder("order")
+      .select("AVG(order.total_amount)", "avg")
+      .where("order.status = :status", { status: OrderStatus.Done })
+      .getRawOne();
+
+    return Number(avg) || 0;
   }
 
 

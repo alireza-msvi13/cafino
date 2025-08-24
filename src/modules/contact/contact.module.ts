@@ -15,5 +15,6 @@ import { MailModule } from '../mail/mail.module';
   ],
   controllers: [ContactController],
   providers: [ContactService],
+  exports: [ContactService]
 })
 export class ContactModule { }

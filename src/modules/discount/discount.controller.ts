@@ -17,7 +17,6 @@ import { AdminGuard } from "../auth/guards/admin.guard";
 import { UUIDValidationPipe } from "src/common/pipes/uuid-validation.pipe";
 import { DiscountQueryDto } from "./dto/sort-discount.dto";
 import { UpdateDiscountDto } from "./dto/update-dicount.dto";
-import { SwaggerContentTypes } from "src/common/enums/swagger.enum";
 import { UpdateActivityStatusDoc } from "src/common/decorators/swagger.decorators";
 @Controller("discount")
 @ApiTags('Discount')

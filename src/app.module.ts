@@ -21,6 +21,8 @@ import { WinstonModule } from 'nest-winston';
 import { winstonLogger } from './common/logger/winston.logger';
 import { AppController } from './app.controller';
 import { MailModule } from './modules/mail/mail.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { RateLimitModule } from './modules/rate-limit/rate-limit.module';
 
 @Module({
   imports: [
@@ -46,8 +48,9 @@ import { MailModule } from './modules/mail/mail.module';
     PaymentModule,
     GatewayModule,
     ContactModule,
-    MailModule
-
+    MailModule,
+    AdminModule,
+    RateLimitModule
   ],
   controllers: [AppController],
   providers: [],

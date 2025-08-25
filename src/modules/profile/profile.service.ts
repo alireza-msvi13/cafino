@@ -182,8 +182,8 @@ export class ProfileService {
         const addressCount = await this.userService.countUserAddresses(userId);
         const totalOrdersCount = await this.orderService.countUserOrders(userId);
         const activeOrdersCount = await this.orderService.countUserOrdersByStatus(userId, [
-            OrderStatus.Pending,
             OrderStatus.Processing,
+            OrderStatus.Delivered,
         ]);
 
         return new ServerResponse(HttpStatus.OK, "User overview fetched successfully.", {

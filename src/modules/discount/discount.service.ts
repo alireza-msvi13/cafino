@@ -8,7 +8,7 @@ import {
 import { DiscountDto } from "./dto/discount.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DiscountEntity } from "./entity/discount.entity";
-import { Between, DeepPartial, Repository } from "typeorm";
+import { Between, DeepPartial, MoreThan, Repository } from "typeorm";
 import { ServerResponse } from "src/common/dto/server-response.dto";
 import { DiscountQueryDto } from "./dto/sort-discount.dto";
 
@@ -153,6 +153,7 @@ export class DiscountService {
       select: ['code', 'usage', 'active'],
       order: { usage: 'DESC' },
       take: limit,
+      where: { usage: MoreThan(0) },
     });
   }
   async incrementUsage(id: string): Promise<void> {

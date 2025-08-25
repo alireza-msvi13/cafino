@@ -166,7 +166,7 @@ export class ItemService {
       sortBy = SortByOption.Newest,
       minPrice,
       maxPrice,
-      categoryId,
+      category,
       availableOnly,
       search
     } = sortItemDto;
@@ -182,7 +182,7 @@ export class ItemService {
     if (minPrice !== undefined) baseQuery.andWhere("item.price >= :minPrice", { minPrice });
     if (maxPrice !== undefined) baseQuery.andWhere("item.price <= :maxPrice", { maxPrice });
     if (availableOnly === true) baseQuery.andWhere("item.quantity > 0");
-    if (categoryId) baseQuery.andWhere("category.id = :categoryId", { categoryId });
+    if (category) baseQuery.andWhere("category.title = :title", { title: category });
     if (search) {
       baseQuery.andWhere(
         "(LOWER(item.title) LIKE :search OR LOWER(item.description) LIKE :search OR LOWER(item.ingredients) LIKE :search)",
@@ -260,7 +260,7 @@ export class ItemService {
       minPrice,
       maxPrice,
       search,
-      categoryId,
+      category,
       availableOnly = false
     } = sortItemDto;
 
@@ -273,7 +273,7 @@ export class ItemService {
     if (minPrice !== undefined) baseQuery.andWhere("item.price >= :minPrice", { minPrice });
     if (maxPrice !== undefined) baseQuery.andWhere("item.price <= :maxPrice", { maxPrice });
     if (availableOnly === true) baseQuery.andWhere("item.quantity > 0");
-    if (categoryId) baseQuery.andWhere("category.id = :categoryId", { categoryId });
+    if (category) baseQuery.andWhere("category.title = :title", { title: category });
     if (search) {
       baseQuery.andWhere(
         "(LOWER(item.title) LIKE :search OR LOWER(item.description) LIKE :search OR LOWER(item.ingredients) LIKE :search)",

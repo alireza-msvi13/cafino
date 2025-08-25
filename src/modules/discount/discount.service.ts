@@ -40,8 +40,10 @@ export class DiscountService {
 
     if (limit) discountObject.limit = limit;
 
-    const time = 1000 * 60 * 60 * 24 * expires_in;
-    discountObject.expires_in = new Date(new Date().getTime() + time);
+    const now = new Date();
+    const expiresDate = new Date(now.getTime() + 1000 * 60 * 60 * 24 * expires_in);
+    expiresDate.setHours(0, 0, 0, 0);
+    discountObject.expires_in = expiresDate;
 
     const discount = this.discountRepository.create(discountObject);
 
@@ -58,15 +60,6 @@ export class DiscountService {
       page = 1,
       limit = 10,
     } = query;
-    const now = new Date();
-
-    await this.discountRepository
-      .createQueryBuilder()
-      .update()
-      .set({ active: false })
-      .where('(expires_in IS NOT NULL AND expires_in <= :now) OR (limit IS NOT NULL AND limit <= usage)', { now })
-      .execute();
-
 
     const qb = this.discountRepository.createQueryBuilder('discount');
 
@@ -90,7 +83,6 @@ export class DiscountService {
       discounts
     });
   }
-
   async delete(id: string): Promise<ServerResponse> {
     const discount = await this.discountRepository.findOneBy({ id });
     if (!discount) throw new NotFoundException("Discount Not Found");
@@ -163,8 +155,25 @@ export class DiscountService {
       take: limit,
     });
   }
+  async incrementUsage(id: string): Promise<void> {
+    await this.discountRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        usage: () => `"usage" + 1`,
+        active: () => `CASE WHEN "limit" IS NOT NULL AND "usage" + 1 >= "limit" THEN false ELSE active END`
+      })
+      .where("id = :id", { id })
+      .execute();
+  }
 
-
-
-
+  async deactivateExpiredDiscounts(): Promise<void> {
+    const now = new Date();
+    await this.discountRepository
+      .createQueryBuilder()
+      .update()
+      .set({ active: false })
+      .where('expires_in IS NOT NULL AND expires_in <= :now', { now })
+      .execute();
+  }
 }

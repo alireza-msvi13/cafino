@@ -184,7 +184,7 @@ export class CartService {
             throw new BadRequestException("Already Used Discount.");
         }
 
-        if (!discount.active) throw new BadRequestException("Discount code is not active.");
+        if (!discount.active) throw new BadRequestException("Discount code expired.");
 
         if (discount.limit && discount.limit <= discount.usage) {
             throw new BadRequestException("Discount code expired.");
@@ -353,6 +353,7 @@ export class CartService {
                 totalDiscount += discountAmount;
 
                 generalDiscount = {
+                    id: discount.id,
                     code: discount.code,
                     ...(discount.percent ? { percent: discount.percent } : {}),
                     ...(discount.amount ? { amount: discount.amount } : {}),

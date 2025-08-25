@@ -13,6 +13,7 @@ import { OrderStatus } from "src/common/enums/order-status.enum";
 import { UserEntity } from "src/modules/user/entities/user.entity";
 import { AddressEntity } from "src/modules/user/entities/address.entity";
 import { PaymentEntity } from "src/modules/payment/entity/payment.entity";
+import { DiscountEntity } from "src/modules/discount/entity/discount.entity";
 
 @Entity(EntityName.Order)
 export class OrderEntity extends BaseEntity {
@@ -52,5 +53,9 @@ export class OrderEntity extends BaseEntity {
 
   @OneToMany(() => PaymentEntity, (payment) => payment.order)
   payments: PaymentEntity[];
+
+  @ManyToOne(() => DiscountEntity, (discount) => discount.orders, { onDelete: "CASCADE" })
+  @JoinColumn({ name: 'discount_id' })
+  discount: DiscountEntity;
 
 }

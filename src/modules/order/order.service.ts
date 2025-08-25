@@ -50,6 +50,7 @@ export class OrderService {
       .leftJoinAndSelect("order.items", "items")
       .leftJoinAndSelect("items.item", "item")
       .leftJoinAndSelect("order.payments", "payments")
+      .leftJoinAndSelect("order.discount", "discount")
       .select([
 
         "order.id",
@@ -75,6 +76,12 @@ export class OrderService {
         "item.id",
         "item.title",
         "item.price",
+
+        "discount.id",
+        "discount.code",
+        "discount.percent",
+        "discount.amount",
+        
 
         "payments.id",
         "payments.status",
@@ -110,8 +117,11 @@ export class OrderService {
 
     await this.userService.findUserByAddress(userId, addressId)
 
-    const { cartItems, totalAmount, paymentAmount, totalDiscount } = cart;
+    const { cartItems, totalAmount, paymentAmount, totalDiscount, generalDiscount } = cart;
 
+    if (!cartItems.length) throw new BadRequestException("Cart is empty.");
+
+    
     let order = this.orderRepository.create({
       total_amount: totalAmount,
       description,
@@ -119,7 +129,8 @@ export class OrderService {
       payment_amount: paymentAmount,
       status: OrderStatus.Pending,
       user: { id: userId },
-      address: { id: addressId }
+      address: { id: addressId },
+      discount: generalDiscount?.id ? { id: generalDiscount.id } : null,
     });
 
     order = await this.orderRepository.save(order);
@@ -134,9 +145,7 @@ export class OrderService {
         order: { id: order.id }
       });
     }
-
-    if (!orderItems.length) throw new BadRequestException("Cart is empty.");
-
+    
     await this.orderItemRepository.insert(orderItems);
 
     return order;
@@ -302,6 +311,10 @@ export class OrderService {
 
     if (start && end) {
       query.andWhere("order.created_at BETWEEN :start AND :end", { start, end });
+    } else if (start) {
+      query.andWhere("order.created_at >= :start", { start });
+    } else if (end) {
+      query.andWhere("order.created_at <= :end", { end });
     }
 
     const result = await query.getRawOne();

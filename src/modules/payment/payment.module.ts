@@ -8,6 +8,7 @@ import { UserModule } from "../user/user.module";
 import { CartModule } from "../cart/cart.module";
 import { OrderModule } from "../order/order.module";
 import { ItemModule } from "../item/item.module";
+import { DiscountModule } from "../discount/discount.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ItemModule } from "../item/item.module";
     OrderModule,
     GatewayModule,
     ItemModule,
+    DiscountModule,
     TypeOrmModule.forFeature([PaymentEntity]),
   ],
   providers: [PaymentService],

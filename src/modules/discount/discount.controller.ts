@@ -18,11 +18,18 @@ import { UUIDValidationPipe } from "src/common/pipes/uuid-validation.pipe";
 import { DiscountQueryDto } from "./dto/sort-discount.dto";
 import { UpdateDiscountDto } from "./dto/update-dicount.dto";
 import { UpdateActivityStatusDoc } from "src/common/decorators/swagger.decorators";
+import { Cron, CronExpression } from '@nestjs/schedule';
 @Controller("discount")
 @ApiTags('Discount')
 @UseGuards(JwtGuard, AdminGuard)
 export class DiscountController {
   constructor(private discountService: DiscountService) { }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async handleDiscountExpiration() {
+    await this.discountService.deactivateExpiredDiscounts();
+    console.log('Expired discounts deactivated at', new Date());
+  }
 
   @Post()
   @ApiOperation({ summary: "Generate new discount code by admin." })

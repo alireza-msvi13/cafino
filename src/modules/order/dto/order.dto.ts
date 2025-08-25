@@ -5,5 +5,5 @@ export class OrderDto {
     totalDiscount: number
     paymentAmount: number
     cartItems: Array<any>
-    generalDiscount: object
+    generalDiscount: any
 }

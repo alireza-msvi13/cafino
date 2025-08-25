@@ -34,7 +34,7 @@ export class DiscountDto {
   expires_in: number;
 
   @ApiPropertyOptional()
-  @IsOptional()
+  @IsNotEmpty({ message: 'limit must not be empty' })
   @Type(() => Number)
   @IsNumber({}, { message: 'limit must be a number' })
   @Min(1, { message: 'limit must be at least 1' })

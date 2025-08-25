@@ -14,11 +14,11 @@ export class PaymentController {
 
   @Post("gateway")
   @ApiOperation({ summary: "Payment gateway." })
-  paymentGatewat(
+  paymentGateway(
     @Body() paymentDto: PaymentDto,
     @GetUser('id') userId: string,
   ) {
-    return this.paymentService.paymentGatewat(paymentDto, userId);
+    return this.paymentService.paymentGateway(paymentDto, userId);
   }
 
   @Get("verify")
@@ -26,9 +26,14 @@ export class PaymentController {
   async paymentVerify(
     @Query("Authority") authority: string,
     @Query("Status") status: string,
-    @Res() response: Response
+    @Res() res: Response
   ) {
-    return await this.paymentService.paymentVerify(authority, status, response);
+    const result = await this.paymentService.paymentVerify(authority, status);
+    if (result.success) {
+      return res.redirect(`${process.env.FRONTEND_URL}/payment?status=success`);
+    } else {
+      return res.redirect(`${process.env.FRONTEND_URL}/payment?status=failed`);
+    }
   }
 
 

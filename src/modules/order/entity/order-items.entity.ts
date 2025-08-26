@@ -4,7 +4,7 @@ import { EntityName } from "src/common/enums/entity.enum";
 import { BaseEntity } from "src/common/abstracts/base.entity";
 import { ItemEntity } from "src/modules/item/entities/item.entity";
 
-@Entity(EntityName.OrderItem)
+@Entity(EntityName.ORDER_ITEM)
 export class OrderItemEntity extends BaseEntity {
 
   @Column()

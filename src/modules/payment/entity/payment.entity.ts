@@ -12,7 +12,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 
-@Entity(EntityName.Payment)
+@Entity(EntityName.PAYMENT)
 export class PaymentEntity extends BaseEntity {
 
   @Column({ default: false })

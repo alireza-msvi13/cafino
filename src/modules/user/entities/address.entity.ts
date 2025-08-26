@@ -12,7 +12,7 @@ import { EntityName } from "src/common/enums/entity.enum";
 import { BaseEntity } from "src/common/abstracts/base.entity";
 import { OrderEntity } from "src/modules/order/entity/order.entity";
 
-@Entity(EntityName.Address)
+@Entity(EntityName.ADDRESS)
 export class AddressEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 100 })
   province: string;

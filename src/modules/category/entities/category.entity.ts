@@ -8,7 +8,7 @@ import {
   OneToMany,
 } from "typeorm";
 
-@Entity(EntityName.Category)
+@Entity(EntityName.CATEGORY)
 export class CategoryEntity extends BaseEntity {
   @Column({ type: 'text', unique: true })
   title: string;

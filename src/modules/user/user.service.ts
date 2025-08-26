@@ -94,7 +94,7 @@ export class UserService {
         await this.userRepository.update(
             { phone: userDto.phone },
             {
-                status: UserStatus.Block
+                status: UserStatus.BLOCK
             }
         )
         return new ServerResponse(HttpStatus.OK, 'User added to blacklist.')
@@ -103,7 +103,7 @@ export class UserService {
         await this.userRepository.update(
             { phone: userDto.phone },
             {
-                status: UserStatus.Normal
+                status: UserStatus.NORMAL
             }
         )
         return new ServerResponse(HttpStatus.OK, 'User removed from blacklist.')
@@ -113,7 +113,7 @@ export class UserService {
 
         const baseQuery = this.userRepository
             .createQueryBuilder('user')
-            .where("user.status = :status", { status: UserStatus.Block });
+            .where("user.status = :status", { status: UserStatus.BLOCK });
 
         const total = await baseQuery.getCount();
 
@@ -494,7 +494,7 @@ export class UserService {
 
     async countBlockUsers() {
         const blockedUsersCount = await this.userRepository.count({
-            where: { status: UserStatus.Block }
+            where: { status: UserStatus.BLOCK }
         });
         return blockedUsersCount;
     }

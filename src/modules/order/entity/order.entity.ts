@@ -15,7 +15,7 @@ import { AddressEntity } from "src/modules/user/entities/address.entity";
 import { PaymentEntity } from "src/modules/payment/entity/payment.entity";
 import { DiscountEntity } from "src/modules/discount/entity/discount.entity";
 
-@Entity(EntityName.Order)
+@Entity(EntityName.ORDER)
 export class OrderEntity extends BaseEntity {
 
   @Column()
@@ -27,7 +27,7 @@ export class OrderEntity extends BaseEntity {
   @Column()
   total_amount: number;
 
-  @Column({ type: "enum", enum: OrderStatus, default: OrderStatus.Pending })
+  @Column({ type: "enum", enum: OrderStatus, default: OrderStatus.PENDING })
   status: string;
 
   @Column({ nullable: true })

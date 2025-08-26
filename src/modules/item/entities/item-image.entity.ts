@@ -5,7 +5,7 @@ import { ItemEntity } from "./item.entity";
 
 
 
-@Entity(EntityName.ItemImage)
+@Entity(EntityName.ITEM_IMAGE)
 export class ItemImageEntity extends BaseEntity {
 
     @Column()

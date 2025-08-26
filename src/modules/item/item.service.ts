@@ -3,7 +3,7 @@ import { StorageService } from '../storage/storage.service';
 import { ItemEntity } from './entities/item.entity';
 import { CreateItemDto } from './dto/create-item.dto';
 import { MulterFileType } from 'src/common/types/multer.file.type';
-import { Folder } from 'src/common/enums/folder.enum';
+import { ImageFolder } from 'src/common/enums/image-folder.enum';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, DeepPartial, LessThan, Repository } from 'typeorm';
 import { CategoryService } from '../category/category.service';
@@ -11,7 +11,7 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { isBoolean, toBoolean } from 'src/common/utils/boolean.utils';
 import { ItemImageEntity } from './entities/item-image.entity';
 import { SortItemDto } from './dto/sort-item.dto';
-import { SortByOption } from 'src/common/enums/sort-by-option.enum';
+import { SortByOption } from 'src/modules/item/enum/sort-by-option.enum';
 import { UserService } from '../user/user.service';
 import { OrderService } from '../order/order.service';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
@@ -72,10 +72,10 @@ export class ItemService {
     await this.itemRepository.save(newItem);
 
     if (images.length > 0) {
-      await this.storageService.uploadMultiFile(images, Folder.Item)
+      await this.storageService.uploadMultiFile(images, ImageFolder.ITEM);
       const imageEntities = images.map(image => ({
         image: image.filename,
-        imageUrl: this.storageService.getFileLink(image.filename, Folder.Item),
+        imageUrl: this.storageService.getFileLink(image.filename, ImageFolder.ITEM),
         item: { id: newItem.id },
       }));
 
@@ -132,17 +132,17 @@ export class ItemService {
     if (images.length > 0) {
       await Promise.all([
         ...item.images.map(async (img) => {
-          await this.storageService.deleteFile(img.image, Folder.Item);
+          await this.storageService.deleteFile(img.image, ImageFolder.ITEM);
           await this.itemImageRepository.delete({ id: img.id });
         }),
       ]);
 
-      await this.storageService.uploadMultiFile(images, Folder.Item);
+      await this.storageService.uploadMultiFile(images, ImageFolder.ITEM);
 
 
       const imageEntities = images.map(image => ({
         image: image.filename,
-        imageUrl: this.storageService.getFileLink(image.filename, Folder.Item),
+        imageUrl: this.storageService.getFileLink(image.filename, ImageFolder.ITEM),
         item: { id: itemId },
       }));
 

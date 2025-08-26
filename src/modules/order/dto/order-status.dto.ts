@@ -3,7 +3,7 @@ import { IsEnum, IsNotEmpty } from "class-validator";
 import { OrderStatus } from "src/common/enums/order-status.enum";
 
 export class OrderStatusDto {
-    @ApiProperty({ enum: OrderStatus, default: OrderStatus.Pending })
+    @ApiProperty({ enum: OrderStatus, default: OrderStatus.PENDING })
     @IsEnum(OrderStatus)
     @IsNotEmpty()
     status: string;

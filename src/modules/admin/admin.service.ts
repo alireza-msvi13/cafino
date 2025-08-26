@@ -38,7 +38,7 @@ export class AdminService {
     const [totalOrders, activeOrders, ordersByStatus, todayOrders] =
       await Promise.all([
         this.orderService.countOrders(),
-        this.orderService.countOrdersByStatus([OrderStatus.Processing, OrderStatus.Delivered]),
+        this.orderService.countOrdersByStatus([OrderStatus.PROCESSING, OrderStatus.DELIVERED]),
         this.orderService.countOrdersGroupedByStatus(),
         this.orderService.countOrdersByDate(new Date()),
       ]);

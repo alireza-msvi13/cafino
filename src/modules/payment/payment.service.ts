@@ -126,7 +126,7 @@ export class PaymentService {
       if (payment.status) return { success: false, message: "Payment already verified." };
 
       if (status !== "OK") {
-        await this.orderService.changeOrderStatus(payment.order.id, OrderStatus.Failed);
+        await this.orderService.changeOrderStatus(payment.order.id, OrderStatus.FAILED);
         await queryRunner.rollbackTransaction();
         return { success: false, message: "Payment failed." };
       }
@@ -144,7 +144,7 @@ export class PaymentService {
         await this.discountService.incrementUsage(payment.order.discount.id);
       }
 
-      await this.orderService.changeOrderStatus(payment.order.id, OrderStatus.Processing);
+      await this.orderService.changeOrderStatus(payment.order.id, OrderStatus.PROCESSING);
       await this.itemService.decreaseItemsQuantity(payment.order.id);
       await this.cartService.clearUserCart(payment.user.id);
 

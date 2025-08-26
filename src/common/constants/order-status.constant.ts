@@ -3,7 +3,6 @@ export const AllowdOrderStatus = [
     "canceled",
     "failed",
     "processing",
-    "shipped",
     "delivered",
     "refunded",
     "done",

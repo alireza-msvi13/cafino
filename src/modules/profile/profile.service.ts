@@ -4,7 +4,7 @@ import { StorageService } from '../storage/storage.service';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { CreateAddressDto } from './dto/create-address-dto';
 import { UpdateAddressDto } from './dto/update-address-dto';
-import { Folder } from 'src/common/enums/folder.enum';
+import { ImageFolder } from 'src/common/enums/image-folder.enum';
 import { ItemService } from '../item/item.service';
 import { OrderService } from '../order/order.service';
 import { OrderStatus } from 'src/common/enums/order-status.enum';
@@ -72,12 +72,12 @@ export class ProfileService {
     ): Promise<ServerResponse> {
         const imageUrl = this.storageService.getFileLink(
             image.filename,
-            Folder.ProfileImage
+            ImageFolder.PROFILE_IMAGE
         )
         const storageQuery = this.storageService.uploadSingleFile(
             image.filename,
             image.buffer,
-            Folder.ProfileImage
+            ImageFolder.PROFILE_IMAGE
         )
         const userQuery = this.userService.updateImage(
             userId,
@@ -102,7 +102,7 @@ export class ProfileService {
 
         const storageQuery = this.storageService.deleteFile(
             image,
-            Folder.ProfileImage
+            ImageFolder.PROFILE_IMAGE
         )
         const userQuery = this.userService.deleteImage(
             userId
@@ -150,7 +150,7 @@ export class ProfileService {
     ): Promise<ServerResponse> {
         await this.orderService.changeOrderStatus(
             orderId,
-            OrderStatus.Canceled
+            OrderStatus.CANCELED
         )
 
         return new ServerResponse(HttpStatus.OK, "Order canceled successfully.");
@@ -182,8 +182,8 @@ export class ProfileService {
         const addressCount = await this.userService.countUserAddresses(userId);
         const totalOrdersCount = await this.orderService.countUserOrders(userId);
         const activeOrdersCount = await this.orderService.countUserOrdersByStatus(userId, [
-            OrderStatus.Processing,
-            OrderStatus.Delivered,
+            OrderStatus.PROCESSING,
+            OrderStatus.DELIVERED,
         ]);
 
         return new ServerResponse(HttpStatus.OK, "User overview fetched successfully.", {

@@ -6,7 +6,7 @@ import { ItemEntity } from "src/modules/item/entities/item.entity";
 import { UserEntity } from "src/modules/user/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 
-@Entity(EntityName.Cart)
+@Entity(EntityName.CART)
 export class CartEntity extends BaseEntity {
   @Column({ type: 'integer', default: 1 })
   count: number;

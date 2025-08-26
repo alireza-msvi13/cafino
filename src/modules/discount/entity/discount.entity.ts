@@ -5,7 +5,7 @@ import { CartEntity } from "src/modules/cart/entity/cart.entity";
 import { OrderEntity } from "src/modules/order/entity/order.entity";
 import { Column, CreateDateColumn, Entity, OneToMany } from "typeorm";
 
-@Entity(EntityName.Discount)
+@Entity(EntityName.DISCOUNT)
 export class DiscountEntity extends BaseEntity {
   @Column({ type: 'varchar', unique: true })
   code: string;

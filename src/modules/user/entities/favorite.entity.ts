@@ -4,7 +4,7 @@ import { ItemEntity } from "src/modules/item/entities/item.entity";
 import { UserEntity } from "src/modules/user/entities/user.entity";
 import { Entity, JoinColumn, ManyToOne } from "typeorm";
 
-@Entity(EntityName.Favorite)
+@Entity(EntityName.FAVORITE)
 export class FavoriteEntity extends BaseEntity {
   @ManyToOne(() => ItemEntity, (item) => item.favorites, { onDelete: "CASCADE" })
   @JoinColumn({ name: 'item_id' })

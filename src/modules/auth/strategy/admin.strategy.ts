@@ -36,7 +36,7 @@ export class AdminStrategy extends PassportStrategy(Strategy, 'admin') {
         } = await this.userService.findUser(
             payload.phone
         );
-        if (role == Roles.User) {
+        if (role == Roles.USER) {
             throw new UnauthorizedException("you dont have access")
         }
         return {

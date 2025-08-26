@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from "class-validator";
 import { PaginationDto } from "src/common/dto/pagination.dto";
-import { SortByOption } from "src/common/enums/sort-by-option.enum";
+import { SortByOption } from "src/modules/item/enum/sort-by-option.enum";
 import { Transform, Type } from "class-transformer";
 
 export class SortItemDto extends PaginationDto {

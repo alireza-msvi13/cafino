@@ -5,7 +5,7 @@ import { UserEntity } from "src/modules/user/entities/user.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 
 
-@Entity(EntityName.Comment)
+@Entity(EntityName.COMMENT)
 export class CommentEntity extends BaseEntity {
     @Column({ type: 'text' })
     text: string;

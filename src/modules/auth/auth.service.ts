@@ -22,7 +22,6 @@ import {
   AccessCookieConfig,
   RefreshCookieConfig,
 } from 'src/common/constants/token-config.constants';
-import { TokenType } from 'src/common/types/token.type';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { UserStatus } from 'src/common/enums/user-status.enum';
 import { Roles } from 'src/common/enums/role.enum';
@@ -42,7 +41,7 @@ export class AuthService {
 
     const existingUser = await this.userService.findByPhoneWithOtp(phone);
 
-    if (existingUser?.status === UserStatus.Block) {
+    if (existingUser?.status === UserStatus.BLOCK) {
       throw new ForbiddenException("Unfortunately, you are in the blacklist.");
     }
 
@@ -56,7 +55,7 @@ export class AuthService {
     let user = existingUser;
     if (!user) {
       const usersCount = await this.userService.countUsers();
-      const role = usersCount === 0 ? Roles.Admin : Roles.User;
+      const role = usersCount === 0 ? Roles.ADMIN : Roles.USER;
       user = await this.userService.createUser({
         username: generateUsername(),
         phone,
@@ -86,7 +85,7 @@ export class AuthService {
       throw new NotFoundException("No account is registered with this phone number.");
     }
 
-    if (user.status === UserStatus.Block) {
+    if (user.status === UserStatus.BLOCK) {
       throw new ForbiddenException("Unfortunately, you are in the blacklist.");
     }
 
@@ -119,7 +118,7 @@ export class AuthService {
     userId: string,
     phone: string,
   ): Promise<ServerResponse> {
-    const tokens: TokenType = await this.createTokens(
+    const tokens = await this.createTokens(
       phone,
       userId,
     );
@@ -143,7 +142,7 @@ export class AuthService {
       throw new NotFoundException("No account is registered with this phone number.");
     }
 
-    if (user.status === UserStatus.Block) {
+    if (user.status === UserStatus.BLOCK) {
       throw new ForbiddenException("Unfortunately, you are in the blacklist.");
     }
 
@@ -186,7 +185,7 @@ export class AuthService {
 
   // * helper
 
-  async createTokens(phone: string, userId: string): Promise<TokenType> {
+  async createTokens(phone: string, userId: string) {
     const jwtPayload: JwtPayload = {
       user: userId,
       phone,

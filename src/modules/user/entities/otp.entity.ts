@@ -4,7 +4,7 @@ import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
 import { UserEntity } from "./user.entity";
 
 
-@Entity(EntityName.Otp)
+@Entity(EntityName.OTP)
 export class OtpEntity extends BaseEntity {
     @Column({ type: 'varchar', length: 6 })
     code: string;

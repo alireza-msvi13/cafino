@@ -8,7 +8,7 @@ import { Contact } from './contact.entity';
 import { EntityName } from 'src/common/enums/entity.enum';
 import { BaseEntity } from "src/common/abstracts/base.entity";
 
-@Entity(EntityName.ContactReplay)
+@Entity(EntityName.CONTACT_REPLY)
 export class Reply extends BaseEntity {
 
     @Column()

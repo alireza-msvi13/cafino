@@ -8,7 +8,7 @@ import { CartEntity } from 'src/modules/cart/entity/cart.entity';
 import { FavoriteEntity } from 'src/modules/user/entities/favorite.entity';
 import { OrderItemEntity } from 'src/modules/order/entity/order-items.entity';
 
-@Entity(EntityName.Item)
+@Entity(EntityName.ITEM)
 export class ItemEntity extends BaseEntity {
 
     @Column({ type: 'text' })

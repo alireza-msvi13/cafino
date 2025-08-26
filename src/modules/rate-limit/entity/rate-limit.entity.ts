@@ -3,7 +3,7 @@ import { BlockStatus } from "src/modules/rate-limit/enums/block-status.enum";
 import { EntityName } from "src/common/enums/entity.enum";
 import { Column, CreateDateColumn, Entity, Index, UpdateDateColumn } from "typeorm";
 
-@Entity(EntityName.RateLimitRecord)
+@Entity(EntityName.RATE_LIMIT_RECORD)
 @Index(['identifier', 'endpoint'], { unique: true })
 export class RateLimitRecord extends BaseEntity {
     @Column()

@@ -11,7 +11,7 @@ import { CartEntity } from "src/modules/cart/entity/cart.entity";
 import { FavoriteEntity } from "./favorite.entity";
 import { OrderEntity } from "src/modules/order/entity/order.entity";
 
-@Entity(EntityName.User)
+@Entity(EntityName.USER)
 export class UserEntity extends BaseEntity {
     @Column({ unique: true, nullable: true })
     username: string;
@@ -29,7 +29,7 @@ export class UserEntity extends BaseEntity {
     phone: string;
     @Column({ unique: true, nullable: true })
     email: string;
-    @Column({ type: "enum", enum: Roles, default: Roles.User })
+    @Column({ type: "enum", enum: Roles, default: Roles.USER })
     role: string;
     @Column({ nullable: true })
     new_email: string;
@@ -37,7 +37,7 @@ export class UserEntity extends BaseEntity {
     new_phone: string;
     @Column({ type: 'boolean', nullable: true, default: false })
     is_email_verified: boolean;
-    @Column({ type: "enum", enum: UserStatus, default: UserStatus.Normal })
+    @Column({ type: "enum", enum: UserStatus, default: UserStatus.NORMAL })
     status: string;
 
     @Column({ nullable: true })

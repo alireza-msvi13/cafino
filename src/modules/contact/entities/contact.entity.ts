@@ -3,7 +3,7 @@ import { Entity, Column, CreateDateColumn, OneToMany } from 'typeorm';
 import { Reply } from './reply.entity';
 import { BaseEntity } from "src/common/abstracts/base.entity";
 
-@Entity(EntityName.Contact)
+@Entity(EntityName.CONTACT)
 export class Contact extends BaseEntity {
     @Column()
     name: string;

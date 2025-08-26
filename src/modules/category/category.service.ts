@@ -6,7 +6,7 @@ import { CategoryEntity } from "./entities/category.entity";
 import { DeepPartial, Repository } from "typeorm";
 import { StorageService } from "../storage/storage.service";
 import { MulterFileType } from "src/common/types/multer.file.type";
-import { Folder } from "src/common/enums/folder.enum";
+import { Folder } from "src/common/enums/image-folder.enum";
 import { isBoolean, toBoolean } from "src/common/utils/boolean.utils";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { ItemService } from "../item/item.service";

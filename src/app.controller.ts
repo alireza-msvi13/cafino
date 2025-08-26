@@ -23,9 +23,4 @@ export class AppController {
   headHealth() {
     return { statusCode: HttpStatus.OK, message: 'Welcome! Use /v1 for API endpoints.' };
   }
-  
-  @Get("test")
-  getHello(): string {
-    return 'Hello World!';
-  }
 }

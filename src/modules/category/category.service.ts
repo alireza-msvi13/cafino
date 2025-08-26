@@ -6,7 +6,7 @@ import { CategoryEntity } from "./entities/category.entity";
 import { DeepPartial, Repository } from "typeorm";
 import { StorageService } from "../storage/storage.service";
 import { MulterFileType } from "src/common/types/multer.file.type";
-import { Folder } from "src/common/enums/image-folder.enum";
+import { ImageFolder } from "src/common/enums/image-folder.enum";
 import { isBoolean, toBoolean } from "src/common/utils/boolean.utils";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { ItemService } from "../item/item.service";
@@ -42,14 +42,14 @@ export class CategoryService {
 
     const imageUrl = this.storageService.getFileLink(
       image.filename,
-      Folder.Category
+      ImageFolder.CATEGORY
     )
 
     await Promise.all([
       this.storageService.uploadSingleFile(
         image.filename,
         image.buffer,
-        Folder.Category
+        ImageFolder.CATEGORY
       ),
 
       this.categoryRepository.insert({
@@ -133,18 +133,18 @@ export class CategoryService {
     if (image) {
       const imageUrl = this.storageService.getFileLink(
         image.filename,
-        Folder.Category
+        ImageFolder.CATEGORY
       )
 
       await this.storageService.uploadSingleFile(
         image.filename,
         image.buffer,
-        Folder.Category
+        ImageFolder.CATEGORY
       )
       updateObject.image = image.filename
       updateObject.imageUrl = imageUrl
       if (category && category?.image && category?.imageUrl) {
-        await this.storageService.deleteFile(category.image, Folder.Category)
+        await this.storageService.deleteFile(category.image, ImageFolder.CATEGORY)
       }
     }
     if (title) updateObject.title = title;
@@ -181,7 +181,7 @@ export class CategoryService {
     if (!category) throw new NotFoundException("Category not found.");
 
     if (category && category?.image && category?.imageUrl) {
-      await this.storageService.deleteFile(category.image, Folder.Category)
+      await this.storageService.deleteFile(category.image, ImageFolder.CATEGORY)
     }
 
     await this.categoryRepository.delete({ id });

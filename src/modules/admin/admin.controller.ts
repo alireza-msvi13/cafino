@@ -4,7 +4,7 @@ import { ServerResponse } from '../../common/dto/server-response.dto';
 import { AdminService } from './admin.service';
 import { SalesReportDto } from './dto/admin.dto';
 
-@ApiTags('Admin')
+@ApiTags('Admin Overview')
 @Controller('admin/overview')
 export class AdminController {
   constructor(private readonly adminService: AdminService) { }

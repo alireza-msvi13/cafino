@@ -1,11 +1,10 @@
+import { BaseEntity } from 'src/common/abstracts/base.entity';
+import { EntityName } from 'src/common/enums/entity.enum';
+import { CartEntity } from 'src/modules/cart/entity/cart.entity';
+import { OrderEntity } from 'src/modules/order/entity/order.entity';
+import { Column, CreateDateColumn, Entity, OneToMany } from 'typeorm';
 
-import { BaseEntity } from "src/common/abstracts/base.entity";
-import { EntityName } from "src/common/enums/entity.enum";
-import { CartEntity } from "src/modules/cart/entity/cart.entity";
-import { OrderEntity } from "src/modules/order/entity/order.entity";
-import { Column, CreateDateColumn, Entity, OneToMany } from "typeorm";
-
-@Entity(EntityName.DISCOUNT)
+@Entity(EntityName.Discount)
 export class DiscountEntity extends BaseEntity {
   @Column({ type: 'varchar', unique: true })
   code: string;
@@ -16,7 +15,7 @@ export class DiscountEntity extends BaseEntity {
   @Column({ type: 'integer', nullable: true })
   amount: number;
 
-  @Column({ type: 'timestamp'})
+  @Column({ type: 'timestamp' })
   expires_in: Date;
 
   @Column({ type: 'integer', nullable: true })
@@ -35,5 +34,5 @@ export class DiscountEntity extends BaseEntity {
   orders: OrderEntity[];
 
   @CreateDateColumn()
-  created_at: Date
+  created_at: Date;
 }

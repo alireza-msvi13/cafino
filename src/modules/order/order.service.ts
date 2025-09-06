@@ -146,7 +146,7 @@ export class OrderService {
       description,
       discount_amount: totalDiscount,
       payment_amount: paymentAmount,
-      status: OrderStatus.PENDING,
+      status: OrderStatus.Pending,
       user: { id: userId },
       address: { id: addressId },
       discount: generalDiscount?.id ? { id: generalDiscount.id } : null,
@@ -326,7 +326,7 @@ export class OrderService {
       .select('SUM(order.total_amount)', 'grossSales')
       .addSelect('SUM(order.discount_amount)', 'discounts')
       .addSelect('SUM(order.payment_amount)', 'netRevenue')
-      .where('order.status = :status', { status: OrderStatus.DONE });
+      .where('order.status = :status', { status: OrderStatus.Done });
 
     if (start && end) {
       query.andWhere('order.created_at BETWEEN :start AND :end', {
@@ -387,7 +387,7 @@ export class OrderService {
     const { avg } = await this.orderRepository
       .createQueryBuilder('order')
       .select('AVG(order.total_amount)', 'avg')
-      .where('order.status = :status', { status: OrderStatus.DONE })
+      .where('order.status = :status', { status: OrderStatus.Done })
       .getRawOne();
 
     return Number(avg) || 0;

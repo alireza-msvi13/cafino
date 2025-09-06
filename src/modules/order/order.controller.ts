@@ -8,29 +8,28 @@ import { OrderStatusDto } from './dto/order-status.dto';
 import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
 import { OrderQueryDto } from './dto/sort-order.dto';
 
-
-
-
 @Controller('order')
 @ApiTags('Order')
 @UseGuards(JwtGuard, AdminGuard)
 export class OrderController {
-  constructor(private orderService: OrderService) { }
+  constructor(private orderService: OrderService) {}
 
-  @Post("/status")
-  @ApiOperation({ summary: "change order status by admin" })
-  @ApiConsumes(SwaggerContentTypes.FORM_URL_ENCODED,SwaggerContentTypes.JSON)
+  @Post('/status')
+  @ApiOperation({ summary: 'change order status by admin' })
+  @ApiConsumes(SwaggerContentTypes.FormUrlEncoded, SwaggerContentTypes.Json)
   changeOrderStatusByAdmin(
     @Body() orderStatusDto: OrderStatusDto,
-    @Query("id") orderId: string,
+    @Query('id') orderId: string,
   ) {
-    return this.orderService.changeOrderStatusByAdmin(orderId, orderStatusDto.status);
+    return this.orderService.changeOrderStatusByAdmin(
+      orderId,
+      orderStatusDto.status,
+    );
   }
   @Get()
   @UseGuards(AdminGuard)
-  @ApiOperation({ summary: "get all orders by admin" })
+  @ApiOperation({ summary: 'get all orders by admin' })
   getAllOrders(@Query() qrderQueryDto: OrderQueryDto) {
-    return this.orderService.getAllOrders(qrderQueryDto)
+    return this.orderService.getAllOrders(qrderQueryDto);
   }
-
 }

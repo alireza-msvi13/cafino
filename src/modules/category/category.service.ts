@@ -1,16 +1,24 @@
-import { BadRequestException, ConflictException, forwardRef, HttpStatus, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateCategoryDto } from "./dto/create-category.dto";
-import { UpdateCategoryDto } from "./dto/update-category.dto";
-import { InjectRepository } from "@nestjs/typeorm";
-import { CategoryEntity } from "./entities/category.entity";
-import { DeepPartial, Repository } from "typeorm";
-import { StorageService } from "../storage/storage.service";
-import { MulterFileType } from "src/common/types/multer.file.type";
-import { ImageFolder } from "src/common/enums/image-folder.enum";
-import { isBoolean, toBoolean } from "src/common/utils/boolean.utils";
-import { PaginationDto } from "src/common/dto/pagination.dto";
-import { ItemService } from "../item/item.service";
-import { ServerResponse } from "src/common/dto/server-response.dto";
+import {
+  BadRequestException,
+  ConflictException,
+  forwardRef,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CategoryEntity } from './entities/category.entity';
+import { DeepPartial, Repository } from 'typeorm';
+import { StorageService } from '../storage/storage.service';
+import { MulterFileType } from 'src/common/types/multer.file.type';
+import { ImageFolder } from 'src/common/enums/image-folder.enum';
+import { isBoolean, toBoolean } from 'src/common/utils/boolean.utils';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ItemService } from '../item/item.service';
+import { ServerResponse } from 'src/common/dto/server-response.dto';
 
 @Injectable()
 export class CategoryService {
@@ -19,9 +27,8 @@ export class CategoryService {
     private categoryRepository: Repository<CategoryEntity>,
     private storageService: StorageService,
     @Inject(forwardRef(() => ItemService))
-    private itemService: ItemService
-  ) { }
-
+    private itemService: ItemService,
+  ) {}
 
   // * primary
 
@@ -29,27 +36,26 @@ export class CategoryService {
     createCategoryDto: CreateCategoryDto,
     image: MulterFileType,
   ): Promise<ServerResponse> {
-
     let { title, slug, show = true } = createCategoryDto;
 
     const category = await this.categoryRepository.findOne({
       where: [{ slug }, { title }],
     });
-    if (category) throw new ConflictException("Category already exist.");
+    if (category) throw new ConflictException('Category already exist.');
     if (isBoolean(show)) {
       show = toBoolean(show);
     }
 
     const imageUrl = this.storageService.getFileLink(
       image.filename,
-      ImageFolder.CATEGORY
-    )
+      ImageFolder.Category,
+    );
 
     await Promise.all([
       this.storageService.uploadSingleFile(
         image.filename,
         image.buffer,
-        ImageFolder.CATEGORY
+        ImageFolder.Category,
       ),
 
       this.categoryRepository.insert({
@@ -57,19 +63,23 @@ export class CategoryService {
         slug,
         show,
         image: image.filename,
-        imageUrl
-      })
-    ])
+        imageUrl,
+      }),
+    ]);
 
-    return new ServerResponse(HttpStatus.CREATED, 'Category created successfully.');
-
+    return new ServerResponse(
+      HttpStatus.CREATED,
+      'Category created successfully.',
+    );
   }
-  async findByPagination(paginationDto: PaginationDto): Promise<ServerResponse> {
+  async findByPagination(
+    paginationDto: PaginationDto,
+  ): Promise<ServerResponse> {
     const { limit = 10, page = 1 } = paginationDto;
 
     const queryBuilder = this.categoryRepository
       .createQueryBuilder('category')
-      .where("category.show = :show", { show: true });
+      .where('category.show = :show', { show: true });
 
     const total = await queryBuilder.getCount();
 
@@ -78,24 +88,33 @@ export class CategoryService {
       .take(limit)
       .getMany();
 
-    return new ServerResponse(HttpStatus.OK, 'Categories fetched successfully.', {
-      total,
-      page,
-      limit,
-      categories
-    });
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Categories fetched successfully.',
+      {
+        total,
+        page,
+        limit,
+        categories,
+      },
+    );
   }
   async findAll(): Promise<ServerResponse> {
     const categories = await this.categoryRepository.find({
-      where: { show: true }
-    })
-    return new ServerResponse(HttpStatus.OK, 'Categories fetched successfully.', { categories });
-
+      where: { show: true },
+    });
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Categories fetched successfully.',
+      { categories },
+    );
   }
-  async findByPaginationByAdmin(paginationDto: PaginationDto): Promise<ServerResponse> {
+  async findByPaginationByAdmin(
+    paginationDto: PaginationDto,
+  ): Promise<ServerResponse> {
     const { limit = 10, page = 1 } = paginationDto;
 
-    const queryBuilder = this.categoryRepository.createQueryBuilder('category')
+    const queryBuilder = this.categoryRepository.createQueryBuilder('category');
 
     const total = await queryBuilder.getCount();
 
@@ -104,97 +123,109 @@ export class CategoryService {
       .take(limit)
       .getMany();
 
-
-    return new ServerResponse(HttpStatus.OK, 'Categories fetched successfully.', {
-      total,
-      page,
-      limit,
-      categories
-    });
-
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Categories fetched successfully.',
+      {
+        total,
+        page,
+        limit,
+        categories,
+      },
+    );
   }
   async update(
     id: string,
     updateCategoryDto: UpdateCategoryDto,
-    image: Express.Multer.File
+    image: Express.Multer.File,
   ): Promise<ServerResponse> {
-
     const { show, slug, title } = updateCategoryDto;
     const category = await this.categoryRepository.findOneBy({ id });
-    if (!category) throw new NotFoundException("Category not found.");
+    if (!category) throw new NotFoundException('Category not found.');
     const updateObject: DeepPartial<CategoryEntity> = {};
 
     if (slug) {
       const category = await this.categoryRepository.findOneBy({ slug });
-      if (category) throw new ConflictException("Slug already exists.");
+      if (category) throw new ConflictException('Slug already exists.');
       updateObject.slug = slug;
     }
 
     if (image) {
       const imageUrl = this.storageService.getFileLink(
         image.filename,
-        ImageFolder.CATEGORY
-      )
+        ImageFolder.Category,
+      );
 
       await this.storageService.uploadSingleFile(
         image.filename,
         image.buffer,
-        ImageFolder.CATEGORY
-      )
-      updateObject.image = image.filename
-      updateObject.imageUrl = imageUrl
+        ImageFolder.Category,
+      );
+      updateObject.image = image.filename;
+      updateObject.imageUrl = imageUrl;
       if (category && category?.image && category?.imageUrl) {
-        await this.storageService.deleteFile(category.image, ImageFolder.CATEGORY)
+        await this.storageService.deleteFile(
+          category.image,
+          ImageFolder.Category,
+        );
       }
     }
     if (title) updateObject.title = title;
 
     if (isBoolean(show)) {
-      const showStatus = toBoolean(show)
-      updateObject.show = showStatus
-      await this.itemService.updateItemShowStatusByCategoryId(id, showStatus)
-    };
+      const showStatus = toBoolean(show);
+      updateObject.show = showStatus;
+      await this.itemService.updateItemShowStatusByCategoryId(id, showStatus);
+    }
 
     const hasTextDataToUpdate = Object.keys(updateObject).length > 0;
     if (!hasTextDataToUpdate && !image) {
-      return new ServerResponse(HttpStatus.OK, "No changes were provided.");
+      return new ServerResponse(HttpStatus.OK, 'No changes were provided.');
     }
 
     await this.categoryRepository.update({ id }, updateObject);
 
     return new ServerResponse(HttpStatus.OK, 'Category updated successfully.');
-
   }
   async findBySlug(slug: string): Promise<ServerResponse> {
     const category = await this.categoryRepository.findOne({
-      where: { slug, show: true }
+      where: { slug, show: true },
     });
 
-    if (!category) throw new NotFoundException("Category not found.");
+    if (!category) throw new NotFoundException('Category not found.');
 
-    return new ServerResponse(HttpStatus.OK, 'Categorory fetched successfully.', { category });
-
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Categorory fetched successfully.',
+      { category },
+    );
   }
   async delete(id: string): Promise<ServerResponse> {
     const category = await this.categoryRepository.findOneBy({ id });
 
-    if (!category) throw new NotFoundException("Category not found.");
+    if (!category) throw new NotFoundException('Category not found.');
 
     if (category && category?.image && category?.imageUrl) {
-      await this.storageService.deleteFile(category.image, ImageFolder.CATEGORY)
+      await this.storageService.deleteFile(
+        category.image,
+        ImageFolder.Category,
+      );
     }
 
     await this.categoryRepository.delete({ id });
 
-    return new ServerResponse(HttpStatus.OK, 'Categorory deleted successfully.');
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Categorory deleted successfully.',
+    );
   }
-
 
   // *helper
 
   async checkCategoryVisibility(id: string): Promise<void> {
     const category = await this.categoryRepository.findOneBy({ id });
-    if (!category) throw new NotFoundException("Category not found.");
-    if (!category.show) throw new BadRequestException("Category is not allow to show.");
+    if (!category) throw new NotFoundException('Category not found.');
+    if (!category.show)
+      throw new BadRequestException('Category is not allow to show.');
   }
 }

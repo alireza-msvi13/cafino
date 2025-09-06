@@ -1,7 +1,19 @@
-
 import { query, Request } from 'express';
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ItemService } from './item.service';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
@@ -21,104 +33,77 @@ import { SearchItemDto } from './dto/search-item.dto';
 @Controller('item')
 @ApiTags('Item')
 export class ItemController {
-  constructor(
-    private itemService: ItemService,
-  ) { }
+  constructor(private itemService: ItemService) {}
 
   @Post()
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadMultiFilesAws('images'))
-  @ApiConsumes(SwaggerContentTypes.MULTIPART)
-  @ApiOperation({ summary: "Create new menu item by admin." })
+  @ApiConsumes(SwaggerContentTypes.Multipart)
+  @ApiOperation({ summary: 'Create new menu item by admin.' })
   async createItem(
-    @StringToArray("ingredients") _: null,
+    @StringToArray('ingredients') _: null,
     @UploadedFiles() images: Array<MulterFileType>,
     @Body() createFoodDto: CreateItemDto,
   ) {
-    return this.itemService.createItem(
-      createFoodDto,
-      images,
-    )
+    return this.itemService.createItem(createFoodDto, images);
   }
-
 
   @Get()
   @UseGuards(OptionalJwtGuard)
-  @ApiOperation({ summary: "Get all items." })
-  async getAllItem(
-    @Query() sortItemDto: SortItemDto,
-    @Req() req: Request,
-  ) {
+  @ApiOperation({ summary: 'Get all items.' })
+  async getAllItem(@Query() sortItemDto: SortItemDto, @Req() req: Request) {
     const userId = req?.user?.id || null;
-    return this.itemService.getAllItems(
-      userId,
-      sortItemDto
-    )
+    return this.itemService.getAllItems(userId, sortItemDto);
   }
 
   @Get('admin')
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: "Get all items by admin, including items that are not allowed to be shown." })
-  async getAllItemsByAdmin(
-    @Query() sortItemDto: SortItemDto,
-  ) {
-    return this.itemService.getAllItemsByAdmin(
-      sortItemDto,
-    )
+  @ApiOperation({
+    summary:
+      'Get all items by admin, including items that are not allowed to be shown.',
+  })
+  async getAllItemsByAdmin(@Query() sortItemDto: SortItemDto) {
+    return this.itemService.getAllItemsByAdmin(sortItemDto);
   }
 
-  @Get("/:id")
+  @Get('/:id')
   @UseGuards(OptionalJwtGuard)
-  @ApiOperation({ summary: "Get a item by id." })
+  @ApiOperation({ summary: 'Get a item by id.' })
   async getItemById(
-    @Param("id", UUIDValidationPipe) itemId: string,
+    @Param('id', UUIDValidationPipe) itemId: string,
     @Req() req: Request,
   ) {
     const userId = req?.user?.id || null;
-    return this.itemService.getItemById(
-      itemId,
-      userId,
-    )
+    return this.itemService.getItemById(itemId, userId);
   }
 
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: "Delete a menu item by admin." })
+  @ApiOperation({ summary: 'Delete a menu item by admin.' })
   @Delete('/:id')
-  async deleteItemById(
-    @Param("id", UUIDValidationPipe) itemId: string
-  ) {
-    return this.itemService.deleteItemById(
-      itemId
-    )
+  async deleteItemById(@Param('id', UUIDValidationPipe) itemId: string) {
+    return this.itemService.deleteItemById(itemId);
   }
 
-  @Put("/:id")
+  @Put('/:id')
   @UseGuards(JwtGuard, AdminGuard)
-  @UseInterceptors(UploadMultiFilesAws('images'), EmptyStringToUndefindInterceptor)
-  @ApiConsumes(SwaggerContentTypes.MULTIPART)
-  @ApiOperation({ summary: "Update menu item by admin." })
+  @UseInterceptors(
+    UploadMultiFilesAws('images'),
+    EmptyStringToUndefindInterceptor,
+  )
+  @ApiConsumes(SwaggerContentTypes.Multipart)
+  @ApiOperation({ summary: 'Update menu item by admin.' })
   async updateItem(
     @StringToArray('ingredients') _: null,
     @UploadedFiles() images: Array<MulterFileType>,
     @Body() updateFoodDto: UpdateItemDto,
-    @Param("id", UUIDValidationPipe) itemId: string
+    @Param('id', UUIDValidationPipe) itemId: string,
   ) {
-    return this.itemService.updateItem(
-      itemId,
-      updateFoodDto,
-      images
-    )
+    return this.itemService.updateItem(itemId, updateFoodDto, images);
   }
 
-
-
-  @Get("search/:search")
-  @ApiOperation({ summary: "Search items." })
-  async searchItem(
-    @Query('search') query: SearchItemDto,
-  ) {
-    return this.itemService.searchItem(
-      query,
-    )
+  @Get('search/:search')
+  @ApiOperation({ summary: 'Search items.' })
+  async searchItem(@Query('search') query: SearchItemDto) {
+    return this.itemService.searchItem(query);
   }
 }

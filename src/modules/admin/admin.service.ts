@@ -7,7 +7,6 @@ import { ContactService } from '../contact/contact.service';
 import { OrderStatus } from 'src/common/enums/order-status.enum';
 import { CommentService } from '../comment/comment.service';
 
-
 @Injectable()
 export class AdminService {
   constructor(
@@ -17,33 +16,51 @@ export class AdminService {
     private readonly discountService: DiscountService,
     private readonly contactService: ContactService,
     private readonly commentService: CommentService,
-  ) { }
-
+  ) {}
 
   // * primary
 
   async getUserOverview() {
-    const [usersCount, blockedUsersCount, newUsersThisWeek, newUsersThisMonth, monthlyActiveUsers] =
-      await Promise.all([
-        this.userService.countUsers(),
-        this.userService.countBlockUsers(),
-        this.userService.countUsersRegisteredThisWeek(),
-        this.userService.countUsersRegisteredThisMonth(),
-        this.orderService.countMonthlyActiveUsers(),
-      ]);
+    const [
+      usersCount,
+      blockedUsersCount,
+      newUsersThisWeek,
+      newUsersThisMonth,
+      monthlyActiveUsers,
+    ] = await Promise.all([
+      this.userService.countUsers(),
+      this.userService.countBlockUsers(),
+      this.userService.countUsersRegisteredThisWeek(),
+      this.userService.countUsersRegisteredThisMonth(),
+      this.orderService.countMonthlyActiveUsers(),
+    ]);
 
-    return { total: usersCount, blockedUsers: blockedUsersCount, newUsersThisWeek, newUsersThisMonth, monthlyActiveUsers };
+    return {
+      total: usersCount,
+      blockedUsers: blockedUsersCount,
+      newUsersThisWeek,
+      newUsersThisMonth,
+      monthlyActiveUsers,
+    };
   }
   async getOrderOverview() {
     const [totalOrders, activeOrders, ordersByStatus, todayOrders] =
       await Promise.all([
         this.orderService.countOrders(),
-        this.orderService.countOrdersByStatus([OrderStatus.PROCESSING, OrderStatus.DELIVERED]),
+        this.orderService.countOrdersByStatus([
+          OrderStatus.Processing,
+          OrderStatus.Delivered,
+        ]),
         this.orderService.countOrdersGroupedByStatus(),
         this.orderService.countOrdersByDate(new Date()),
       ]);
 
-    return { total: totalOrders, active: activeOrders, today: todayOrders, byStatus: ordersByStatus };
+    return {
+      total: totalOrders,
+      active: activeOrders,
+      today: todayOrders,
+      byStatus: ordersByStatus,
+    };
   }
   async getItemOverview() {
     const [itemCount, topSellingItems, lowStockItems] = await Promise.all([
@@ -55,23 +72,33 @@ export class AdminService {
     return { total: itemCount, lowStockItems, topSellingItems };
   }
   async getDiscountOverview() {
-    const [activeDiscounts, expiringDiscounts, topDiscountCodes] = await Promise.all([
-      this.discountService.countActiveDiscounts(),
-      this.discountService.getExpiringDiscounts(),
-      this.discountService.getTopDiscountCodes(),
-    ]);
+    const [activeDiscounts, expiringDiscounts, topDiscountCodes] =
+      await Promise.all([
+        this.discountService.countActiveDiscounts(),
+        this.discountService.getExpiringDiscounts(),
+        this.discountService.getTopDiscountCodes(),
+      ]);
 
-    return { active: activeDiscounts, expiringInWeek: expiringDiscounts, topUsed: topDiscountCodes };
+    return {
+      active: activeDiscounts,
+      expiringInWeek: expiringDiscounts,
+      topUsed: topDiscountCodes,
+    };
   }
   async getRevenueOverview() {
-    const [totalRevenue, revenueToday, revenueThisWeek, revenueThisMonth, averageOrderValue] =
-      await Promise.all([
-        this.orderService.getTotalRevenue(),
-        this.orderService.getTodayRevenue(),
-        this.orderService.getWeeklyRevenue(),
-        this.orderService.getMonthlyRevenue(),
-        this.orderService.getAverageOrderValue(),
-      ]);
+    const [
+      totalRevenue,
+      revenueToday,
+      revenueThisWeek,
+      revenueThisMonth,
+      averageOrderValue,
+    ] = await Promise.all([
+      this.orderService.getTotalRevenue(),
+      this.orderService.getTodayRevenue(),
+      this.orderService.getWeeklyRevenue(),
+      this.orderService.getMonthlyRevenue(),
+      this.orderService.getAverageOrderValue(),
+    ]);
 
     return {
       total: totalRevenue,
@@ -90,7 +117,12 @@ export class AdminService {
     return { total: messageCount, unreplied: unrepliedMessageCount };
   }
   async getCommentOverview() {
-    const [totalComments, acceptedComments, unacceptedComments, latestUnacceptedComments] = await Promise.all([
+    const [
+      totalComments,
+      acceptedComments,
+      unacceptedComments,
+      latestUnacceptedComments,
+    ] = await Promise.all([
       this.commentService.countComments(),
       this.commentService.countAcceptedComments(),
       this.commentService.countUnacceptedComments(),
@@ -105,15 +137,16 @@ export class AdminService {
     };
   }
   async getOverview() {
-    const [user, order, item, discount, revenue, message, comment] = await Promise.all([
-      this.getUserOverview(),
-      this.getOrderOverview(),
-      this.getItemOverview(),
-      this.getDiscountOverview(),
-      this.getRevenueOverview(),
-      this.getMessageOverview(),
-      this.getCommentOverview(),
-    ]);
+    const [user, order, item, discount, revenue, message, comment] =
+      await Promise.all([
+        this.getUserOverview(),
+        this.getOrderOverview(),
+        this.getItemOverview(),
+        this.getDiscountOverview(),
+        this.getRevenueOverview(),
+        this.getMessageOverview(),
+        this.getCommentOverview(),
+      ]);
 
     return { user, order, item, discount, revenue, message, comment };
   }

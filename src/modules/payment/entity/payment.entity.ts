@@ -1,8 +1,7 @@
-
-import { BaseEntity } from "src/common/abstracts/base.entity";
-import { EntityName } from "src/common/enums/entity.enum";
-import { OrderEntity } from "src/modules/order/entity/order.entity";
-import { UserEntity } from "src/modules/user/entities/user.entity";
+import { BaseEntity } from 'src/common/abstracts/base.entity';
+import { EntityName } from 'src/common/enums/entity.enum';
+import { OrderEntity } from 'src/modules/order/entity/order.entity';
+import { UserEntity } from 'src/modules/user/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -10,11 +9,10 @@ import {
   JoinColumn,
   ManyToOne,
   UpdateDateColumn,
-} from "typeorm";
+} from 'typeorm';
 
-@Entity(EntityName.PAYMENT)
+@Entity(EntityName.Payment)
 export class PaymentEntity extends BaseEntity {
-
   @Column({ default: false })
   status: boolean;
 
@@ -37,20 +35,20 @@ export class PaymentEntity extends BaseEntity {
   ref_id: number;
 
   @ManyToOne(() => OrderEntity, (order) => order.payments, {
-    onDelete: "CASCADE",
+    onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: "order_id" })
+  @JoinColumn({ name: 'order_id' })
   order: OrderEntity;
 
   @ManyToOne(() => UserEntity, (user) => user.payments, {
-    onDelete: "CASCADE",
+    onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: "user_id" })
+  @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
   @CreateDateColumn()
   created_at: Date;
-  
+
   @UpdateDateColumn()
   updated_at: Date;
 }

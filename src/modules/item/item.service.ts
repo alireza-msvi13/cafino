@@ -1,4 +1,12 @@
-import { BadRequestException, HttpStatus, Inject, Injectable, NotFoundException, UnprocessableEntityException, forwardRef } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+  forwardRef,
+} from '@nestjs/common';
 import { StorageService } from '../storage/storage.service';
 import { ItemEntity } from './entities/item.entity';
 import { CreateItemDto } from './dto/create-item.dto';
@@ -17,7 +25,6 @@ import { OrderService } from '../order/order.service';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { SearchItemDto } from './dto/search-item.dto';
 
-
 @Injectable()
 export class ItemService {
   constructor(
@@ -31,14 +38,13 @@ export class ItemService {
     @Inject(forwardRef(() => UserService))
     private userService: UserService,
     private orderService: OrderService,
-
-  ) { }
+  ) {}
 
   // *primary
 
   async createItem(
     createItemDto: CreateItemDto,
-    images: MulterFileType[]
+    images: MulterFileType[],
   ): Promise<ServerResponse> {
     const {
       title,
@@ -50,7 +56,6 @@ export class ItemService {
       show = true,
       category: categoryId,
     } = createItemDto;
-
 
     await this.categoryService.checkCategoryVisibility(categoryId);
 
@@ -67,30 +72,34 @@ export class ItemService {
       discount: Number(discount),
       quantity: Number(quantity),
       category: { id: categoryId },
-      show: showBoolean
+      show: showBoolean,
     });
     await this.itemRepository.save(newItem);
 
     if (images.length > 0) {
-      await this.storageService.uploadMultiFile(images, ImageFolder.ITEM);
-      const imageEntities = images.map(image => ({
+      await this.storageService.uploadMultiFile(images, ImageFolder.Item);
+      const imageEntities = images.map((image) => ({
         image: image.filename,
-        imageUrl: this.storageService.getFileLink(image.filename, ImageFolder.ITEM),
+        imageUrl: this.storageService.getFileLink(
+          image.filename,
+          ImageFolder.Item,
+        ),
         item: { id: newItem.id },
       }));
 
       await this.itemImageRepository.save(imageEntities);
     }
 
-    return new ServerResponse(HttpStatus.CREATED, 'Menu item created successfully.');
-
+    return new ServerResponse(
+      HttpStatus.CREATED,
+      'Menu item created successfully.',
+    );
   }
   async updateItem(
     itemId: string,
     updateItemDto: UpdateItemDto,
-    images: MulterFileType[]
+    images: MulterFileType[],
   ): Promise<ServerResponse> {
-
     const {
       title,
       ingredients,
@@ -99,14 +108,14 @@ export class ItemService {
       discount,
       quantity,
       show,
-      category: categoryId
+      category: categoryId,
     } = updateItemDto;
 
     const item = await this.itemRepository.findOne({
       where: { id: itemId },
-      relations: ["images"],
+      relations: ['images'],
     });
-    if (!item) throw new NotFoundException("Menu item not found.");
+    if (!item) throw new NotFoundException('Menu item not found.');
 
     const updateObject: DeepPartial<ItemEntity> = {};
 
@@ -119,30 +128,32 @@ export class ItemService {
     if (description) updateObject.description = description;
     if (price) updateObject.price = +price;
     if (discount) updateObject.discount = +discount;
-    if (quantity) updateObject.quantity = +quantity
+    if (quantity) updateObject.quantity = +quantity;
     if (isBoolean(show)) updateObject.show = toBoolean(show);
 
     const hasTextDataToUpdate = Object.keys(updateObject).length > 0;
     const hasNewImages = images.length > 0;
 
     if (!hasTextDataToUpdate && !hasNewImages) {
-      return new ServerResponse(HttpStatus.OK, "No changes were provided.");
+      return new ServerResponse(HttpStatus.OK, 'No changes were provided.');
     }
 
     if (images.length > 0) {
       await Promise.all([
         ...item.images.map(async (img) => {
-          await this.storageService.deleteFile(img.image, ImageFolder.ITEM);
+          await this.storageService.deleteFile(img.image, ImageFolder.Item);
           await this.itemImageRepository.delete({ id: img.id });
         }),
       ]);
 
-      await this.storageService.uploadMultiFile(images, ImageFolder.ITEM);
+      await this.storageService.uploadMultiFile(images, ImageFolder.Item);
 
-
-      const imageEntities = images.map(image => ({
+      const imageEntities = images.map((image) => ({
         image: image.filename,
-        imageUrl: this.storageService.getFileLink(image.filename, ImageFolder.ITEM),
+        imageUrl: this.storageService.getFileLink(
+          image.filename,
+          ImageFolder.Item,
+        ),
         item: { id: itemId },
       }));
 
@@ -153,13 +164,12 @@ export class ItemService {
       await this.itemRepository.update({ id: itemId }, updateObject);
     }
 
-    return new ServerResponse(HttpStatus.OK, "Menu item updated successfully.")
+    return new ServerResponse(HttpStatus.OK, 'Menu item updated successfully.');
   }
   async getAllItems(
     userId: string,
-    sortItemDto: SortItemDto
+    sortItemDto: SortItemDto,
   ): Promise<ServerResponse> {
-
     const {
       page = 1,
       limit = 10,
@@ -168,45 +178,46 @@ export class ItemService {
       maxPrice,
       category,
       availableOnly,
-      search
+      search,
     } = sortItemDto;
 
     const baseQuery = this.itemRepository
-      .createQueryBuilder("item")
-      .leftJoin("item.category", "category")
-      .leftJoin("item.images", "itemImage")
-      .where("category.show = :show", { show: true })
-      .andWhere("item.show = :show", { show: true });
+      .createQueryBuilder('item')
+      .leftJoin('item.category', 'category')
+      .leftJoin('item.images', 'itemImage')
+      .where('category.show = :show', { show: true })
+      .andWhere('item.show = :show', { show: true });
 
-
-    if (minPrice !== undefined) baseQuery.andWhere("item.price >= :minPrice", { minPrice });
-    if (maxPrice !== undefined) baseQuery.andWhere("item.price <= :maxPrice", { maxPrice });
-    if (availableOnly === true) baseQuery.andWhere("item.quantity > 0");
-    if (category) baseQuery.andWhere("category.title = :title", { title: category });
+    if (minPrice !== undefined)
+      baseQuery.andWhere('item.price >= :minPrice', { minPrice });
+    if (maxPrice !== undefined)
+      baseQuery.andWhere('item.price <= :maxPrice', { maxPrice });
+    if (availableOnly === true) baseQuery.andWhere('item.quantity > 0');
+    if (category)
+      baseQuery.andWhere('category.title = :title', { title: category });
     if (search) {
       baseQuery.andWhere(
-        "(LOWER(item.title) LIKE :search OR LOWER(item.description) LIKE :search OR LOWER(item.ingredients) LIKE :search)",
-        { search: `%${search.toLowerCase()}%` }
+        '(LOWER(item.title) LIKE :search OR LOWER(item.description) LIKE :search OR LOWER(item.ingredients) LIKE :search)',
+        { search: `%${search.toLowerCase()}%` },
       );
     }
 
-
     switch (sortBy) {
       case SortByOption.LowestPrice:
-        baseQuery.orderBy("item.price", "ASC");
+        baseQuery.orderBy('item.price', 'ASC');
         break;
       case SortByOption.HighestPrice:
-        baseQuery.orderBy("item.price", "DESC");
+        baseQuery.orderBy('item.price', 'DESC');
         break;
       case SortByOption.HighestDiscount:
-        baseQuery.orderBy("item.discount", "DESC");
+        baseQuery.orderBy('item.discount', 'DESC');
         break;
       case SortByOption.TopRated:
-        baseQuery.orderBy("item.rate", "DESC");
+        baseQuery.orderBy('item.rate', 'DESC');
         break;
       case SortByOption.Newest:
       default:
-        baseQuery.orderBy("item.createdAt", "DESC");
+        baseQuery.orderBy('item.createdAt', 'DESC');
         break;
     }
 
@@ -214,20 +225,20 @@ export class ItemService {
 
     const items = await baseQuery
       .select([
-        "item.id",
-        "item.title",
-        "item.ingredients",
-        "item.description",
-        "item.price",
-        "item.discount",
-        "item.quantity",
-        "item.rate",
-        "item.rate_count",
-        "category.title",
-        "item.createdAt",
-        "itemImage.id",
-        "itemImage.image",
-        "itemImage.imageUrl",
+        'item.id',
+        'item.title',
+        'item.ingredients',
+        'item.description',
+        'item.price',
+        'item.discount',
+        'item.quantity',
+        'item.rate',
+        'item.rate_count',
+        'category.title',
+        'item.createdAt',
+        'itemImage.id',
+        'itemImage.image',
+        'itemImage.imageUrl',
       ])
       .skip((page - 1) * limit)
       .take(limit)
@@ -238,21 +249,23 @@ export class ItemService {
       favoriteItemIds = await this.userService.getFavoriteItemIds(userId);
     }
 
-    const dataWithFav = items.map(item => ({
+    const dataWithFav = items.map((item) => ({
       ...item,
-      isFav: favoriteItemIds.includes(item.id)
+      isFav: favoriteItemIds.includes(item.id),
     }));
 
-    return new ServerResponse(HttpStatus.OK, 'Menu items fetched successfully.', {
-      total,
-      page,
-      limit,
-      items: dataWithFav
-    });
-
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Menu items fetched successfully.',
+      {
+        total,
+        page,
+        limit,
+        items: dataWithFav,
+      },
+    );
   }
   async getAllItemsByAdmin(sortItemDto: SortItemDto) {
-
     const {
       page = 1,
       limit = 10,
@@ -261,160 +274,165 @@ export class ItemService {
       maxPrice,
       search,
       category,
-      availableOnly = false
+      availableOnly = false,
     } = sortItemDto;
 
     const baseQuery = this.itemRepository
-      .createQueryBuilder("item")
-      .leftJoin("item.category", "category")
-      .leftJoin("item.images", "itemImage")
+      .createQueryBuilder('item')
+      .leftJoin('item.category', 'category')
+      .leftJoin('item.images', 'itemImage');
 
-
-    if (minPrice !== undefined) baseQuery.andWhere("item.price >= :minPrice", { minPrice });
-    if (maxPrice !== undefined) baseQuery.andWhere("item.price <= :maxPrice", { maxPrice });
-    if (availableOnly === true) baseQuery.andWhere("item.quantity > 0");
-    if (category) baseQuery.andWhere("category.title = :title", { title: category });
+    if (minPrice !== undefined)
+      baseQuery.andWhere('item.price >= :minPrice', { minPrice });
+    if (maxPrice !== undefined)
+      baseQuery.andWhere('item.price <= :maxPrice', { maxPrice });
+    if (availableOnly === true) baseQuery.andWhere('item.quantity > 0');
+    if (category)
+      baseQuery.andWhere('category.title = :title', { title: category });
     if (search) {
       baseQuery.andWhere(
-        "(LOWER(item.title) LIKE :search OR LOWER(item.description) LIKE :search OR LOWER(item.ingredients) LIKE :search)",
-        { search: `%${search.toLowerCase()}%` }
+        '(LOWER(item.title) LIKE :search OR LOWER(item.description) LIKE :search OR LOWER(item.ingredients) LIKE :search)',
+        { search: `%${search.toLowerCase()}%` },
       );
     }
 
-
-
     switch (sortBy) {
       case SortByOption.LowestPrice:
-        baseQuery.orderBy("item.price", "ASC");
+        baseQuery.orderBy('item.price', 'ASC');
         break;
       case SortByOption.HighestPrice:
-        baseQuery.orderBy("item.price", "DESC");
+        baseQuery.orderBy('item.price', 'DESC');
         break;
       case SortByOption.HighestDiscount:
-        baseQuery.orderBy("item.discount", "DESC");
+        baseQuery.orderBy('item.discount', 'DESC');
         break;
       case SortByOption.TopRated:
-        baseQuery.orderBy("item.rate", "DESC");
+        baseQuery.orderBy('item.rate', 'DESC');
         break;
       case SortByOption.Newest:
       default:
-        baseQuery.orderBy("item.createdAt", "DESC");
+        baseQuery.orderBy('item.createdAt', 'DESC');
         break;
     }
 
-
     const total = await baseQuery.getCount();
-
 
     const data = await baseQuery
       .select([
-        "item.id",
-        "item.title",
-        "item.ingredients",
-        "item.description",
-        "item.price",
-        "item.discount",
-        "item.show",
-        "item.quantity",
-        "item.rate",
-        "item.rate_count",
-        "category.title",
-        "item.createdAt",
-        "itemImage.id",
-        "itemImage.image",
-        "itemImage.imageUrl",
+        'item.id',
+        'item.title',
+        'item.ingredients',
+        'item.description',
+        'item.price',
+        'item.discount',
+        'item.show',
+        'item.quantity',
+        'item.rate',
+        'item.rate_count',
+        'category.title',
+        'item.createdAt',
+        'itemImage.id',
+        'itemImage.image',
+        'itemImage.imageUrl',
       ])
       .skip((page - 1) * limit)
       .take(limit)
       .getMany();
 
-    return new ServerResponse(HttpStatus.OK, 'Menu items fetched successfully.', {
-      total,
-      page,
-      limit,
-      items: data
-    });
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Menu items fetched successfully.',
+      {
+        total,
+        page,
+        limit,
+        items: data,
+      },
+    );
   }
   async getItemById(itemId: string, userId: string): Promise<ServerResponse> {
-
     const item = await this.itemRepository
-      .createQueryBuilder("item")
-      .leftJoin("item.category", "category")
-      .leftJoin("item.images", "itemImage")
-      .leftJoin("item.comments", "comment", "comment.accept = true")
-      .leftJoin("comment.user", "user")
-      .leftJoin("comment.children", "children", "children.accept = true")
-      .leftJoin("children.user", "childrenUser")
+      .createQueryBuilder('item')
+      .leftJoin('item.category', 'category')
+      .leftJoin('item.images', 'itemImage')
+      .leftJoin('item.comments', 'comment', 'comment.accept = true')
+      .leftJoin('comment.user', 'user')
+      .leftJoin('comment.children', 'children', 'children.accept = true')
+      .leftJoin('children.user', 'childrenUser')
       .select([
-        "item.id",
-        "item.title",
-        "item.ingredients",
-        "item.description",
-        "item.price",
-        "item.discount",
-        "item.quantity",
-        "item.rate",
-        "item.rate_count",
-        "category.title",
-        "itemImage.image",
-        "itemImage.imageUrl",
-        "comment.id",
-        "comment.text",
-        "user.first_name",
-        "user.last_name",
-        "user.username",
-        "children.text",
-        "childrenUser.first_name",
-        "childrenUser.last_name",
-        "childrenUser.username"
+        'item.id',
+        'item.title',
+        'item.ingredients',
+        'item.description',
+        'item.price',
+        'item.discount',
+        'item.quantity',
+        'item.rate',
+        'item.rate_count',
+        'category.title',
+        'itemImage.image',
+        'itemImage.imageUrl',
+        'comment.id',
+        'comment.text',
+        'user.first_name',
+        'user.last_name',
+        'user.username',
+        'children.text',
+        'childrenUser.first_name',
+        'childrenUser.last_name',
+        'childrenUser.username',
       ])
-      .where("item.id = :itemId", { itemId })
-      .andWhere("category.show = :show", { show: true })
-      .andWhere("item.show = :show", { show: true })
+      .where('item.id = :itemId', { itemId })
+      .andWhere('category.show = :show', { show: true })
+      .andWhere('item.show = :show', { show: true })
       .getOne();
 
-    if (!item) throw new NotFoundException("Menu Item not found.");
+    if (!item) throw new NotFoundException('Menu Item not found.');
 
     const isFav = await this.userService.isItemFavorited(userId, itemId);
 
-    return new ServerResponse(HttpStatus.OK, 'Menu item fetched successfully.', {
-      item: {
-        ...item,
-        isFav
-      }
-    });
-
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Menu item fetched successfully.',
+      {
+        item: {
+          ...item,
+          isFav,
+        },
+      },
+    );
   }
-  async deleteItemById(
-    itemId: string
-  ): Promise<ServerResponse> {
+  async deleteItemById(itemId: string): Promise<ServerResponse> {
     const deleteResult = await this.itemRepository.delete({ id: itemId });
-    if (deleteResult.affected === 0) throw new NotFoundException("Item not found");
+    if (deleteResult.affected === 0)
+      throw new NotFoundException('Item not found');
 
     return new ServerResponse(HttpStatus.OK, 'Menu item delete successfully.');
   }
   async searchItem(query: SearchItemDto): Promise<ServerResponse> {
-
     const { page = 1, limit = 10, search = '' } = query;
 
     const [items, total] = await this.itemRepository
       .createQueryBuilder('item')
       .leftJoinAndSelect('item.category', 'category')
       .leftJoinAndSelect('item.images', 'images')
-      .where("category.show = :show", { show: true })
-      .andWhere("item.show = :show", { show: true })
+      .where('category.show = :show', { show: true })
+      .andWhere('item.show = :show', { show: true })
       .andWhere(
-        new Brackets(qb => {
-          qb.where('item.title ILIKE :search', { search: `%${search}%` })
-            .orWhere('item.description ILIKE :search', { search: `%${search}%` });
-        })
+        new Brackets((qb) => {
+          qb.where('item.title ILIKE :search', {
+            search: `%${search}%`,
+          }).orWhere('item.description ILIKE :search', {
+            search: `%${search}%`,
+          });
+        }),
       )
       .skip((page - 1) * limit)
       .take(limit)
       .getManyAndCount();
 
     if (!items.length) {
-      throw new NotFoundException("No items found matching the search query.");
+      throw new NotFoundException('No items found matching the search query.');
     }
 
     return new ServerResponse(HttpStatus.OK, 'Search done successfully.', {
@@ -424,7 +442,9 @@ export class ItemService {
       items,
     });
 
-    return new ServerResponse(HttpStatus.OK, 'Search done successfully.', { items });
+    return new ServerResponse(HttpStatus.OK, 'Search done successfully.', {
+      items,
+    });
   }
 
   // *helper
@@ -439,14 +459,11 @@ export class ItemService {
       .getOne();
 
     if (!item) throw new NotFoundException('Menu Item not found.');
-    return item
+    return item;
   }
-  async checkItemQuantity(
-    itemId: string,
-    count: number = 1
-  ): Promise<void> {
+  async checkItemQuantity(itemId: string, count: number = 1): Promise<void> {
     if (count < 1) {
-      throw new BadRequestException("Invalid quantity requested.");
+      throw new BadRequestException('Invalid quantity requested.');
     }
 
     const item = await this.checkItemExist(itemId);
@@ -457,30 +474,42 @@ export class ItemService {
         message: `Unfortunately, the ${item?.title} stock is less than the quantity you requested.`,
         statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
         item: item?.title,
-        available_quantity: item?.quantity
+        available_quantity: item?.quantity,
       });
     }
   }
   async incrementItemQuantity(
     itemId: string,
-    count: number = 1
+    count: number = 1,
   ): Promise<void> {
-    const item = await this.checkItemExist(itemId)
-    item.quantity += count
-    await this.itemRepository.update({ id: item.id }, { quantity: item.quantity })
+    const item = await this.checkItemExist(itemId);
+    item.quantity += count;
+    await this.itemRepository.update(
+      { id: item.id },
+      { quantity: item.quantity },
+    );
   }
   async decrementItemQuantity(
     itemId: string,
-    count: number = 1
+    count: number = 1,
   ): Promise<void> {
-    const item = await this.checkItemExist(itemId)
-    item.quantity -= count
-    await this.itemRepository.update({ id: item.id }, { quantity: item.quantity })
+    const item = await this.checkItemExist(itemId);
+    item.quantity -= count;
+    await this.itemRepository.update(
+      { id: item.id },
+      { quantity: item.quantity },
+    );
   }
-  async updateItemShowStatusByCategoryId(categoryId: string, showStatus: boolean): Promise<void> {
-    await this.itemRepository.update({ category: { id: categoryId } }, {
-      show: showStatus
-    })
+  async updateItemShowStatusByCategoryId(
+    categoryId: string,
+    showStatus: boolean,
+  ): Promise<void> {
+    await this.itemRepository.update(
+      { category: { id: categoryId } },
+      {
+        show: showStatus,
+      },
+    );
   }
   async decreaseItemsQuantity(orderId: string): Promise<void> {
     const order = await this.orderService.getOrderWithItems(orderId);
@@ -488,8 +517,8 @@ export class ItemService {
     for (const orderItem of order.items) {
       await this.itemRepository.decrement(
         { id: orderItem.item.id },
-        "quantity",
-        orderItem.count
+        'quantity',
+        orderItem.count,
       );
     }
   }
@@ -508,7 +537,11 @@ export class ItemService {
 
     return item || null;
   }
-  async updateItemRating(itemId: string, rating: number, ratingCount: number): Promise<void> {
+  async updateItemRating(
+    itemId: string,
+    rating: number,
+    ratingCount: number,
+  ): Promise<void> {
     await this.itemRepository.update(itemId, {
       rate: rating,
       rate_count: ratingCount,
@@ -518,10 +551,10 @@ export class ItemService {
 
   async countActiveItems() {
     return this.itemRepository
-      .createQueryBuilder("item")
-      .leftJoin("item.category", "category")
-      .where("category.show = :show", { show: true })
-      .andWhere("item.show = :show", { show: true })
+      .createQueryBuilder('item')
+      .leftJoin('item.category', 'category')
+      .where('category.show = :show', { show: true })
+      .andWhere('item.show = :show', { show: true })
       .getCount();
   }
   async getLowStockItems(threshold: number, limit?: number) {
@@ -532,7 +565,4 @@ export class ItemService {
       take: limit,
     });
   }
-
-
-
 }

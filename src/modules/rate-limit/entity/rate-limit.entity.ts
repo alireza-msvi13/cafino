@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity(EntityName.RATE_LIMIT_RECORD)
+@Entity(EntityName.RateLimitRecord)
 @Index(['identifier', 'endpoint'], { unique: true })
 export class RateLimitRecord extends BaseEntity {
   @Column()

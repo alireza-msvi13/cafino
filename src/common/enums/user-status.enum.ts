@@ -1,4 +1,4 @@
 export enum UserStatus {
-    NORMAL="normal",
-    BLOCK="block",
+  Normal = 'normal',
+  Block = 'block',
 }

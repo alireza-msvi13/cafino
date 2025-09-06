@@ -1,5 +1,5 @@
 export enum BlockStatus {
-  NONE = 'none',
-  TEMPORARY = 'temporary',
-  PERMANENT = 'permanent',
+  None = 'none',
+  Temporary = 'temporary',
+  Permanent = 'permanent',
 }

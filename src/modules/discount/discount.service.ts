@@ -4,35 +4,38 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
-} from "@nestjs/common";
-import { DiscountDto } from "./dto/discount.dto";
-import { InjectRepository } from "@nestjs/typeorm";
-import { DiscountEntity } from "./entity/discount.entity";
-import { Between, DeepPartial, MoreThan, Repository } from "typeorm";
-import { ServerResponse } from "src/common/dto/server-response.dto";
-import { DiscountQueryDto } from "./dto/sort-discount.dto";
+} from '@nestjs/common';
+import { DiscountDto } from './dto/discount.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DiscountEntity } from './entity/discount.entity';
+import { Between, DeepPartial, MoreThan, Repository } from 'typeorm';
+import { ServerResponse } from 'src/common/dto/server-response.dto';
+import { DiscountQueryDto } from './dto/sort-discount.dto';
+import { DiscountSortField } from './enum/discount.enum';
 
 @Injectable()
 export class DiscountService {
   constructor(
     @InjectRepository(DiscountEntity)
-    private discountRepository: Repository<DiscountEntity>
-  ) { }
+    private discountRepository: Repository<DiscountEntity>,
+  ) {}
 
   // * primary
 
   async generate(discountDto: DiscountDto): Promise<ServerResponse> {
     const { amount, code, expires_in, limit, percent } = discountDto;
 
-    const isDiscountCodeExsit = await this.discountRepository.findOneBy({ code });
+    const isDiscountCodeExsit = await this.discountRepository.findOneBy({
+      code,
+    });
 
-    if (isDiscountCodeExsit) throw new ConflictException("Code already exsit");
+    if (isDiscountCodeExsit) throw new ConflictException('Code already exsit');
 
     const discountObject: DeepPartial<DiscountEntity> = { code };
 
     if ((!amount && !percent) || (amount && percent)) {
       throw new BadRequestException(
-        "You must enter one of the Amount or Percent fields."
+        'You must enter one of the Amount or Percent fields.',
       );
     }
     if (amount) discountObject.amount = amount;
@@ -41,7 +44,9 @@ export class DiscountService {
     if (limit) discountObject.limit = limit;
 
     const now = new Date();
-    const expiresDate = new Date(now.getTime() + 1000 * 60 * 60 * 24 * expires_in);
+    const expiresDate = new Date(
+      now.getTime() + 1000 * 60 * 60 * 24 * expires_in,
+    );
     expiresDate.setHours(0, 0, 0, 0);
     discountObject.expires_in = expiresDate;
 
@@ -49,17 +54,13 @@ export class DiscountService {
 
     await this.discountRepository.save(discount);
 
-    return new ServerResponse(HttpStatus.CREATED, 'Discount generated successfully.');
-
+    return new ServerResponse(
+      HttpStatus.CREATED,
+      'Discount generated successfully.',
+    );
   }
   async findAll(query: DiscountQueryDto): Promise<ServerResponse> {
-    const {
-      sortBy = 'created_at',
-      order = 'DESC',
-      isActive,
-      page = 1,
-      limit = 10,
-    } = query;
+    const { sortBy, isActive, page = 1, limit = 10 } = query;
 
     const qb = this.discountRepository.createQueryBuilder('discount');
 
@@ -67,7 +68,16 @@ export class DiscountService {
       qb.andWhere('discount.active = :isActive', { isActive });
     }
 
-    qb.orderBy(`discount.${sortBy}`, order);
+    switch (sortBy) {
+      case DiscountSortField.Newest:
+        qb.orderBy('discount.created_at', 'DESC');
+        break;
+      case DiscountSortField.Oldest:
+        qb.orderBy('discount.created_at', 'ASC');
+        break;
+      default:
+        qb.orderBy('discount.created_at', 'DESC');
+    }
 
     const total = await qb.getCount();
 
@@ -76,45 +86,58 @@ export class DiscountService {
       .take(limit)
       .getMany();
 
-    return new ServerResponse(HttpStatus.OK, 'Discounts fetched successfully.', {
-      total,
-      page,
-      limit,
-      discounts
-    });
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Discounts fetched successfully.',
+      {
+        total,
+        page,
+        limit,
+        discounts,
+      },
+    );
   }
   async delete(id: string): Promise<ServerResponse> {
     const discount = await this.discountRepository.findOneBy({ id });
-    if (!discount) throw new NotFoundException("Discount Not Found");
+    if (!discount) throw new NotFoundException('Discount Not Found');
     await this.discountRepository.delete({ id });
     return new ServerResponse(HttpStatus.OK, 'Discount deleted successfully.');
   }
-  async updateActivityStatus(id: string, status: boolean): Promise<ServerResponse> {
+  async updateActivityStatus(
+    id: string,
+    status: boolean,
+  ): Promise<ServerResponse> {
     const discount = await this.discountRepository.findOneBy({ id });
 
     if (!discount) {
-      throw new NotFoundException("Discount Not Found.");
+      throw new NotFoundException('Discount Not Found.');
     }
 
     if (discount.active === status) {
-      throw new ConflictException(`Discount is already ${status ? "active" : "inactive"}.`);
+      throw new ConflictException(
+        `Discount is already ${status ? 'active' : 'inactive'}.`,
+      );
     }
 
     const now = Date.now();
 
-    if (discount.limit !== null && discount.limit !== undefined && discount.limit <= discount.usage) {
-      throw new BadRequestException("Discount code expired.");
+    if (
+      discount.limit !== null &&
+      discount.limit !== undefined &&
+      discount.limit <= discount.usage
+    ) {
+      throw new BadRequestException('Discount code expired.');
     }
 
     if (discount.expires_in && discount.expires_in.getTime() <= now) {
-      throw new BadRequestException("Discount code expired.");
+      throw new BadRequestException('Discount code expired.');
     }
 
     await this.discountRepository.update({ id }, { active: status });
 
     return new ServerResponse(
       HttpStatus.OK,
-      `Discount status updated to ${status ? "active" : "inactive"}.`
+      `Discount status updated to ${status ? 'active' : 'inactive'}.`,
     );
   }
 
@@ -122,7 +145,7 @@ export class DiscountService {
 
   async findOneByCode(code: string) {
     const discount = await this.discountRepository.findOneBy({ code });
-    if (!discount) throw new NotFoundException("Discount Not Found");
+    if (!discount) throw new NotFoundException('Discount Not Found');
     return discount;
   }
 
@@ -162,9 +185,10 @@ export class DiscountService {
       .update()
       .set({
         usage: () => `"usage" + 1`,
-        active: () => `CASE WHEN "limit" IS NOT NULL AND "usage" + 1 >= "limit" THEN false ELSE active END`
+        active: () =>
+          `CASE WHEN "limit" IS NOT NULL AND "usage" + 1 >= "limit" THEN false ELSE active END`,
       })
-      .where("id = :id", { id })
+      .where('id = :id', { id })
       .execute();
   }
 

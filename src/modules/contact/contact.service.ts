@@ -8,43 +8,52 @@ import { ReplyContactDto } from './dto/reply-contact.dto';
 import { ContactQueryDto } from './dto/sort-contact.dto';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { MailService } from '../mail/mail.service';
+import { SortContactOption } from './enum/contact.enum';
 @Injectable()
 export class ContactService {
-
   constructor(
     @InjectRepository(Contact)
     private contactRepository: Repository<Contact>,
     @InjectRepository(Reply)
     private replyRepository: Repository<Reply>,
-    private readonly mailService: MailService
-  ) { }
-
+    private readonly mailService: MailService,
+  ) {}
 
   async create(createContactDto: CreateContactDto): Promise<ServerResponse> {
     const { name, email, phone, message } = createContactDto;
-    const contact = this.contactRepository.create({ name, email, phone, message });
+    const contact = this.contactRepository.create({
+      name,
+      email,
+      phone,
+      message,
+    });
     await this.contactRepository.save(contact);
 
-    return new ServerResponse(HttpStatus.CREATED, "Your message was sent successfully.");
+    return new ServerResponse(
+      HttpStatus.CREATED,
+      'Your message was sent successfully.',
+    );
   }
   async findAll(query: ContactQueryDto) {
-    const { sortBy, order, hasReply, name, email, phone } = query;
+    const { sortBy, hasReply, name, email, phone } = query;
 
-
-    const qb = this.contactRepository.createQueryBuilder('contact')
+    const qb = this.contactRepository
+      .createQueryBuilder('contact')
       .leftJoinAndSelect('contact.replies', 'reply');
 
-
     if (name) {
-      qb.andWhere('LOWER(contact.name) LIKE LOWER(:name)', { name: `%${name}%` });
+      qb.andWhere('LOWER(contact.name) LIKE LOWER(:name)', {
+        name: `%${name}%`,
+      });
     }
     if (email) {
-      qb.andWhere('LOWER(contact.email) LIKE LOWER(:email)', { email: `%${email}%` });
+      qb.andWhere('LOWER(contact.email) LIKE LOWER(:email)', {
+        email: `%${email}%`,
+      });
     }
     if (phone) {
       qb.andWhere('contact.phone LIKE :phone', { phone: `%${phone}%` });
     }
-
 
     if (hasReply !== undefined) {
       if (hasReply) {
@@ -54,21 +63,27 @@ export class ContactService {
       }
     }
 
-
-    if (sortBy === 'hasReply') {
-      qb.addSelect('COUNT(reply.id)', 'replyCount')
-        .groupBy('contact.id')
-        .orderBy('replyCount', order);
-    } else {
-      qb.orderBy(`contact.${sortBy}`, order);
+    switch (sortBy) {
+      case SortContactOption.Newest:
+        qb.orderBy('contact.created_at', 'DESC');
+        break;
+      case SortContactOption.Oldest:
+        qb.orderBy('contact.created_at', 'ASC');
+        break;
+      default:
+        qb.orderBy('contact.created_at', 'DESC');
     }
 
     const contacts = await qb.getMany();
 
-    return new ServerResponse(HttpStatus.OK, "Contact messages fetched successfully.", { contacts });
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Contact messages fetched successfully.',
+      { contacts },
+    );
   }
   async reply(contactId: string, dto: ReplyContactDto) {
-    const { subject, message } = dto
+    const { subject, message } = dto;
     const contact = await this.contactRepository.findOneBy({ id: contactId });
     if (!contact) throw new NotFoundException('Contact not found.');
 
@@ -77,8 +92,10 @@ export class ContactService {
 
     await this.mailService.sendReplyEmail(contact.email, subject, message);
 
-    return new ServerResponse(HttpStatus.OK, "Your message was sent successfully.");
-
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Your message was sent successfully.',
+    );
   }
   async getReplies(contactId: string) {
     const contact = await this.contactRepository.findOne({
@@ -90,7 +107,11 @@ export class ContactService {
       throw new NotFoundException('Contact not found.');
     }
 
-    return new ServerResponse(HttpStatus.OK, "Contact messages fetched successfully.", { replies: contact.replies });
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Contact messages fetched successfully.',
+      { replies: contact.replies },
+    );
   }
 
   // * admin dashboard reports
@@ -103,7 +124,4 @@ export class ContactService {
       where: { replies: null },
     });
   }
-
-
-
 }

@@ -3,19 +3,19 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
-} from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { OrderEntity } from "./entity/order.entity";
-import { DeepPartial, In, Repository } from "typeorm";
-import { OrderItemEntity } from "./entity/order-items.entity";
-import { UserService } from "../user/user.service";
-import { OrderStatus } from "src/common/enums/order-status.enum";
-import { OrderDto } from "./dto/order.dto";
-import { AllowdOrderStatus } from "src/common/constants/order-status.constant";
-import { PaginationDto } from "src/common/dto/pagination.dto";
-import { ServerResponse } from "src/common/dto/server-response.dto";
-import { OrderQueryDto } from "./dto/sort-order.dto";
-import { OrderSortField } from "./enum/order.enum";
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { OrderEntity } from './entity/order.entity';
+import { DeepPartial, In, Repository } from 'typeorm';
+import { OrderItemEntity } from './entity/order-items.entity';
+import { UserService } from '../user/user.service';
+import { OrderStatus } from 'src/common/enums/order-status.enum';
+import { OrderDto } from './dto/order.dto';
+import { AllowdOrderStatus } from 'src/common/constants/order-status.constant';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ServerResponse } from 'src/common/dto/server-response.dto';
+import { OrderQueryDto } from './dto/sort-order.dto';
+import { OrderSortField } from './enum/order.enum';
 
 @Injectable()
 export class OrderService {
@@ -24,75 +24,86 @@ export class OrderService {
     private orderRepository: Repository<OrderEntity>,
     @InjectRepository(OrderItemEntity)
     private orderItemRepository: Repository<OrderItemEntity>,
-    private userService: UserService
-  ) { }
-
+    private userService: UserService,
+  ) {}
 
   // * primary
 
-  async changeOrderStatusByAdmin(orderId: string, status: string): Promise<ServerResponse> {
-    await this.changeOrderStatus(orderId, status)
-    return new ServerResponse(HttpStatus.OK, `Order status changed to ${status} successfully.`);
+  async changeOrderStatusByAdmin(
+    orderId: string,
+    status: string,
+  ): Promise<ServerResponse> {
+    await this.changeOrderStatus(orderId, status);
+    return new ServerResponse(
+      HttpStatus.OK,
+      `Order status changed to ${status} successfully.`,
+    );
   }
   async getAllOrders(query: OrderQueryDto): Promise<ServerResponse> {
-    const {
-      limit = 10,
-      page = 1,
-      sortBy = OrderSortField.CREATED_AT,
-      order = "DESC",
-      status,
-    } = query;
+    const { limit = 10, page = 1, sortBy, status } = query;
 
     const baseQuery = this.orderRepository
-      .createQueryBuilder("order")
-      .leftJoinAndSelect("order.user", "user")
-      .leftJoinAndSelect("order.address", "address")
-      .leftJoinAndSelect("order.items", "items")
-      .leftJoinAndSelect("items.item", "item")
-      .leftJoinAndSelect("order.payments", "payments")
-      .leftJoinAndSelect("order.discount", "discount")
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.address', 'address')
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('items.item', 'item')
+      .leftJoinAndSelect('order.payments', 'payments')
+      .leftJoinAndSelect('order.discount', 'discount')
       .select([
+        'order.id',
+        'order.payment_amount',
+        'order.discount_amount',
+        'order.total_amount',
+        'order.status',
+        'order.description',
+        'order.created_at',
 
-        "order.id",
-        "order.payment_amount",
-        "order.discount_amount",
-        "order.total_amount",
-        "order.status",
-        "order.description",
-        "order.created_at",
+        'user.id',
+        'user.first_name',
+        'user.last_name',
+        'user.phone',
 
-        "user.id",
-        "user.first_name",
-        "user.last_name",
-        "user.phone",
+        'address.id',
+        'address.province',
+        'address.city',
+        'address.address',
 
-        "address.id",
-        "address.province",
-        "address.city",
-        "address.address",
+        'items.id',
+        'items.count',
+        'item.id',
+        'item.title',
+        'item.price',
 
-        "items.id",
-        "items.count",
-        "item.id",
-        "item.title",
-        "item.price",
+        'discount.id',
+        'discount.code',
+        'discount.percent',
+        'discount.amount',
 
-        "discount.id",
-        "discount.code",
-        "discount.percent",
-        "discount.amount",
-        
+        'payments.id',
+        'payments.status',
+        'payments.amount',
+        'payments.invoice_number',
+        'payments.ref_id',
+        'payments.created_at',
+      ]);
 
-        "payments.id",
-        "payments.status",
-        "payments.amount",
-        "payments.invoice_number",
-        "payments.ref_id",
-        "payments.created_at",
-      ]).orderBy(`order.${sortBy}`, order);
+    switch (sortBy) {
+      case OrderSortField.Newest:
+        baseQuery.orderBy('order.created_at', 'DESC');
+        break;
+      case OrderSortField.Oldest:
+        baseQuery.orderBy('order.created_at', 'ASC');
+        break;
+      case OrderSortField.TotalAmount:
+        baseQuery.orderBy('order.total_amount', 'DESC');
+        break;
+      default:
+        baseQuery.orderBy('order.created_at', 'DESC');
+    }
 
-    if (status) {
-      baseQuery.andWhere("order.status = :status", { status });
+    if (status && AllowdOrderStatus.includes(status)) {
+      baseQuery.andWhere('order.status = :status', { status });
     }
 
     const total = await baseQuery.getCount();
@@ -102,7 +113,7 @@ export class OrderService {
       .take(limit)
       .getMany();
 
-    return new ServerResponse(HttpStatus.OK, "Orders fetched successfully.", {
+    return new ServerResponse(HttpStatus.OK, 'Orders fetched successfully.', {
       total,
       limit,
       page,
@@ -112,16 +123,24 @@ export class OrderService {
 
   // * helper
 
-  async create(cart: OrderDto, userId: string, addressId: string, description: string) {
+  async create(
+    cart: OrderDto,
+    userId: string,
+    addressId: string,
+    description: string,
+  ) {
+    await this.userService.findUserByAddress(userId, addressId);
 
+    const {
+      cartItems,
+      totalAmount,
+      paymentAmount,
+      totalDiscount,
+      generalDiscount,
+    } = cart;
 
-    await this.userService.findUserByAddress(userId, addressId)
+    if (!cartItems.length) throw new BadRequestException('Cart is empty.');
 
-    const { cartItems, totalAmount, paymentAmount, totalDiscount, generalDiscount } = cart;
-
-    if (!cartItems.length) throw new BadRequestException("Cart is empty.");
-
-    
     let order = this.orderRepository.create({
       total_amount: totalAmount,
       description,
@@ -135,49 +154,46 @@ export class OrderService {
 
     order = await this.orderRepository.save(order);
 
-
     let orderItems: DeepPartial<OrderItemEntity>[] = [];
 
     for (const cartItem of cartItems) {
       orderItems.push({
         count: cartItem.count,
         item: { id: cartItem.itemId },
-        order: { id: order.id }
+        order: { id: order.id },
       });
     }
-    
+
     await this.orderItemRepository.insert(orderItems);
 
     return order;
-
-
   }
   async findOne(id: string) {
     const order = await this.orderRepository.findOneBy({ id });
-    if (!order) throw new NotFoundException("Order not found.");
+    if (!order) throw new NotFoundException('Order not found.');
     return order;
   }
   async changeOrderStatus(orderId: string, status: string) {
     if (!AllowdOrderStatus.includes(status)) {
-      throw new BadRequestException('Invalid status.')
+      throw new BadRequestException('Invalid status.');
     }
-    await this.orderRepository.update({ id: orderId }, {
-      status
-    })
+    await this.orderRepository.update(
+      { id: orderId },
+      {
+        status,
+      },
+    );
   }
-  async getUserOrders(
-    userId: string,
-    paginationDto: PaginationDto
-  ) {
+  async getUserOrders(userId: string, paginationDto: PaginationDto) {
     const { limit = 10, page = 1 } = paginationDto;
 
     const baseQuery = this.orderRepository
-      .createQueryBuilder("order")
-      .leftJoinAndSelect("order.address", "address")
-      .leftJoinAndSelect("order.items", "items")
-      .leftJoinAndSelect("items.item", "item")
-      .leftJoinAndSelect("order.payments", "payments")
-      .where("order.user.id = :userId", { userId });
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.address', 'address')
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('items.item', 'item')
+      .leftJoinAndSelect('order.payments', 'payments')
+      .where('order.user.id = :userId', { userId });
 
     const total = await baseQuery.getCount();
 
@@ -186,13 +202,12 @@ export class OrderService {
       .take(limit)
       .getMany();
 
-
     return {
       data,
       total,
       page,
       limit,
-    }
+    };
   }
   async getOrderWithItems(orderId: string): Promise<OrderEntity> {
     const order = await this.orderRepository.findOne({
@@ -202,7 +217,7 @@ export class OrderService {
       },
     });
     if (!order) {
-      throw new NotFoundException("Order not found.");
+      throw new NotFoundException('Order not found.');
     }
     return order;
   }
@@ -227,14 +242,16 @@ export class OrderService {
   }
   async countOrdersByStatus(statuses: OrderStatus[]) {
     return this.orderRepository.count({
-      where: { status: In(statuses) }
+      where: { status: In(statuses) },
     });
   }
   async countMonthlyActiveUsers(days = 30): Promise<number> {
     const result = await this.orderRepository
       .createQueryBuilder('order')
       .select('COUNT(DISTINCT order.user)', 'count')
-      .where('order.created_at >= :date', { date: new Date(Date.now() - days * 24 * 60 * 60 * 1000) })
+      .where('order.created_at >= :date', {
+        date: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
+      })
       .getRawOne();
 
     return Number(result.count) || 0;
@@ -247,12 +264,14 @@ export class OrderService {
       .groupBy('order.status')
       .getRawMany();
 
-    const counts: Record<OrderStatus, number> = Object.values(OrderStatus).reduce(
+    const counts: Record<OrderStatus, number> = Object.values(
+      OrderStatus,
+    ).reduce(
       (acc, status) => {
         acc[status] = 0;
         return acc;
       },
-      {} as Record<OrderStatus, number>
+      {} as Record<OrderStatus, number>,
     );
 
     result.forEach((row) => {
@@ -290,31 +309,34 @@ export class OrderService {
       .limit(limit)
       .getRawMany();
 
-    return items.map(i => ({
+    return items.map((i) => ({
       ...i,
       totalSold: Number(i.totalSold),
     }));
   }
 
-
-
   // * admin dashboard reports
 
-
-  async getRevenueByDateRange(start?: Date, end?: Date): Promise<RevenueSummary> {
+  async getRevenueByDateRange(
+    start?: Date,
+    end?: Date,
+  ): Promise<RevenueSummary> {
     const query = this.orderRepository
-      .createQueryBuilder("order")
-      .select("SUM(order.total_amount)", "grossSales")
-      .addSelect("SUM(order.discount_amount)", "discounts")
-      .addSelect("SUM(order.payment_amount)", "netRevenue")
-      .where("order.status = :status", { status: OrderStatus.DONE });
+      .createQueryBuilder('order')
+      .select('SUM(order.total_amount)', 'grossSales')
+      .addSelect('SUM(order.discount_amount)', 'discounts')
+      .addSelect('SUM(order.payment_amount)', 'netRevenue')
+      .where('order.status = :status', { status: OrderStatus.DONE });
 
     if (start && end) {
-      query.andWhere("order.created_at BETWEEN :start AND :end", { start, end });
+      query.andWhere('order.created_at BETWEEN :start AND :end', {
+        start,
+        end,
+      });
     } else if (start) {
-      query.andWhere("order.created_at >= :start", { start });
+      query.andWhere('order.created_at >= :start', { start });
     } else if (end) {
-      query.andWhere("order.created_at <= :end", { end });
+      query.andWhere('order.created_at <= :end', { end });
     }
 
     const result = await query.getRawOne();
@@ -363,13 +385,11 @@ export class OrderService {
 
   async getAverageOrderValue() {
     const { avg } = await this.orderRepository
-      .createQueryBuilder("order")
-      .select("AVG(order.total_amount)", "avg")
-      .where("order.status = :status", { status: OrderStatus.DONE })
+      .createQueryBuilder('order')
+      .select('AVG(order.total_amount)', 'avg')
+      .where('order.status = :status', { status: OrderStatus.DONE })
       .getRawOne();
 
     return Number(avg) || 0;
   }
-
-
 }

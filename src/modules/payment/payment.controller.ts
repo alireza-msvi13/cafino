@@ -1,19 +1,27 @@
-import { Body, Controller, Get, Post, Query, Res, UseGuards } from "@nestjs/common";
-import { PaymentService } from "./payment.service";
-import { PaymentDto } from "./dto/payment.dto";
-import { Response } from "express";
-import { JwtGuard } from "../auth/guards/access-token.guard";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
-import { GetUser } from "src/common/decorators/get-user.decorator";
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { PaymentService } from './payment.service';
+import { PaymentDto } from './dto/payment.dto';
+import { Response } from 'express';
+import { JwtGuard } from '../auth/guards/access-token.guard';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { GetUser } from 'src/common/decorators/get-user.decorator';
 
-@Controller("Payment")
+@Controller('Payment')
 @ApiTags('Payment')
 @UseGuards(JwtGuard)
 export class PaymentController {
-  constructor(private paymentService: PaymentService) { }
+  constructor(private paymentService: PaymentService) {}
 
-  @Post("gateway")
-  @ApiOperation({ summary: "Payment gateway." })
+  @Post('gateway')
+  @ApiOperation({ summary: 'Payment gateway.' })
   paymentGateway(
     @Body() paymentDto: PaymentDto,
     @GetUser('id') userId: string,
@@ -21,12 +29,12 @@ export class PaymentController {
     return this.paymentService.paymentGateway(paymentDto, userId);
   }
 
-  @Get("verify")
-  @ApiOperation({ summary: "Payment verify." })
+  @Get('verify')
+  @ApiOperation({ summary: 'Payment verify.' })
   async paymentVerify(
-    @Query("Authority") authority: string,
-    @Query("Status") status: string,
-    @Res() res: Response
+    @Query('Authority') authority: string,
+    @Query('Status') status: string,
+    @Res() res: Response,
   ) {
     const result = await this.paymentService.paymentVerify(authority, status);
     if (result.success) {
@@ -35,6 +43,4 @@ export class PaymentController {
       return res.redirect(`${process.env.FRONTEND_URL}/payment?status=failed`);
     }
   }
-
-
 }

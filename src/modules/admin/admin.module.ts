@@ -15,9 +15,9 @@ import { CommentModule } from '../comment/comment.module';
     OrderModule,
     ContactModule,
     DiscountModule,
-    CommentModule
+    CommentModule,
   ],
   controllers: [AdminController],
   providers: [AdminService],
 })
-export class AdminModule { }
+export class AdminModule {}

@@ -28,7 +28,7 @@ import { RateLimitModule } from './modules/rate-limit/rate-limit.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: join(process.cwd(), '.env')
+      envFilePath: join(process.cwd(), '.env'),
     }),
     WinstonModule.forRoot({
       transports: winstonLogger.transports,
@@ -50,9 +50,9 @@ import { RateLimitModule } from './modules/rate-limit/rate-limit.module';
     ContactModule,
     MailModule,
     AdminModule,
-    RateLimitModule
+    RateLimitModule,
   ],
   controllers: [AppController],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

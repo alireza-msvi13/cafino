@@ -4,7 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import * as compression from 'compression'
+import * as compression from 'compression';
 import { AllowOrigins } from './common/constants/allow-origins.constant';
 import { CompressionConfig } from './common/constants/compression.constant';
 import { SwaggerConfigInit } from './config/swagger/swagger.config';
@@ -26,18 +26,19 @@ async function bootstrap() {
   app.setGlobalPrefix('v1', {
     exclude: [
       { path: '/', method: RequestMethod.GET },
-      { path: '/', method: RequestMethod.HEAD }
+      { path: '/', method: RequestMethod.HEAD },
     ],
   });
 
   app.enableVersioning({ type: VersioningType.URI });
 
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true
-  }));
-
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
   app.useLogger(logger);
@@ -47,14 +48,10 @@ async function bootstrap() {
 
   SwaggerConfigInit(app);
 
-  app.useGlobalPipes(
-    new ValidationPipe(),
-    new SanitizePipe()
-  )
+  app.useGlobalPipes(new ValidationPipe(), new SanitizePipe());
 
   app.use(compression(CompressionConfig));
 
   await app.listen(process.env.PORT);
-
 }
 bootstrap();

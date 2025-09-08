@@ -11,74 +11,65 @@ import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { RateLimitGuard } from 'src/modules/rate-limit/guards/rate-limit.guard';
 import { RateLimit } from 'src/modules/rate-limit/decorators/rate-limit.decorator';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
-import { ResendOtpDoc, SendOtpDoc, VerfiyOtpDoc } from 'src/common/decorators/swagger.decorators';
+import {
+  ResendOtpDoc,
+  SendOtpDoc,
+  VerfiyOtpDoc,
+} from 'src/common/decorators/swagger.decorators';
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
-    constructor(
-        private authService: AuthService
-    ) { }
+  constructor(private authService: AuthService) {}
 
-    @Post('send-otp')
-    @RateLimit({ max: 10, duration: 1 })
-    @UseGuards(RateLimitGuard)
-    @SendOtpDoc()
-    async sendOtp(
-        @Body() loginUserDto: LoginUserDto,
-    ) {
-        return this.authService.sendOtp(
-            loginUserDto.phone,
-        );
-    }
+  @Post('send-otp')
+  @RateLimit({ max: 10, duration: 1 })
+  @UseGuards(RateLimitGuard)
+  @SendOtpDoc()
+  async sendOtp(@Body() loginUserDto: LoginUserDto) {
+    return this.authService.sendOtp(loginUserDto.phone);
+  }
 
-    @Post('verfiy-otp')
-    @RateLimit({ max: 10, duration: 1 })
-    @UseGuards(RateLimitGuard)
-    @VerfiyOtpDoc()
-    async verfiyOtp(
-        @Body() VerifyOtpDto: VerifyOtpDto,
-        @Res({ passthrough: true }) res: Response
-    ) {
-        return this.authService.verfiyOtp(
-            VerifyOtpDto.phone,
-            VerifyOtpDto.otpCode,
-            res
-        )
-    }
+  @Post('verfiy-otp')
+  @RateLimit({ max: 10, duration: 1 })
+  @UseGuards(RateLimitGuard)
+  @VerfiyOtpDoc()
+  async verfiyOtp(
+    @Body() VerifyOtpDto: VerifyOtpDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.verfiyOtp(
+      VerifyOtpDto.phone,
+      VerifyOtpDto.otpCode,
+      res,
+    );
+  }
 
-    @Post('resend-otp')
-    @RateLimit({ max: 10, duration: 1 })
-    @UseGuards(RateLimitGuard)
-    @ResendOtpDoc()
-    async resendOtp(
-        @Body() resendCodeDto: ResendCodeDto
-    ) {
-        return this.authService.resendOtp(resendCodeDto);
-    }
+  @Post('resend-otp')
+  @RateLimit({ max: 10, duration: 1 })
+  @UseGuards(RateLimitGuard)
+  @ResendOtpDoc()
+  async resendOtp(@Body() resendCodeDto: ResendCodeDto) {
+    return this.authService.resendOtp(resendCodeDto);
+  }
 
-    @Get('refresh')
-    @UseGuards(RefreshGuard)
-    @ApiOperation({ summary: "Generate new Tokens." })
-    async refreshToken(
-        @GetUser("phone") phone: string,
-        @GetUser("id") userId: string,
-        @Res({ passthrough: true }) res: Response
-    ) {
-        return await this.authService.refreshToken(
-            res,
-            userId,
-            phone
-        );
-    }
+  @Get('refresh')
+  @UseGuards(RefreshGuard)
+  @ApiOperation({ summary: 'Generate new Tokens.' })
+  async refreshToken(
+    @GetUser('phone') phone: string,
+    @GetUser('id') userId: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return await this.authService.refreshToken(res, userId, phone);
+  }
 
-    @Get('logout')
-    @UseGuards(JwtGuard)
-    @ApiOperation({ summary: "Logout user." })
-    async logout(
-        @GetUser("phone") phone: string,
-        @Res({ passthrough: true }) res: Response
-    ) {
-        return await this.authService.logout(phone, res);
-    }
-
+  @Get('logout')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: 'Logout user.' })
+  async logout(
+    @GetUser('phone') phone: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return await this.authService.logout(phone, res);
+  }
 }

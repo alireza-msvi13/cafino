@@ -1,1 +1,1 @@
-export const AllowdImageFormats = [".jpg", ".jpeg", ".webp", ".png"]
+export const AllowdImageFormats = ['.jpg', '.jpeg', '.webp', '.png'];

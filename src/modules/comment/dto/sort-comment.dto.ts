@@ -1,16 +1,26 @@
-import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsBoolean, IsEmail, IsEnum, IsInt, IsOptional, IsUUID, Matches, Max, Min } from "class-validator";
-import { PaginationDto } from "src/common/dto/pagination.dto";
-import {  SortCommentOption,  } from "../enum/comment.enum";
-import { Transform, Type } from "class-transformer";
-import { PHONE_ERROR_MESSAGE } from "src/common/constants/error.constant";
-import { normalizePhoneNumber } from "src/common/utils/phone.util";
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsUUID,
+  Matches,
+  Max,
+  Min,
+} from 'class-validator';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { SortCommentOption } from '../enum/comment.enum';
+import { Transform, Type } from 'class-transformer';
+import { PHONE_ERROR_MESSAGE } from 'src/common/constants/error.constant';
+import { normalizePhoneNumber } from 'src/common/utils/phone.util';
 
 export class SortCommentDto extends PaginationDto {
   @ApiPropertyOptional({
     enum: SortCommentOption,
     default: SortCommentOption.Newest,
-    description: "Sort comments by creation date or rating"
+    description: 'Sort comments by creation date or rating',
   })
   @IsOptional()
   @IsEnum(SortCommentOption)
@@ -25,7 +35,6 @@ export class SortAdminCommentDto extends PaginationDto {
   @IsOptional()
   sortBy?: SortCommentOption = SortCommentOption.Newest;
 
-
   @ApiPropertyOptional({ type: 'boolean' })
   @Transform(({ value }) => {
     if (typeof value === 'string') {
@@ -38,23 +47,22 @@ export class SortAdminCommentDto extends PaginationDto {
   accept?: boolean;
 
   @ApiPropertyOptional()
-  @IsUUID('4', { message: "ItemId is not valid." })
+  @IsUUID('4', { message: 'ItemId is not valid.' })
   @IsOptional()
   itemId?: string;
 
   @ApiPropertyOptional()
-  @IsUUID('4', { message: "UserId is not valid." })
+  @IsUUID('4', { message: 'UserId is not valid.' })
   @IsOptional()
   userId?: string;
 
   @ApiPropertyOptional({
-    title: "enter phone number",
+    title: 'enter phone number',
     nullable: false,
-    description: 'Filter by phone'
+    description: 'Filter by phone',
   })
   @Transform(({ value }) => normalizePhoneNumber(value))
   @IsOptional()
   @Matches(/^09\d{9}$/, { message: PHONE_ERROR_MESSAGE })
   phone?: string;
-
 }

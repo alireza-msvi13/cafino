@@ -1,15 +1,15 @@
-import { CookieOptions } from "express";
+import { CookieOptions } from 'express';
 
 export const AccessCookieConfig: CookieOptions = {
-    sameSite: process.env.NODE_ENV === "production" ? "none" : 'lax',
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 1 * 24 * 60 * 60 * 1000,
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  maxAge: 1 * 24 * 60 * 60 * 1000,
 };
 
 export const RefreshCookieConfig: CookieOptions = {
-    sameSite: process.env.NODE_ENV === "production" ? "none" : 'lax',
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };

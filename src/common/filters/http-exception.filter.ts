@@ -14,11 +14,10 @@ import { parseUserAgent } from 'src/modules/rate-limit/utils/user-agent.utils';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-
   constructor(
     @Inject(WINSTON_MODULE_NEST_PROVIDER)
     private readonly logger: LoggerService,
-  ) { }
+  ) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -35,14 +34,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       ? this.extractMessage(exception)
       : INTERNAL_SERVER_ERROR_MESSAGE;
 
-
     const ip = req.ip;
 
     const rawUserAgent = req.headers['user-agent'] || '';
     const userAgent = parseUserAgent(rawUserAgent);
 
     const userId = req.user?.['id'];
-    const identifier = userId ?? `${ip}:${userAgent.browser}:${userAgent.os}:${userAgent.device}`;
+    const identifier =
+      userId ??
+      `${ip}:${userAgent.browser}:${userAgent.os}:${userAgent.device}`;
 
     this.logger.error({
       path: req.url,
@@ -55,8 +55,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       userId,
       identifier,
     });
-
-
 
     response.status(status).json({
       statusCode: status,
@@ -78,7 +76,4 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     return resMessage || INTERNAL_SERVER_ERROR_MESSAGE;
   }
-
-
-
 }

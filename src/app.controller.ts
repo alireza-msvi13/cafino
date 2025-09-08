@@ -11,7 +11,10 @@ export class AppController {
       'This endpoint can be used by monitoring services to verify that the API server is running and reachable.',
   })
   getHealth() {
-    return { statusCode: HttpStatus.OK, message: 'Welcome! Use /v1 for API endpoints.' };
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Welcome! Use /v1 for API endpoints.',
+    };
   }
 
   @Head()
@@ -21,6 +24,9 @@ export class AppController {
       'This endpoint can be used by monitoring services to verify that the API server is running and reachable.',
   })
   headHealth() {
-    return { statusCode: HttpStatus.OK, message: 'Welcome! Use /v1 for API endpoints.' };
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Welcome! Use /v1 for API endpoints.',
+    };
   }
 }

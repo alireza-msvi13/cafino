@@ -1,9 +1,9 @@
-import {Module} from "@nestjs/common";
-import {TypeOrmModule} from "@nestjs/typeorm";
-import {DiscountEntity} from "./entity/discount.entity";
-import {DiscountService} from "./discount.service";
-import {DiscountController} from "./discount.controller";
-import { ScheduleModule } from "@nestjs/schedule";
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DiscountEntity } from './entity/discount.entity';
+import { DiscountService } from './discount.service';
+import { DiscountController } from './discount.controller';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [

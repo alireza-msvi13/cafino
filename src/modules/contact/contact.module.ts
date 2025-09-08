@@ -11,10 +11,10 @@ import { MailModule } from '../mail/mail.module';
   imports: [
     RateLimitModule,
     MailModule,
-    TypeOrmModule.forFeature([Contact, Reply])
+    TypeOrmModule.forFeature([Contact, Reply]),
   ],
   controllers: [ContactController],
   providers: [ContactService],
-  exports: [ContactService]
+  exports: [ContactService],
 })
-export class ContactModule { }
+export class ContactModule {}

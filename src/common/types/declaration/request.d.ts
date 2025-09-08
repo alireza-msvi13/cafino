@@ -1,11 +1,10 @@
-import { UserEntity } from "src/modules/user/entities/user.entity"
+import { UserEntity } from 'src/modules/user/entities/user.entity';
 
-
-export {}
+export {};
 declare global {
-    namespace Express {
-        export interface Request {
-            user?: UserEntity
-        }
+  namespace Express {
+    export interface Request {
+      user?: UserEntity;
     }
+  }
 }

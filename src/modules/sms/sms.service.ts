@@ -18,17 +18,12 @@ export class SmsService {
     };
 
     try {
-      
       const response = await axios.post(process.env.SMS_BASE_URL, requestBody);
-      if (
-        typeof response.data !== "number" &&
-        Number(response.data[0]) !== 0
-      ) {
-        throw new InternalServerErrorException(response.data[1])
+      if (typeof response.data !== 'number' && Number(response.data[0]) !== 0) {
+        throw new InternalServerErrorException(response.data[1]);
       }
-
     } catch (error) {
-      throw new InternalServerErrorException(error)
+      throw new InternalServerErrorException(error);
     }
   }
 }

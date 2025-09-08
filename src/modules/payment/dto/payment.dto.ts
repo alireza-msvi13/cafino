@@ -1,9 +1,15 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 export class PaymentDto {
   @ApiProperty()
-  @IsUUID('4', { message: "addressId is not valid" })
+  @IsUUID('4', { message: 'addressId is not valid' })
   @IsNotEmpty()
   addressId: string;
 

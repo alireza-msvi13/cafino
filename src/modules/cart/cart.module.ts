@@ -7,13 +7,9 @@ import { ItemModule } from '../item/item.module';
 import { DiscountModule } from '../discount/discount.module';
 
 @Module({
-  imports: [
-    ItemModule,
-    DiscountModule,
-    TypeOrmModule.forFeature([CartEntity])
-  ],
+  imports: [ItemModule, DiscountModule, TypeOrmModule.forFeature([CartEntity])],
   controllers: [CartController],
   providers: [CartService],
-  exports: [CartService]
+  exports: [CartService],
 })
-export class CartModule { }
+export class CartModule {}

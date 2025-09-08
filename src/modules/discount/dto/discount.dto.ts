@@ -1,6 +1,14 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { Type } from "class-transformer";
-import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export class DiscountDto {
   @ApiProperty()
@@ -25,7 +33,7 @@ export class DiscountDto {
   @Max(1_000_000, { message: 'amount must not exceed 1,000,000' })
   amount: number;
 
-  @ApiPropertyOptional({ description: "expires in days", default: 20 })
+  @ApiPropertyOptional({ description: 'expires in days', default: 20 })
   @IsNotEmpty({ message: 'expires_in must not be empty' })
   @Type(() => Number)
   @IsNumber({}, { message: 'expires_in must be a number' })

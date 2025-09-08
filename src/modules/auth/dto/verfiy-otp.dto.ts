@@ -1,30 +1,26 @@
-import { ApiProperty } from "@nestjs/swagger";
-import {
-  IsNotEmpty,
-  Length,
-  Matches,
-} from "class-validator";
-import { Transform } from "class-transformer";
-import { PHONE_ERROR_MESSAGE } from "src/common/constants/error.constant";
-import { normalizePhoneNumber } from "src/common/utils/phone.util";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, Length, Matches } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { PHONE_ERROR_MESSAGE } from 'src/common/constants/error.constant';
+import { normalizePhoneNumber } from 'src/common/utils/phone.util';
 
 export class VerifyOtpDto {
   @IsNotEmpty({ message: PHONE_ERROR_MESSAGE })
   @Transform(({ value }) => normalizePhoneNumber(value))
   @Matches(/^09\d{9}$/, { message: PHONE_ERROR_MESSAGE })
   @ApiProperty({
-    title: "enter phone number for login",
-    example: "09375012365",
+    title: 'enter phone number for login',
+    example: '09375012365',
     nullable: false,
   })
   phone: string;
 
-  @IsNotEmpty({ message: "otp code is required" })
-  @Length(5, 5, { message: "otp code must be exactly 5 digits" })
-  @Matches(/^\d+$/, { message: "otp code must be number" })
+  @IsNotEmpty({ message: 'otp code is required' })
+  @Length(5, 5, { message: 'otp code must be exactly 5 digits' })
+  @Matches(/^\d+$/, { message: 'otp code must be number' })
   @ApiProperty({
-    type: "string",
-    example: "12345",
+    type: 'string',
+    example: '12345',
   })
   otpCode: string;
 }

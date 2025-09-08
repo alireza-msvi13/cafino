@@ -11,10 +11,15 @@ import { FavoriteEntity } from './entities/favorite.entity';
 @Module({
   imports: [
     // AuthModule,
-    TypeOrmModule.forFeature([UserEntity, OtpEntity, AddressEntity, FavoriteEntity])
+    TypeOrmModule.forFeature([
+      UserEntity,
+      OtpEntity,
+      AddressEntity,
+      FavoriteEntity,
+    ]),
   ],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],
 })
-export class UserModule { }
+export class UserModule {}

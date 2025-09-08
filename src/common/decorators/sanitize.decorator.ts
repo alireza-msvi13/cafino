@@ -1,6 +1,8 @@
 import sanitizeHtml from 'sanitize-html';
 
-export function Sanitize(options: sanitizeHtml.IOptions = { allowedTags: [], allowedAttributes: {} }) {
+export function Sanitize(
+  options: sanitizeHtml.IOptions = { allowedTags: [], allowedAttributes: {} },
+) {
   return function (target: any, propertyKey: string) {
     const key = `__sanitized__${propertyKey}`;
 

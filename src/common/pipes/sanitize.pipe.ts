@@ -1,10 +1,5 @@
-import {
-  ArgumentMetadata,
-  Injectable,
-  PipeTransform,
-} from '@nestjs/common';
+import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 import * as sanitizeHtml from 'sanitize-html';
-
 
 @Injectable()
 export class SanitizePipe implements PipeTransform {

@@ -15,9 +15,10 @@ import { OrderModule } from '../order/order.module';
     UserModule,
     OrderModule,
     forwardRef(() => CategoryModule),
-    TypeOrmModule.forFeature([ItemEntity, ItemImageEntity])],
+    TypeOrmModule.forFeature([ItemEntity, ItemImageEntity]),
+  ],
   controllers: [ItemController],
   providers: [ItemService],
-  exports: [ItemService]
+  exports: [ItemService],
 })
-export class ItemModule { }
+export class ItemModule {}

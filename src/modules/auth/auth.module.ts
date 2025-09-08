@@ -18,15 +18,7 @@ import { RateLimitModule } from 'src/modules/rate-limit/rate-limit.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    RefreshStrategy,
-    JwtStrategy,
-    AdminStrategy
-  ],
-  exports: [
-    AuthService
-  ]
+  providers: [AuthService, RefreshStrategy, JwtStrategy, AdminStrategy],
+  exports: [AuthService],
 })
-
 export class AuthModule {}

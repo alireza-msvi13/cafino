@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsString, MaxLength, IsNotEmpty } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, MaxLength, IsNotEmpty } from 'class-validator';
 
 export class CreateAddressDto {
   @ApiProperty()

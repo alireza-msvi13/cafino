@@ -1,3 +1,3 @@
-import { AuthGuard } from "@nestjs/passport";
+import { AuthGuard } from '@nestjs/passport';
 
-export class RefreshGuard extends AuthGuard('refresh') { }
+export class RefreshGuard extends AuthGuard('refresh') {}

@@ -19,11 +19,11 @@ export class TelegramTransport extends Transport {
 
   async log(info: any, callback: () => void) {
     setImmediate(() => this.emit('logged', info));
-    
+
     if (!isShouldSendToTelegram(info)) {
       return callback();
     }
-    
+
     const {
       level = 'error',
       message,
@@ -48,10 +48,11 @@ export class TelegramTransport extends Transport {
 
 <b>📝 Message:</b>
 <pre>${this.escape(message)}</pre>
-${stack
-        ? `<b>🧵 Stack Trace:</b>\n<pre>${this.escape(stack.slice(0, 3500))}</pre>`
-        : ''
-      }
+${
+  stack
+    ? `<b>🧵 Stack Trace:</b>\n<pre>${this.escape(stack.slice(0, 3500))}</pre>`
+    : ''
+}
 
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
 <b>📥 Request Info:</b>
@@ -66,11 +67,14 @@ ${stack
     `.trim();
 
     try {
-      await axios.post(`https://api.telegram.org/bot${this.botToken}/sendMessage`, {
-        chat_id: this.chatId,
-        text: html,
-        parse_mode: 'HTML',
-      });
+      await axios.post(
+        `https://api.telegram.org/bot${this.botToken}/sendMessage`,
+        {
+          chat_id: this.chatId,
+          text: html,
+          parse_mode: 'HTML',
+        },
+      );
     } catch (err) {
       console.error('❌ Failed to send log to Telegram:', err.message);
     }

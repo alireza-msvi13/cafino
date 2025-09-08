@@ -2,14 +2,13 @@ import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 const mjml2html = require('mjml');
 
-
 @Injectable()
 export class MailService {
   private transporter: any;
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      service: "gmail",
+      service: 'gmail',
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -17,10 +16,7 @@ export class MailService {
     });
   }
 
-
-
   async sendReplyEmail(to: string, subject: string, replyMessage: string) {
-
     const mjmlTemplate = `
   <mjml>
     <mj-body background-color="#f4f4f4" font-family="Arial">

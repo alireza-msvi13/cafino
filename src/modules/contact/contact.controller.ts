@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ContactService } from './contact.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -13,8 +21,7 @@ import { RateLimitGuard } from '../rate-limit/guards/rate-limit.guard';
 @Controller('contact')
 @ApiTags('Contact')
 export class ContactController {
-  constructor(private readonly contactService: ContactService) { }
-
+  constructor(private readonly contactService: ContactService) {}
 
   @Post()
   @RateLimit({ max: 10, duration: 1 })
@@ -48,6 +55,4 @@ export class ContactController {
   async getReplies(@Param('id', UUIDValidationPipe) id: string) {
     return this.contactService.getReplies(id);
   }
-
-
 }

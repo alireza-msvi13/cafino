@@ -1,4 +1,6 @@
 export const CompressionConfig = {
-    filter: () => { return true },
-    threshold: 0
-}
+  filter: () => {
+    return true;
+  },
+  threshold: 0,
+};

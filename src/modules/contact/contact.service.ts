@@ -120,8 +120,10 @@ export class ContactService {
     return this.contactRepository.count();
   }
   async countUnrepliedMessages(): Promise<number> {
-    return this.contactRepository.count({
-      where: { replies: null },
-    });
+    return this.contactRepository
+      .createQueryBuilder('contact')
+      .leftJoin('contact.replies', 'reply')
+      .where('reply.id IS NULL')
+      .getCount();
   }
 }

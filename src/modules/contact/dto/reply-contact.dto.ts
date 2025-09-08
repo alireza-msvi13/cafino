@@ -15,7 +15,7 @@ export class ReplyContactDto {
   })
   @IsString()
   @IsNotEmpty()
-  @MinLength(10)
-  @MaxLength(2000)
+  @MinLength(5)
+  @MaxLength(1000)
   message: string;
 }

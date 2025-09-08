@@ -390,6 +390,6 @@ export class OrderService {
       .where('order.status = :status', { status: OrderStatus.Done })
       .getRawOne();
 
-    return Number(avg) || 0;
+    return Math.round(Number(avg)) || 0;
   }
 }

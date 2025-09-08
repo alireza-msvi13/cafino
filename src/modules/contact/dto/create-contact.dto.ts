@@ -37,7 +37,7 @@ export class CreateContactDto {
   @ApiProperty({ example: 'I have a problem with my order...' })
   @IsString()
   @IsNotEmpty({ message: 'Message cannot be empty' })
-  @MinLength(10)
-  @MaxLength(2000)
+  @MinLength(5)
+  @MaxLength(1000)
   message: string;
 }

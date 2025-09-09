@@ -27,6 +27,7 @@ export class MailService {
             color="#333" 
             font-weight="bold" 
             align="center"
+            line-height="1.6"
           >
             ${subject}
           </mj-text>

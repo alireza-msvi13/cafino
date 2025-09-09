@@ -75,11 +75,12 @@ export class ContactService {
     }
 
     const contacts = await qb.getMany();
+    const totalUnreplied = await this.countUnrepliedMessages();
 
     return new ServerResponse(
       HttpStatus.OK,
       'Contact messages fetched successfully.',
-      { contacts },
+      { total: contacts.length, totalUnreplied, contacts },
     );
   }
   async reply(contactId: string, dto: ReplyContactDto) {
@@ -111,6 +112,19 @@ export class ContactService {
       HttpStatus.OK,
       'Contact messages fetched successfully.',
       { replies: contact.replies },
+    );
+  }
+  async delete(contactId: string): Promise<ServerResponse> {
+    const contact = await this.contactRepository.findOneBy({ id: contactId });
+    if (!contact) {
+      throw new NotFoundException('Contact not found.');
+    }
+
+    await this.contactRepository.remove(contact);
+
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Contact message deleted successfully.',
     );
   }
 

@@ -6,6 +6,7 @@ import {
   Param,
   Query,
   UseGuards,
+  Delete,
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
 import { CreateContactDto } from './dto/create-contact.dto';
@@ -36,6 +37,13 @@ export class ContactController {
   @ApiOperation({ summary: 'Get all contact messages with filters.' })
   async findAll(@Query() query: ContactQueryDto) {
     return this.contactService.findAll(query);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtGuard, AdminGuard)
+  @ApiOperation({ summary: 'Delete a contact message.' })
+  async delete(@Param('id', UUIDValidationPipe) id: string) {
+    return this.contactService.delete(id);
   }
 
   @Post(':id/reply')

@@ -7,6 +7,7 @@ import { UserModule } from '../user/user.module';
 import { DiscountModule } from '../discount/discount.module';
 import { ContactModule } from '../contact/contact.module';
 import { CommentModule } from '../comment/comment.module';
+import { TicketModule } from '../ticket/ticket.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CommentModule } from '../comment/comment.module';
     ContactModule,
     DiscountModule,
     CommentModule,
+    TicketModule,
   ],
   controllers: [AdminController],
   providers: [AdminService],

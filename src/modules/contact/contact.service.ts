@@ -35,11 +35,13 @@ export class ContactService {
     );
   }
   async findAll(query: ContactQueryDto) {
-    const { sortBy, hasReply, name, email, phone } = query;
+    const { sortBy, hasReply, name, email, phone, page, limit } = query;
 
     const qb = this.contactRepository
       .createQueryBuilder('contact')
-      .leftJoinAndSelect('contact.replies', 'reply');
+      .leftJoinAndSelect('contact.replies', 'reply')
+      .skip((page - 1) * limit)
+      .take(limit);
 
     if (name) {
       qb.andWhere('LOWER(contact.name) LIKE LOWER(:name)', {

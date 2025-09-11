@@ -47,7 +47,7 @@ export class TicketService {
     query: SortTicketDto,
     userId?: string,
   ): Promise<ServerResponse> {
-    const { sortBy, status } = query;
+    const { sortBy, status, page, limit } = query;
 
     const qb = this.ticketRepo
       .createQueryBuilder('ticket')
@@ -67,7 +67,9 @@ export class TicketService {
       .orderBy(
         'ticket.created_at',
         sortBy === SortTicket.Newest ? 'DESC' : 'ASC',
-      );
+      )
+      .skip((page - 1) * limit)
+      .take(limit);
 
     if (userId) {
       qb.andWhere('user.id = :userId', { userId });
@@ -77,13 +79,12 @@ export class TicketService {
       qb.andWhere('ticket.status = :status', { status });
     }
 
-    const tickets = await qb.getMany();
+    const [total, tickets] = await Promise.all([qb.getCount(), qb.getMany()]);
 
-    return new ServerResponse(
-      HttpStatus.OK,
-      'Tickets fetched successfully.',
+    return new ServerResponse(HttpStatus.OK, 'Tickets fetched successfully.', {
+      total,
       tickets,
-    );
+    });
   }
   async getMessages(
     ticketId: string,
@@ -197,5 +198,17 @@ export class TicketService {
 
     await this.ticketRepo.remove(ticket);
     return new ServerResponse(HttpStatus.OK, 'Ticket deleted successfully.');
+  }
+  async countTickets(): Promise<number> {
+    return this.ticketRepo.count();
+  }
+  async countOpenTickets(): Promise<number> {
+    return this.ticketRepo.count({ where: { status: TicketStatus.Open } });
+  }
+  async countClosedTickets(): Promise<number> {
+    return this.ticketRepo.count({ where: { status: TicketStatus.Closed } });
+  }
+  async countAnsweredTickets(): Promise<number> {
+    return this.ticketRepo.count({ where: { status: TicketStatus.Answered } });
   }
 }

@@ -97,6 +97,17 @@ export class AdminController {
     );
   }
 
+  @Get('tickets')
+  @ApiOperation({ summary: 'Get tickets overview for dashboard.' })
+  async getTicketOverview() {
+    const result = await this.adminService.getTicketOverview();
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Ticket overview fetched successfully.',
+      result,
+    );
+  }
+
   @Get('sales-report')
   @ApiOperation({ summary: 'Get sales report by date range' })
   async getSalesReport(@Query() query: SalesReportDto) {

@@ -6,6 +6,7 @@ import { DiscountService } from '../discount/discount.service';
 import { ContactService } from '../contact/contact.service';
 import { OrderStatus } from 'src/common/enums/order-status.enum';
 import { CommentService } from '../comment/comment.service';
+import { TicketService } from '../ticket/ticket.service';
 
 @Injectable()
 export class AdminService {
@@ -16,6 +17,7 @@ export class AdminService {
     private readonly discountService: DiscountService,
     private readonly contactService: ContactService,
     private readonly commentService: CommentService,
+    private readonly ticketService: TicketService,
   ) {}
 
   // * primary
@@ -116,6 +118,26 @@ export class AdminService {
 
     return { total: messageCount, unreplied: unrepliedMessageCount };
   }
+  async getTicketOverview() {
+    const [
+      ticketCount,
+      openTicketCount,
+      closedTicketCount,
+      answeredTicketCount,
+    ] = await Promise.all([
+      this.ticketService.countTickets(),
+      this.ticketService.countOpenTickets(),
+      this.ticketService.countClosedTickets(),
+      this.ticketService.countAnsweredTickets(),
+    ]);
+
+    return {
+      total: ticketCount,
+      open: openTicketCount,
+      closed: closedTicketCount,
+      answered: answeredTicketCount,
+    };
+  }
   async getCommentOverview() {
     const [
       totalComments,
@@ -137,7 +159,7 @@ export class AdminService {
     };
   }
   async getOverview() {
-    const [user, order, item, discount, revenue, message, comment] =
+    const [user, order, item, discount, revenue, message, comment, ticket] =
       await Promise.all([
         this.getUserOverview(),
         this.getOrderOverview(),
@@ -146,9 +168,10 @@ export class AdminService {
         this.getRevenueOverview(),
         this.getMessageOverview(),
         this.getCommentOverview(),
+        this.getTicketOverview(),
       ]);
 
-    return { user, order, item, discount, revenue, message, comment };
+    return { user, order, item, discount, revenue, message, comment, ticket };
   }
   async getRevenueByDateRange(startDate?: Date, endDate?: Date) {
     return this.orderService.getRevenueByDateRange(startDate, endDate);

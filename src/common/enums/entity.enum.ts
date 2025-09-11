@@ -16,4 +16,6 @@ export enum EntityName {
   Contact = 'contacts',
   ContactReply = 'contact_replies',
   RateLimitRecord = 'rate_limit_records',
+  Ticket = 'tickets',
+  TicketMessage = 'ticket_messages',
 }

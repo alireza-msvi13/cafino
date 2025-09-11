@@ -23,6 +23,7 @@ import { AppController } from './app.controller';
 import { MailModule } from './modules/mail/mail.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { RateLimitModule } from './modules/rate-limit/rate-limit.module';
+import { TicketModule } from './modules/ticket/ticket.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { RateLimitModule } from './modules/rate-limit/rate-limit.module';
     MailModule,
     AdminModule,
     RateLimitModule,
+    TicketModule,
   ],
   controllers: [AppController],
   providers: [],

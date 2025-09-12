@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
   Delete,
+  Req,
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
 import { CreateContactDto } from './dto/create-contact.dto';
@@ -18,6 +19,9 @@ import { JwtGuard } from '../auth/guards/access-token.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator';
 import { RateLimitGuard } from '../rate-limit/guards/rate-limit.guard';
+import { OptionalJwtGuard } from '../auth/guards/optional-token.guard';
+import { Request } from 'express';
+import { parseUserAgent } from '../rate-limit/utils/user-agent.utils';
 
 @Controller('contact')
 @ApiTags('Contact')
@@ -26,10 +30,19 @@ export class ContactController {
 
   @Post()
   @RateLimit({ max: 10, duration: 1 })
-  @UseGuards(RateLimitGuard)
+  @UseGuards(OptionalJwtGuard, RateLimitGuard)
   @ApiOperation({ summary: 'Create a new contact message.' })
-  async create(@Body() createContactDto: CreateContactDto) {
-    return this.contactService.create(createContactDto);
+  async create(
+    @Body() createContactDto: CreateContactDto,
+    @Req() req: Request,
+  ) {
+    const userId = req?.user && req.user['id'];
+    const ip = req.ip;
+    const rawUA = req.headers['user-agent'] || '';
+    const ua = parseUserAgent(rawUA);
+    const identifier = userId ?? `${ip}:${ua.browser}:${ua.os}:${ua.device}`;
+
+    return this.contactService.create(createContactDto, identifier);
   }
 
   @Get()

@@ -24,6 +24,11 @@ export class ContactQueryDto extends PaginationDto {
   @IsEnum(SortContactOption)
   sortBy?: SortContactOption = SortContactOption.Newest;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @MaxLength(100)
+  identifier?: string;
+
   @ApiPropertyOptional({ description: 'Filter by name' })
   @IsOptional()
   @IsString()

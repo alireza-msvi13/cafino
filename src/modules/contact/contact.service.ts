@@ -19,9 +19,13 @@ export class ContactService {
     private readonly mailService: MailService,
   ) {}
 
-  async create(createContactDto: CreateContactDto): Promise<ServerResponse> {
+  async create(
+    createContactDto: CreateContactDto,
+    identifier: string,
+  ): Promise<ServerResponse> {
     const { name, email, phone, message } = createContactDto;
     const contact = this.contactRepository.create({
+      identifier,
       name,
       email,
       phone,
@@ -35,13 +39,20 @@ export class ContactService {
     );
   }
   async findAll(query: ContactQueryDto) {
-    const { sortBy, hasReply, name, email, phone, page, limit } = query;
+    const { sortBy, hasReply, identifier, name, email, phone, page, limit } =
+      query;
 
     const qb = this.contactRepository
       .createQueryBuilder('contact')
       .leftJoinAndSelect('contact.replies', 'reply')
       .skip((page - 1) * limit)
       .take(limit);
+
+    if (identifier) {
+      qb.andWhere('LOWER(contact.identifier) LIKE LOWER(:identifier)', {
+        identifier: `%${identifier}%`,
+      });
+    }
 
     if (name) {
       qb.andWhere('LOWER(contact.name) LIKE LOWER(:name)', {

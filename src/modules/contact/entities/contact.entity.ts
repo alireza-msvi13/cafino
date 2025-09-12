@@ -6,6 +6,9 @@ import { BaseEntity } from 'src/common/abstracts/base.entity';
 @Entity(EntityName.Contact)
 export class Contact extends BaseEntity {
   @Column()
+  identifier: string;
+
+  @Column()
   name: string;
 
   @Column()

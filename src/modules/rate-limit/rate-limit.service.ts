@@ -9,8 +9,6 @@ import { RateLimitRecord } from './entity/rate-limit.entity';
 import { Repository } from 'typeorm';
 import { BlockStatus } from 'src/modules/rate-limit/enums/block-status.enum';
 import { BlockUserDto, RateLimitQueryDto } from './dto/rate-limit-query.dto';
-import { Response } from 'express';
-import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
 
 @Injectable()
@@ -101,6 +99,9 @@ export class RateLimitService {
     }
 
     await this.rateLimitRepository.save(record);
+
+    if (record.block_status === BlockStatus.Permanent)
+      this.throwBlocked(record);
 
     if (
       record.block_status === BlockStatus.Temporary &&
@@ -274,14 +275,39 @@ export class RateLimitService {
     const is_permanently_blocked =
       record.block_status === BlockStatus.Permanent;
 
-    const message = is_permanently_blocked
-      ? 'You are permanently blocked. Contact support.'
-      : 'You are temporarily blocked. Please try again later.';
+    let message: string;
+    let retryAfter: number | null = null;
+
+    if (is_permanently_blocked) {
+      message = 'You are permanently blocked. Contact support.';
+    } else {
+      if (record.block_expires_at) {
+        const now = new Date();
+        const msRemaining = record.block_expires_at.getTime() - now.getTime();
+
+        const minutes = Math.floor(msRemaining / 60000);
+        const hours = Math.floor(msRemaining / 3600000);
+        const days = Math.floor(msRemaining / (24 * 3600000));
+
+        if (days > 0) {
+          message = `You are temporarily blocked. Try again in ${days} day(s).`;
+        } else if (hours > 0) {
+          message = `You are temporarily blocked. Try again in ${hours} hour(s).`;
+        } else {
+          message = `You are temporarily blocked. Try again in ${minutes} minute(s).`;
+        }
+
+        retryAfter = Math.ceil(msRemaining / 1000);
+      } else {
+        message = 'You are temporarily blocked. Please try again later.';
+      }
+    }
 
     throw new HttpException(
       {
         message,
-        block_type: is_permanently_blocked ? 'permanent' : 'temporary',
+        blockType: is_permanently_blocked ? 'permanent' : 'temporary',
+        retryAfter,
       },
       HttpStatus.TOO_MANY_REQUESTS,
     );

@@ -5,9 +5,14 @@ import { UserModule } from '../user/user.module';
 import { TicketMessage } from './entity/ticket-message.entity';
 import { Ticket } from './entity/ticket.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RateLimitModule } from '../rate-limit/rate-limit.module';
 
 @Module({
-  imports: [UserModule, TypeOrmModule.forFeature([Ticket, TicketMessage])],
+  imports: [
+    UserModule,
+    RateLimitModule,
+    TypeOrmModule.forFeature([Ticket, TicketMessage]),
+  ],
   controllers: [TicketController],
   providers: [TicketService],
   exports: [TicketService],

@@ -56,12 +56,24 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       identifier,
     });
 
-    response.status(status).json({
+    let responseBody: any = {
       statusCode: status,
       message,
       timestamp: new Date().toISOString(),
       path: req.url,
-    });
+    };
+
+    if (status === HttpStatus.TOO_MANY_REQUESTS && isHttpException) {
+      const exceptionResponse = exception.getResponse();
+      if (typeof exceptionResponse === 'object') {
+        responseBody = {
+          ...responseBody,
+          ...exceptionResponse,
+        };
+      }
+    }
+
+    response.status(status).json(responseBody);
   }
 
   private extractMessage(exception: HttpException): string | string[] {

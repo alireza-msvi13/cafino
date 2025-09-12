@@ -27,7 +27,7 @@ export class RateLimitController {
     return await this.rateLimitService.getRateLimitRecords(rateLimitQueryDto);
   }
 
-  @Get(':id')
+  @Get('record/:id')
   @ApiOperation({ summary: 'Get a specific rate-limit record by ID.' })
   async findOne(
     @Param('id', UUIDValidationPipe) id: string,

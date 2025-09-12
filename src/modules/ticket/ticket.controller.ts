@@ -5,7 +5,6 @@ import {
   Body,
   Param,
   Patch,
-  Req,
   UseGuards,
   Query,
   Delete,
@@ -20,6 +19,7 @@ import { SortTicketDto } from './dto/sort-ticket.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { Roles } from 'src/common/enums/role.enum';
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
+import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator';
 
 @ApiTags('Ticket')
 @Controller('ticket')
@@ -28,6 +28,7 @@ export class TicketController {
 
   @Post()
   @UseGuards(JwtGuard)
+  @RateLimit({ max: 10, duration: 1 })
   @ApiOperation({ summary: 'Create a new ticket.' })
   createTicket(
     @GetUser('id', UUIDValidationPipe) userId: string,
@@ -66,6 +67,7 @@ export class TicketController {
 
   @Post(':id/messages')
   @UseGuards(JwtGuard)
+  @RateLimit({ max: 10, duration: 1 })
   @ApiOperation({ summary: 'Add a message to a ticket.' })
   addMessage(
     @Param('id', UUIDValidationPipe) ticketId: string,

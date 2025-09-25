@@ -8,6 +8,7 @@ import {
   OneToMany,
   JoinColumn,
   CreateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { ItemImageEntity } from './item-image.entity';
 import { CommentEntity } from 'src/modules/comment/entities/comment.entity';
@@ -17,8 +18,11 @@ import { OrderItemEntity } from 'src/modules/order/entity/order-items.entity';
 
 @Entity(EntityName.Item)
 export class ItemEntity extends BaseEntity {
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 100, unique: true })
   title: string;
+
+  @Column({ type: 'varchar', length: 100, unique: true })
+  slug: string;
 
   @Column('simple-array', { nullable: true })
   ingredients: string[];
@@ -29,7 +33,7 @@ export class ItemEntity extends BaseEntity {
   @Column({ type: 'integer', default: 0 })
   price: number;
 
-  @Column({ type: 'integer', default: 0 })
+  @Column({ type: 'smallint', default: 0 })
   discount: number;
 
   @Column({ type: 'integer', default: 1 })
@@ -44,30 +48,34 @@ export class ItemEntity extends BaseEntity {
   @Column({ type: 'boolean', default: true })
   show: boolean;
 
-  @OneToMany(() => ItemImageEntity, (image) => image.item)
+  @CreateDateColumn({ type: 'timestamptz' })
+  created_at: Date;
+
+  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
+  deleted_at?: Date;
+
+  @OneToMany(() => ItemImageEntity, (image) => image.item, {
+    cascade: ['soft-remove'],
+  })
   images: ItemImageEntity[];
 
-  @ManyToOne(() => CategoryEntity, (category) => category.items, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => CategoryEntity, (category) => category.items)
   @JoinColumn({ name: 'category_id' })
   category: CategoryEntity;
 
   @OneToMany(() => CommentEntity, (comment) => comment.item)
   comments: CommentEntity[];
 
-  @OneToMany(() => CartEntity, (cart) => cart.item)
+  @OneToMany(() => CartEntity, (cart) => cart.item, {
+    cascade: ['soft-remove'],
+  })
   cart: CartEntity[];
 
-  @OneToMany(() => FavoriteEntity, (favorite) => favorite.item)
+  @OneToMany(() => FavoriteEntity, (favorite) => favorite.item, {
+    cascade: ['soft-remove'],
+  })
   favorites: FavoriteEntity[];
 
   @OneToMany(() => OrderItemEntity, (order) => order.item)
   orders: OrderItemEntity[];
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  // comments
-  // category
 }

@@ -16,6 +16,7 @@ import {
 export class CreateItemDto {
   @ApiProperty()
   @IsString()
+  @IsNotEmpty()
   @MaxLength(100)
   title: string;
 

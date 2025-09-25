@@ -1,4 +1,5 @@
 import {
+  GoneException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -16,7 +17,6 @@ import { UserService } from '../user/user.service';
 import { OrderStatus } from 'src/common/enums/order-status.enum';
 import { ItemService } from '../item/item.service';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
-import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 import { DiscountService } from '../discount/discount.service';
 
 @Injectable()
@@ -48,11 +48,13 @@ export class PaymentService {
       const cart = await this.cartService.getUserCart(userId);
 
       await Promise.all(
-        cart.cartItems.map((item) =>
-          this.itemService.checkItemQuantity(item.itemId, item.count),
-        ),
+        cart.cartItems.map((item) => {
+          if (!item.isAvailable) {
+            throw new GoneException(`Item ${item.title} is not available.`);
+          }
+          return this.itemService.checkItemQuantity(item.itemId, item.count);
+        }),
       );
-
       const order = await this.orderService.create(
         cart,
         userId,

@@ -31,7 +31,7 @@ export class OrderService {
 
   async changeOrderStatusByAdmin(
     orderId: string,
-    status: string,
+    status: OrderStatus,
   ): Promise<ServerResponse> {
     await this.changeOrderStatus(orderId, status);
     return new ServerResponse(
@@ -44,10 +44,12 @@ export class OrderService {
 
     const baseQuery = this.orderRepository
       .createQueryBuilder('order')
+      .withDeleted()
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.address', 'address')
       .leftJoinAndSelect('order.items', 'items')
       .leftJoinAndSelect('items.item', 'item')
+      .leftJoinAndSelect('item.images', 'itemImages')
       .leftJoinAndSelect('order.payments', 'payments')
       .leftJoinAndSelect('order.discount', 'discount')
       .select([
@@ -74,6 +76,8 @@ export class OrderService {
         'item.id',
         'item.title',
         'item.price',
+        'itemImages.id',
+        'itemImages.imageUrl',
 
         'discount.id',
         'discount.code',
@@ -173,7 +177,7 @@ export class OrderService {
     if (!order) throw new NotFoundException('Order not found.');
     return order;
   }
-  async changeOrderStatus(orderId: string, status: string) {
+  async changeOrderStatus(orderId: string, status: OrderStatus) {
     if (!AllowdOrderStatus.includes(status)) {
       throw new BadRequestException('Invalid status.');
     }
@@ -189,11 +193,48 @@ export class OrderService {
 
     const baseQuery = this.orderRepository
       .createQueryBuilder('order')
+      .withDeleted()
       .leftJoinAndSelect('order.address', 'address')
       .leftJoinAndSelect('order.items', 'items')
       .leftJoinAndSelect('items.item', 'item')
+      .leftJoinAndSelect('item.images', 'itemImages')
       .leftJoinAndSelect('order.payments', 'payments')
-      .where('order.user.id = :userId', { userId });
+      .leftJoinAndSelect('order.discount', 'discount')
+      .where('order.user.id = :userId', { userId })
+      .select([
+        'order.id',
+        'order.payment_amount',
+        'order.discount_amount',
+        'order.total_amount',
+        'order.status',
+        'order.description',
+        'order.created_at',
+
+        'address.id',
+        'address.province',
+        'address.city',
+        'address.address',
+
+        'items.id',
+        'items.count',
+        'item.id',
+        'item.title',
+        'item.price',
+        'itemImages.id',
+        'itemImages.imageUrl',
+
+        'discount.id',
+        'discount.code',
+        'discount.percent',
+        'discount.amount',
+
+        'payments.id',
+        'payments.status',
+        'payments.amount',
+        'payments.invoice_number',
+        'payments.ref_id',
+        'payments.created_at',
+      ]);
 
     const total = await baseQuery.getCount();
 

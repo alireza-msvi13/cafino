@@ -1,7 +1,9 @@
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -21,6 +23,7 @@ export class CartService {
     @InjectRepository(CartEntity)
     private cartRepository: Repository<CartEntity>,
     private itemService: ItemService,
+    @Inject(forwardRef(() => DiscountService))
     private discountService: DiscountService,
   ) {}
 
@@ -121,13 +124,12 @@ export class CartService {
   ): Promise<ServerResponse> {
     const { itemId } = removeItem;
 
-    await this.itemService.checkItemExist(itemId);
-
     let cartItem = await this.cartRepository.findOne({
       where: {
         user: { id: userId },
         item: { id: itemId },
       },
+      withDeleted: true,
     });
 
     if (!cartItem)
@@ -320,6 +322,7 @@ export class CartService {
     const cart = await this.cartRepository.find({
       relations: { discount: true, item: { category: true, images: true } },
       where: { user: { id: userId } },
+      withDeleted: true,
     });
 
     const activeGeneralDiscount = cart.find((item) => item.discount?.active);
@@ -347,6 +350,7 @@ export class CartService {
         discount: item.discount,
         finalPrice: itemTotalPrice - itemDiscount,
         category: item.category ? { title: item.category.title } : null,
+        isAvailable: !item.deleted_at && item.show,
       };
     });
 
@@ -385,6 +389,14 @@ export class CartService {
       .createQueryBuilder()
       .delete()
       .where('user_id = :userId', { userId })
+      .execute();
+  }
+  async deactivateDiscountInCarts(discountId: string): Promise<void> {
+    await this.cartRepository
+      .createQueryBuilder()
+      .update()
+      .set({ discount: null })
+      .where('discount.id = :discountId', { discountId })
       .execute();
   }
 }

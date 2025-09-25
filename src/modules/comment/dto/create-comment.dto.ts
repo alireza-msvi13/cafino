@@ -5,7 +5,6 @@ import {
   IsString,
   IsUUID,
   MaxLength,
-  MinLength,
   Min,
   Max,
   IsInt,
@@ -15,8 +14,8 @@ import {
 export class CreateCommentDto {
   @ApiProperty()
   @IsString()
-  @MinLength(1, { message: 'text cannot be empty' })
-  @MaxLength(200, { message: 'text is too long' })
+  @IsNotEmpty()
+  @MaxLength(500, { message: 'text is too long' })
   text: string;
 
   @ApiProperty()

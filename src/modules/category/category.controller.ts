@@ -62,10 +62,10 @@ export class CategoryController {
     return this.categoryService.findByPaginationByAdmin(pagination);
   }
 
-  @Get('/by-slug/:slug')
-  @ApiOperation({ summary: 'Find category by slug.' })
-  findBySlug(@Param('slug') slug: string) {
-    return this.categoryService.findBySlug(slug);
+  @Get(':id')
+  @ApiOperation({ summary: 'Find a category by its Id' })
+  findById(@Param('id', UUIDValidationPipe) id: string) {
+    return this.categoryService.findById(id);
   }
 
   @Put(':id')

@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -15,17 +16,23 @@ import { OrderEntity } from 'src/modules/order/entity/order.entity';
 export class AddressEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 100 })
   province: string;
+
   @Column({ type: 'varchar', length: 100 })
   city: string;
+
   @Column({ type: 'text' })
   address: string;
-  @ManyToOne(() => UserEntity, (user) => user.addressList, {
-    onDelete: 'CASCADE',
-  })
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  created_at: Date;
+
+  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
+  deleted_at?: Date;
+
+  @ManyToOne(() => UserEntity, (user) => user.addressList)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
+
   @OneToMany(() => OrderEntity, (order) => order.address)
   orders: OrderEntity[];
-  @CreateDateColumn()
-  created_at: Date;
 }

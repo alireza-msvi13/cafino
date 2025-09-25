@@ -1,7 +1,9 @@
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,12 +14,15 @@ import { Between, DeepPartial, MoreThan, Repository } from 'typeorm';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { DiscountQueryDto } from './dto/sort-discount.dto';
 import { DiscountSortField } from './enum/discount.enum';
+import { CartService } from '../cart/cart.service';
 
 @Injectable()
 export class DiscountService {
   constructor(
     @InjectRepository(DiscountEntity)
     private discountRepository: Repository<DiscountEntity>,
+    @Inject(forwardRef(() => CartService))
+    private cartService: CartService,
   ) {}
 
   // * primary
@@ -100,7 +105,8 @@ export class DiscountService {
   async delete(id: string): Promise<ServerResponse> {
     const discount = await this.discountRepository.findOneBy({ id });
     if (!discount) throw new NotFoundException('Discount Not Found');
-    await this.discountRepository.delete({ id });
+    await this.cartService.deactivateDiscountInCarts(discount.id);
+    await this.discountRepository.softRemove(discount);
     return new ServerResponse(HttpStatus.OK, 'Discount deleted successfully.');
   }
   async updateActivityStatus(
@@ -131,6 +137,10 @@ export class DiscountService {
 
     if (discount.expires_in && discount.expires_in.getTime() <= now) {
       throw new BadRequestException('Discount code expired.');
+    }
+
+    if (discount.active && status === false) {
+      await this.cartService.deactivateDiscountInCarts(discount.id);
     }
 
     await this.discountRepository.update({ id }, { active: status });

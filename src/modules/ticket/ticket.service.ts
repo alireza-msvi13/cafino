@@ -61,7 +61,7 @@ export class TicketService {
         'user.username',
         'user.first_name',
         'user.last_name',
-        'user.image',
+        'user.imageUrl',
         'user.role',
       ])
       .orderBy(
@@ -103,7 +103,7 @@ export class TicketService {
         'user.username',
         'user.first_name',
         'user.last_name',
-        'user.image',
+        'user.imageUrl',
         'user.role',
       ])
       .where('ticket.id = :ticketId', { ticketId })
@@ -130,7 +130,7 @@ export class TicketService {
         'sender.username',
         'sender.first_name',
         'sender.last_name',
-        'sender.image',
+        'sender.imageUrl',
         'sender.role',
       ])
       .orderBy('message.created_at', 'ASC')
@@ -193,10 +193,12 @@ export class TicketService {
     return new ServerResponse(HttpStatus.OK, 'Ticket closed successfully.');
   }
   async deleteTicket(ticketId: string): Promise<ServerResponse> {
-    const ticket = await this.ticketRepo.findOne({ where: { id: ticketId } });
+    const ticket = await this.ticketRepo.findOne({
+      where: { id: ticketId },
+      relations: ['messages'],
+    });
     if (!ticket) throw new NotFoundException('Ticket not found.');
-
-    await this.ticketRepo.remove(ticket);
+    await this.ticketRepo.softRemove(ticket);
     return new ServerResponse(HttpStatus.OK, 'Ticket deleted successfully.');
   }
   async countTickets(): Promise<number> {
@@ -210,5 +212,13 @@ export class TicketService {
   }
   async countAnsweredTickets(): Promise<number> {
     return this.ticketRepo.count({ where: { status: TicketStatus.Answered } });
+  }
+  async countUserTickets(userId: string): Promise<number> {
+    return this.ticketRepo.count({ where: { user: { id: userId } } });
+  }
+  async countUserOpenTickets(userId: string): Promise<number> {
+    return this.ticketRepo.count({
+      where: { user: { id: userId }, status: TicketStatus.Open },
+    });
   }
 }

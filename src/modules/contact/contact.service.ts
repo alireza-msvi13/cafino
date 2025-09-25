@@ -128,12 +128,16 @@ export class ContactService {
     );
   }
   async delete(contactId: string): Promise<ServerResponse> {
-    const contact = await this.contactRepository.findOneBy({ id: contactId });
+    const contact = await this.contactRepository.findOne({
+      where: { id: contactId },
+      relations: ['replies'],
+    });
+
     if (!contact) {
       throw new NotFoundException('Contact not found.');
     }
 
-    await this.contactRepository.remove(contact);
+    await this.contactRepository.softRemove(contact);
 
     return new ServerResponse(
       HttpStatus.OK,

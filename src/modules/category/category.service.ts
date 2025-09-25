@@ -36,10 +36,10 @@ export class CategoryService {
     createCategoryDto: CreateCategoryDto,
     image: MulterFileType,
   ): Promise<ServerResponse> {
-    let { title, slug, show = true } = createCategoryDto;
+    let { title, show = true } = createCategoryDto;
 
     const category = await this.categoryRepository.findOne({
-      where: [{ slug }, { title }],
+      where: [{ title }],
     });
     if (category) throw new ConflictException('Category already exist.');
     if (isBoolean(show)) {
@@ -60,7 +60,6 @@ export class CategoryService {
 
       this.categoryRepository.insert({
         title,
-        slug,
         show,
         image: image.filename,
         imageUrl,
@@ -139,15 +138,15 @@ export class CategoryService {
     updateCategoryDto: UpdateCategoryDto,
     image: Express.Multer.File,
   ): Promise<ServerResponse> {
-    const { show, slug, title } = updateCategoryDto;
+    const { show, title } = updateCategoryDto;
     const category = await this.categoryRepository.findOneBy({ id });
     if (!category) throw new NotFoundException('Category not found.');
     const updateObject: DeepPartial<CategoryEntity> = {};
 
-    if (slug) {
-      const category = await this.categoryRepository.findOneBy({ slug });
-      if (category) throw new ConflictException('Slug already exists.');
-      updateObject.slug = slug;
+    if (title) {
+      const category = await this.categoryRepository.findOneBy({ title });
+      if (category) throw new ConflictException('Title already exists.');
+      updateObject.title = title;
     }
 
     if (image) {
@@ -170,7 +169,6 @@ export class CategoryService {
         );
       }
     }
-    if (title) updateObject.title = title;
 
     if (isBoolean(show)) {
       const showStatus = toBoolean(show);
@@ -187,13 +185,11 @@ export class CategoryService {
 
     return new ServerResponse(HttpStatus.OK, 'Category updated successfully.');
   }
-  async findBySlug(slug: string): Promise<ServerResponse> {
+  async findById(id: string): Promise<ServerResponse> {
     const category = await this.categoryRepository.findOne({
-      where: { slug, show: true },
+      where: { id, show: true },
     });
-
     if (!category) throw new NotFoundException('Category not found.');
-
     return new ServerResponse(
       HttpStatus.OK,
       'Categorory fetched successfully.',
@@ -201,19 +197,17 @@ export class CategoryService {
     );
   }
   async delete(id: string): Promise<ServerResponse> {
-    const category = await this.categoryRepository.findOneBy({ id });
-
+    const category = await this.categoryRepository
+      .createQueryBuilder('category')
+      .leftJoinAndSelect('category.items', 'items')
+      .leftJoinAndSelect('items.images', 'images')
+      .leftJoinAndSelect('items.comments', 'comments')
+      .leftJoinAndSelect('items.cart', 'cart')
+      .leftJoinAndSelect('items.favorites', 'favorites')
+      .where('category.id = :id', { id })
+      .getOne();
     if (!category) throw new NotFoundException('Category not found.');
-
-    if (category && category?.image && category?.imageUrl) {
-      await this.storageService.deleteFile(
-        category.image,
-        ImageFolder.Category,
-      );
-    }
-
-    await this.categoryRepository.delete({ id });
-
+    await this.categoryRepository.softRemove(category);
     return new ServerResponse(
       HttpStatus.OK,
       'Categorory deleted successfully.',

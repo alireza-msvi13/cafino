@@ -6,5 +6,5 @@ export class OrderStatusDto {
   @ApiProperty({ enum: OrderStatus, default: OrderStatus.Pending })
   @IsEnum(OrderStatus)
   @IsNotEmpty()
-  status: string;
+  status: OrderStatus;
 }

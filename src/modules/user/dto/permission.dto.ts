@@ -18,5 +18,5 @@ export class UserPermissionDto {
 
   @ApiProperty({ enum: Roles })
   @IsEnum(Roles)
-  role: string;
+  role: Roles = Roles.User;
 }

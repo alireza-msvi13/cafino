@@ -30,7 +30,6 @@ export class DiscountDto {
   @Type(() => Number)
   @IsNumber({}, { message: 'amount must be a number' })
   @Min(1_000, { message: 'amount must be at least 1000' })
-  @Max(1_000_000, { message: 'amount must not exceed 1,000,000' })
   amount: number;
 
   @ApiPropertyOptional({ description: 'expires in days', default: 20 })
@@ -38,7 +37,7 @@ export class DiscountDto {
   @Type(() => Number)
   @IsNumber({}, { message: 'expires_in must be a number' })
   @Min(1, { message: 'expires_in must be at least 1 day' })
-  @Max(10_000, { message: 'expires_in must not exceed 10,000 days' })
+  @Max(1000, { message: 'expires_in must not exceed 1000 days' })
   expires_in: number;
 
   @ApiPropertyOptional()

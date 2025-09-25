@@ -112,6 +112,7 @@ export class UserService {
       { phone: userDto.phone },
       {
         status: UserStatus.Block,
+        rt_hash: null,
       },
     );
     return new ServerResponse(HttpStatus.OK, 'User added to blacklist.');
@@ -166,13 +167,11 @@ export class UserService {
     updateUserDto: UpdateUserDto,
     userId: string,
   ): Promise<void> {
-    const { username, email, first_name, last_name, birthday } = updateUserDto;
+    const { first_name, last_name, birthday } = updateUserDto;
 
     await this.userRepository.update(
       { id: userId },
       {
-        username,
-        email,
         first_name,
         last_name,
         birthday,
@@ -208,7 +207,7 @@ export class UserService {
     );
   }
   async deleteAddress(addressId: string): Promise<void> {
-    await this.addressRepository.delete({ id: addressId });
+    await this.addressRepository.softDelete({ id: addressId });
   }
   async getAddresses(userId: string) {
     const addresses = await this.addressRepository.find({
@@ -262,6 +261,7 @@ export class UserService {
         user: { id: userId },
         item: { id: itemId },
       },
+      withDeleted: true,
     });
 
     if (!favorite) {
@@ -275,9 +275,30 @@ export class UserService {
 
     const baseQuery = this.favoriteRepository
       .createQueryBuilder('favorite')
+      .withDeleted()
       .leftJoinAndSelect('favorite.item', 'item')
+      .leftJoinAndSelect('item.images', 'images')
       .leftJoin('favorite.user', 'user')
-      .where('user.id = :userId', { userId });
+      .where('user.id = :userId', { userId })
+      .select([
+        'favorite.id',
+
+        'item.id',
+        'item.title',
+        'item.ingredients',
+        'item.description',
+        'item.price',
+        'item.discount',
+        'item.quantity',
+        'item.rate',
+        'item.rate_count',
+        'item.show',
+        'item.deleted_at',
+
+        'images.id',
+        'images.image',
+        'images.imageUrl',
+      ]);
 
     const total = await baseQuery.getCount();
 
@@ -286,8 +307,13 @@ export class UserService {
       .take(limit)
       .getMany();
 
+    const itemsWithAvailability = data.map((fav) => ({
+      ...fav,
+      isAvailable: !!fav.item && !fav.item.deleted_at && fav.item.show,
+    }));
+
     return {
-      data,
+      data: itemsWithAvailability,
       total,
       page,
       limit,

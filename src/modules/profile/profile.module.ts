@@ -10,9 +10,10 @@ import { StorageModule } from '../storage/storage.module';
 import { UserModule } from '../user/user.module';
 import { ItemModule } from '../item/item.module';
 import { OrderModule } from '../order/order.module';
+import { TicketModule } from '../ticket/ticket.module';
 
 @Module({
-  imports: [UserModule, ItemModule, OrderModule, StorageModule],
+  imports: [UserModule, ItemModule, OrderModule, StorageModule, TicketModule],
   controllers: [ProfileController],
   providers: [ProfileService],
 })

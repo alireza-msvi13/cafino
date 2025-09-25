@@ -16,6 +16,7 @@ import { OrderService } from '../order/order.service';
 import { OrderStatus } from 'src/common/enums/order-status.enum';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
+import { TicketService } from '../ticket/ticket.service';
 
 @Injectable()
 export class ProfileService {
@@ -25,6 +26,7 @@ export class ProfileService {
     private storageService: StorageService,
     private itemService: ItemService,
     private orderService: OrderService,
+    private ticketService: TicketService,
   ) {}
 
   // * primary
@@ -33,9 +35,9 @@ export class ProfileService {
     updateUserDto: UpdateUserDto,
     userId: string,
   ): Promise<ServerResponse> {
-    if (updateUserDto.username) {
-      await this.userService.checkUsernameExist(updateUserDto.username);
-    }
+    // if (updateUserDto.username) {
+    //   await this.userService.checkUsernameExist(updateUserDto.username);
+    // }
 
     await this.userService.updateUser(updateUserDto, userId);
 
@@ -179,6 +181,9 @@ export class ProfileService {
       userId,
       [OrderStatus.Processing, OrderStatus.Delivered],
     );
+    const ticketCount = await this.ticketService.countUserTickets(userId);
+    const openTicketCount =
+      await this.ticketService.countUserOpenTickets(userId);
 
     return new ServerResponse(
       HttpStatus.OK,
@@ -193,6 +198,10 @@ export class ProfileService {
         order: {
           total: totalOrdersCount,
           active: activeOrdersCount,
+        },
+        ticket: {
+          total: ticketCount,
+          open: openTicketCount,
         },
       },
     );

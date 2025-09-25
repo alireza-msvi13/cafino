@@ -17,6 +17,6 @@ export class CreateAddressDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @MaxLength(300)
+  @MaxLength(500)
   address: string;
 }

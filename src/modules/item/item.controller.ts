@@ -1,15 +1,17 @@
-import { query, Request } from 'express';
+import { query, Request, Response } from 'express';
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Post,
   Put,
   Query,
   Req,
+  Res,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -27,7 +29,6 @@ import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 import { SortItemDto } from './dto/sort-item.dto';
 import { OptionalJwtGuard } from '../auth/guards/optional-token.guard';
-import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { SearchItemDto } from './dto/search-item.dto';
 
 @Controller('item')
@@ -66,15 +67,23 @@ export class ItemController {
     return this.itemService.getAllItemsByAdmin(sortItemDto);
   }
 
-  @Get('/:id')
+  @Get('item-:id/:slug?')
   @UseGuards(OptionalJwtGuard)
   @ApiOperation({ summary: 'Get a item by id.' })
-  async getItemById(
-    @Param('id', UUIDValidationPipe) itemId: string,
+  async findById(
+    @Param('id', UUIDValidationPipe) id: string,
+    // @Param('slug') slug: string,
+    // @Res() res: Response,
     @Req() req: Request,
   ) {
     const userId = req?.user?.id || null;
-    return this.itemService.getItemById(itemId, userId);
+    return await this.itemService.getItemById(id, userId);
+
+    // const response = await this.itemService.getItemById(id, userId, slug);
+    // if (response.statusCode === HttpStatus.MOVED_PERMANENTLY) {
+    //   return res.redirect(301, response.data.redirectTo);
+    // }
+    // return res.json(response);
   }
 
   @UseGuards(JwtGuard, AdminGuard)

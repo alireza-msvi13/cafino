@@ -5,19 +5,25 @@ import { UserEntity } from './user.entity';
 
 @Entity(EntityName.Otp)
 export class OtpEntity extends BaseEntity {
-  @Column({ type: 'varchar', length: 6 })
+  @Column({ type: 'char', length: 5 })
   code: string;
+
   @Column({ type: 'varchar', length: 15 })
   phone: string;
-  @Column({ type: 'timestamp' })
+
+  @Column({ type: 'timestamptz' })
   expires_in: Date;
+
   @Column({ default: false })
   is_used: boolean;
-  @Column({ type: 'timestamp', nullable: true })
+
+  @Column({ type: 'timestamptz', nullable: true })
   last_requested_at: Date;
+
   @Column({ default: 0 })
   request_count: number;
-  @OneToOne(() => UserEntity, (user) => user.otp, { onDelete: 'CASCADE' })
+
+  @OneToOne(() => UserEntity, (user) => user.otp)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 }

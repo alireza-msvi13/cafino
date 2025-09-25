@@ -36,12 +36,12 @@ export class UserController {
     return await this.userService.getUsersList(paginationDto);
   }
 
-  @Delete()
-  @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: 'Delete user by admin.' })
-  async deleteUser(@Body() deleteUserDto: UserDto) {
-    return this.userService.deleteUser(deleteUserDto);
-  }
+  // @Delete()
+  // @UseGuards(JwtGuard, AdminGuard)
+  // @ApiOperation({ summary: 'Delete user by admin.' })
+  // async deleteUser(@Body() deleteUserDto: UserDto) {
+  //   return this.userService.deleteUser(deleteUserDto);
+  // }
 
   @Patch('permission')
   @UseGuards(JwtGuard, AdminGuard)

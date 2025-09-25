@@ -41,10 +41,9 @@ export class SortItemDto extends PaginationDto {
   @IsBoolean()
   availableOnly?: boolean;
 
-  @ApiPropertyOptional({ description: 'Slug to filter items by category' })
+  @ApiPropertyOptional({ description: 'Title to filter items by category' })
   @IsString()
   @IsOptional()
-  @MinLength(2)
   @MaxLength(100, { message: 'category title is too long' })
   category: string;
 
@@ -52,8 +51,6 @@ export class SortItemDto extends PaginationDto {
     description: 'Search keyword for title or description or ingredients',
   })
   @IsOptional()
-  @Type(() => String)
-  @MinLength(2)
   @MaxLength(100)
   search?: string;
 }

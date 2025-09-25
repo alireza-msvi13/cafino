@@ -12,16 +12,16 @@ import {
 @Entity(EntityName.RateLimitRecord)
 @Index(['identifier', 'endpoint'], { unique: true })
 export class RateLimitRecord extends BaseEntity {
-  @Column()
+  @Column({ type: 'varchar', length: 100 })
   identifier: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 100 })
   endpoint: string;
 
   @Column({ default: 0 })
   violation_count: number;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamptz' })
   window_start_at: Date;
 
   @Column({ default: 0 })
@@ -34,15 +34,15 @@ export class RateLimitRecord extends BaseEntity {
   })
   block_status: BlockStatus;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   block_expires_at: Date | null;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   violation_count_reset_at: Date | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
 }

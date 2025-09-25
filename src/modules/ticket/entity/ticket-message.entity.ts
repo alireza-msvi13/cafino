@@ -4,6 +4,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   JoinColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Ticket } from './ticket.entity';
 import { BaseEntity } from 'src/common/abstracts/base.entity';
@@ -15,16 +16,17 @@ export class TicketMessage extends BaseEntity {
   @Column('text')
   message: string;
 
-  @ManyToOne(() => Ticket, (ticket) => ticket.messages, {
-    onDelete: 'CASCADE',
-  })
+  @CreateDateColumn({ type: 'timestamptz' })
+  created_at: Date;
+
+  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
+  deleted_at?: Date;
+
+  @ManyToOne(() => Ticket, (ticket) => ticket.messages)
   @JoinColumn({ name: 'ticket_id' })
   ticket: Ticket;
 
   @ManyToOne(() => UserEntity, (user) => user.messages)
   @JoinColumn({ name: 'user_id' })
   sender: UserEntity;
-
-  @CreateDateColumn()
-  created_at: Date;
 }

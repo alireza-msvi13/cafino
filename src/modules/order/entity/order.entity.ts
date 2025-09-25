@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -17,33 +18,32 @@ import { DiscountEntity } from 'src/modules/discount/entity/discount.entity';
 
 @Entity(EntityName.Order)
 export class OrderEntity extends BaseEntity {
-  @Column()
+  @Column({ type: 'integer' })
   payment_amount: number;
 
-  @Column()
+  @Column({ type: 'integer' })
   discount_amount: number;
 
-  @Column()
+  @Column({ type: 'integer' })
   total_amount: number;
 
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.Pending })
-  status: string;
+  status: OrderStatus;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 500, nullable: true })
   description: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.orders, {
-    onDelete: 'CASCADE',
-  })
+  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
+  deleted_at?: Date;
+
+  @ManyToOne(() => UserEntity, (user) => user.orders)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
-  @ManyToOne(() => AddressEntity, (address) => address.orders, {
-    onDelete: 'SET NULL',
-  })
+  @ManyToOne(() => AddressEntity, (address) => address.orders)
   @JoinColumn({ name: 'address_id' })
   address: AddressEntity;
 
@@ -53,9 +53,7 @@ export class OrderEntity extends BaseEntity {
   @OneToMany(() => PaymentEntity, (payment) => payment.order)
   payments: PaymentEntity[];
 
-  @ManyToOne(() => DiscountEntity, (discount) => discount.orders, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => DiscountEntity, (discount) => discount.orders)
   @JoinColumn({ name: 'discount_id' })
   discount: DiscountEntity;
 }

@@ -16,6 +16,6 @@ export class PaymentDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  @MaxLength(300)
+  @MaxLength(500)
   description?: string;
 }

@@ -16,39 +16,35 @@ export class PaymentEntity extends BaseEntity {
   @Column({ default: false })
   status: boolean;
 
-  @Column()
+  @Column({ type: 'integer' })
   amount: number;
 
-  @Column()
+  @Column({ type: 'varchar', length: 100 })
   invoice_number: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   authority: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   card_pan: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   card_hash: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'integer', nullable: true })
   ref_id: number;
 
-  @ManyToOne(() => OrderEntity, (order) => order.payments, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => OrderEntity, (order) => order.payments)
   @JoinColumn({ name: 'order_id' })
   order: OrderEntity;
 
-  @ManyToOne(() => UserEntity, (user) => user.payments, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => UserEntity, (user) => user.payments)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
 }

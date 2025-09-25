@@ -32,7 +32,6 @@ export class ContactQueryDto extends PaginationDto {
   @ApiPropertyOptional({ description: 'Filter by name' })
   @IsOptional()
   @IsString()
-  @MinLength(2)
   @MaxLength(100)
   name?: string;
 

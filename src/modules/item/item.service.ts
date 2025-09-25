@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   HttpStatus,
   Inject,
   Injectable,
@@ -24,6 +25,7 @@ import { UserService } from '../user/user.service';
 import { OrderService } from '../order/order.service';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { SearchItemDto } from './dto/search-item.dto';
+import { generateSlug } from 'src/common/utils/slug.util';
 
 @Injectable()
 export class ItemService {
@@ -59,6 +61,16 @@ export class ItemService {
 
     await this.categoryService.checkCategoryVisibility(categoryId);
 
+    const slug = generateSlug(title);
+
+    const item = await this.itemRepository.findOne({
+      where: [{ slug }, { title }],
+    });
+    if (item)
+      throw new ConflictException(
+        'Item with this title or slug already exist.',
+      );
+
     let showBoolean = show;
     if (isBoolean(show)) {
       showBoolean = toBoolean(show);
@@ -66,6 +78,7 @@ export class ItemService {
 
     const newItem = this.itemRepository.create({
       title,
+      slug,
       ingredients,
       description,
       price: Number(price),
@@ -123,7 +136,18 @@ export class ItemService {
       await this.categoryService.checkCategoryVisibility(categoryId);
       updateObject.category = { id: categoryId };
     }
-    if (title) updateObject.title = title;
+    if (title) {
+      const slug = generateSlug(title);
+      const item = await this.itemRepository.findOne({
+        where: [{ slug }, { title }],
+      });
+      if (item)
+        throw new ConflictException(
+          'Item with this title or slug already exist.',
+        );
+      updateObject.title = title;
+      updateObject.slug = slug;
+    }
     if (ingredients) updateObject.ingredients = ingredients;
     if (description) updateObject.description = description;
     if (price) updateObject.price = +price;
@@ -217,7 +241,7 @@ export class ItemService {
         break;
       case SortByOption.Newest:
       default:
-        baseQuery.orderBy('item.createdAt', 'DESC');
+        baseQuery.orderBy('item.created_at', 'DESC');
         break;
     }
 
@@ -227,6 +251,7 @@ export class ItemService {
       .select([
         'item.id',
         'item.title',
+        'item.slug',
         'item.ingredients',
         'item.description',
         'item.price',
@@ -235,7 +260,7 @@ export class ItemService {
         'item.rate',
         'item.rate_count',
         'category.title',
-        'item.createdAt',
+        'item.created_at',
         'itemImage.id',
         'itemImage.image',
         'itemImage.imageUrl',
@@ -311,7 +336,7 @@ export class ItemService {
         break;
       case SortByOption.Newest:
       default:
-        baseQuery.orderBy('item.createdAt', 'DESC');
+        baseQuery.orderBy('item.created_at', 'DESC');
         break;
     }
 
@@ -321,6 +346,7 @@ export class ItemService {
       .select([
         'item.id',
         'item.title',
+        'item.slug',
         'item.ingredients',
         'item.description',
         'item.price',
@@ -330,7 +356,7 @@ export class ItemService {
         'item.rate',
         'item.rate_count',
         'category.title',
-        'item.createdAt',
+        'item.created_at',
         'itemImage.id',
         'itemImage.image',
         'itemImage.imageUrl',
@@ -350,7 +376,11 @@ export class ItemService {
       },
     );
   }
-  async getItemById(itemId: string, userId: string): Promise<ServerResponse> {
+  async getItemById(
+    id: string,
+    userId: string,
+    slug?: string,
+  ): Promise<ServerResponse> {
     const item = await this.itemRepository
       .createQueryBuilder('item')
       .leftJoin('item.category', 'category')
@@ -362,6 +392,7 @@ export class ItemService {
       .select([
         'item.id',
         'item.title',
+        'item.slug',
         'item.ingredients',
         'item.description',
         'item.price',
@@ -382,14 +413,20 @@ export class ItemService {
         'childrenUser.last_name',
         'childrenUser.username',
       ])
-      .where('item.id = :itemId', { itemId })
+      .where('item.id = :id', { id })
       .andWhere('category.show = :show', { show: true })
       .andWhere('item.show = :show', { show: true })
       .getOne();
 
     if (!item) throw new NotFoundException('Menu Item not found.');
 
-    const isFav = await this.userService.isItemFavorited(userId, itemId);
+    // if (!slug || slug !== item.slug) {
+    //   return new ServerResponse(HttpStatus.MOVED_PERMANENTLY, 'Redirect', {
+    //     redirectTo: `${process.env.APP_URL}/menu/item-${item.id}/${item.slug}`,
+    //   });
+    // }
+
+    const isFav = await this.userService.isItemFavorited(userId, item.id);
 
     return new ServerResponse(
       HttpStatus.OK,
@@ -403,10 +440,12 @@ export class ItemService {
     );
   }
   async deleteItemById(itemId: string): Promise<ServerResponse> {
-    const deleteResult = await this.itemRepository.delete({ id: itemId });
-    if (deleteResult.affected === 0)
-      throw new NotFoundException('Item not found');
-
+    const item = await this.itemRepository.findOne({
+      where: { id: itemId },
+      relations: ['cart', 'images', 'comments', 'favorites'],
+    });
+    if (!item) throw new NotFoundException('Item not found.');
+    await this.itemRepository.softRemove(item);
     return new ServerResponse(HttpStatus.OK, 'Menu item delete successfully.');
   }
   async searchItem(query: SearchItemDto): Promise<ServerResponse> {
@@ -439,10 +478,6 @@ export class ItemService {
       total,
       page,
       limit,
-      items,
-    });
-
-    return new ServerResponse(HttpStatus.OK, 'Search done successfully.', {
       items,
     });
   }

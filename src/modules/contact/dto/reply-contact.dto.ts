@@ -1,12 +1,11 @@
-import { IsNotEmpty, IsString, MinLength, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ReplyContactDto {
   @ApiProperty({ example: 'Regarding your order #12345' })
   @IsString()
   @IsNotEmpty({ message: 'Subject cannot be empty' })
-  @MinLength(10)
-  @MaxLength(150)
+  @MaxLength(100)
   subject: string;
 
   @ApiProperty({
@@ -15,7 +14,6 @@ export class ReplyContactDto {
   })
   @IsString()
   @IsNotEmpty()
-  @MinLength(5)
   @MaxLength(1000)
   message: string;
 }

@@ -13,25 +13,30 @@ import {
 
 @Entity(EntityName.Comment)
 export class CommentEntity extends BaseEntity {
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 500 })
   text: string;
+
   @Column({ type: 'boolean', default: false })
   accept: boolean;
+
   @Column({ type: 'integer', nullable: true })
   star: number;
-  @ManyToOne(() => UserEntity, (user) => user.comments, { onDelete: 'CASCADE' })
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  created_at: Date;
+
+  @ManyToOne(() => UserEntity, (user) => user.comments)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
-  @ManyToOne(() => ItemEntity, (item) => item.comments, { onDelete: 'CASCADE' })
+
+  @ManyToOne(() => ItemEntity, (item) => item.comments)
   @JoinColumn({ name: 'item_id' })
   item: ItemEntity;
-  @ManyToOne(() => CommentEntity, (parent) => parent.children, {
-    onDelete: 'CASCADE',
-  })
+
+  @ManyToOne(() => CommentEntity, (parent) => parent.children)
   @JoinColumn({ name: 'parent_id' })
   parent: CommentEntity;
+
   @OneToMany(() => CommentEntity, (comment) => comment.parent)
   children: CommentEntity[];
-  @CreateDateColumn()
-  created_at: Date;
 }

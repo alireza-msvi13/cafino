@@ -40,7 +40,7 @@ export class Ticket extends BaseEntity {
   user: UserEntity;
 
   @OneToMany(() => TicketMessage, (message) => message.ticket, {
-    cascade: ['soft-remove'],
+    cascade: true,
   })
   messages: TicketMessage[];
 }

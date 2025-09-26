@@ -33,7 +33,7 @@ export class Contact extends BaseEntity {
   deleted_at?: Date;
 
   @OneToMany(() => Reply, (reply) => reply.contact, {
-    cascade: ['soft-remove'],
+    cascade: true,
   })
   replies: Reply[];
 }

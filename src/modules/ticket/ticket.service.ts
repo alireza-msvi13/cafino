@@ -41,7 +41,10 @@ export class TicketService {
     });
     await this.ticketRepo.save(ticket);
 
-    return new ServerResponse(HttpStatus.OK, 'Ticket created successfully.');
+    return new ServerResponse(
+      HttpStatus.CREATED,
+      'Ticket created successfully.',
+    );
   }
   async findAllTickets(
     query: SortTicketDto,
@@ -179,10 +182,7 @@ export class TicketService {
 
     await this.messageRepo.save(message);
 
-    return new ServerResponse(
-      HttpStatus.CREATED,
-      'Message added successfully.',
-    );
+    return new ServerResponse(HttpStatus.CREATED, 'Message sent successfully.');
   }
   async closeTicket(ticketId: string): Promise<ServerResponse> {
     const ticket = await this.ticketRepo.findOne({ where: { id: ticketId } });

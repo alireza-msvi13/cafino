@@ -117,9 +117,7 @@ export class AuthService {
 
     await this.userService.changeOtpStatusToUsed(user.otp.id);
 
-    return new ServerResponse(HttpStatus.OK, 'You login successfully.', {
-      tokens,
-    });
+    return new ServerResponse(HttpStatus.OK, 'You login successfully.');
   }
   async refreshToken(
     res: Response,

@@ -345,6 +345,7 @@ export class CartService {
         title: item.title,
         description: item.description,
         count,
+        quantity: item.quantity,
         images: item.images ? item.images.map((image) => image.imageUrl) : [],
         price: item.price,
         discount: item.discount,

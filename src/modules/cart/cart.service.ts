@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   forwardRef,
+  GoneException,
   HttpStatus,
   Inject,
   Injectable,
@@ -76,9 +77,8 @@ export class CartService {
       },
     });
 
-    if (!cartItem) {
-      throw new NotFoundException('Item is not exist in your cart.');
-    }
+    if (!cartItem)
+      throw new ConflictException('Item is not exist in your cart.');
 
     let count = cartItem.count + 1;
     await this.itemService.checkItemQuantity(itemId, count);
@@ -104,7 +104,7 @@ export class CartService {
     });
 
     if (!cartItem)
-      throw new NotFoundException('Item is not exist in your cart.');
+      throw new ConflictException('Item is not exist in your cart.');
 
     if (cartItem.count === 1) {
       await this.cartRepository.remove(cartItem);
@@ -180,21 +180,20 @@ export class CartService {
       discount: { id: discount.id },
     });
     if (userCartDiscount) {
-      throw new BadRequestException('Already Used Discount.');
+      throw new ConflictException('Already Used Discount.');
     }
 
-    if (!discount.active)
-      throw new BadRequestException('Discount code expired.');
+    if (!discount.active) throw new GoneException('Discount code expired.');
 
     if (discount.limit && discount.limit <= discount.usage) {
-      throw new BadRequestException('Discount code expired.');
+      throw new GoneException('Discount code expired.');
     }
 
     if (
       discount?.expires_in &&
       discount?.expires_in?.getTime() <= new Date().getTime()
     ) {
-      throw new BadRequestException('Discount code expired.');
+      throw new GoneException('Discount code expired.');
     }
 
     await this.cartRepository.update(
@@ -220,7 +219,7 @@ export class CartService {
       discount: { id: discount.id },
     });
     if (!userCartDiscount) {
-      throw new BadRequestException('Discount is not found in your cart.');
+      throw new NotFoundException('Discount is not found in your cart.');
     }
 
     await this.cartRepository.update(

@@ -1,8 +1,7 @@
 import {
   Injectable,
   BadRequestException,
-  InternalServerErrorException,
-  NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import axios from 'axios';
 import { ZarinpalRequestDto } from './dto/zarinpal.dto';
@@ -41,7 +40,9 @@ export class ZarinpalService {
       };
     }
 
-    throw new BadRequestException('connection failed in zarinpal');
+    throw new ServiceUnavailableException(
+      'Failed to connect with Zarinpal service.',
+    );
   }
   async verifyRequest(authority: string, amount: number) {
     const options = {
@@ -50,7 +51,8 @@ export class ZarinpalService {
       merchant_id: this.merchantId,
     };
     const data = await this.handleRequest(this.verifyUrl, options);
-    if (data.code !== 100 || !data.ref_id) throw new NotFoundException();
+    if (data.code !== 100 || !data.ref_id)
+      throw new BadRequestException('Payment verification failed.');
 
     return data;
   }
@@ -66,7 +68,9 @@ export class ZarinpalService {
       return response.data.data;
     } catch (error) {
       console.log(error);
-      throw new InternalServerErrorException('Error in zarinpal request.');
+      throw new ServiceUnavailableException(
+        'Failed to connect with Zarinpal service.',
+      );
     }
   }
 }

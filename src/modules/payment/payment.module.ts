@@ -9,6 +9,7 @@ import { CartModule } from '../cart/cart.module';
 import { OrderModule } from '../order/order.module';
 import { ItemModule } from '../item/item.module';
 import { DiscountModule } from '../discount/discount.module';
+import { RateLimitModule } from '../rate-limit/rate-limit.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { DiscountModule } from '../discount/discount.module';
     GatewayModule,
     ItemModule,
     DiscountModule,
+    RateLimitModule,
     TypeOrmModule.forFeature([PaymentEntity]),
   ],
   providers: [PaymentService],

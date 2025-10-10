@@ -25,8 +25,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(
     payload: JwtPayload,
   ): Promise<{ phone: string; id: string; role: Roles }> {
-    if (!payload || !payload?.phone?.startsWith('09')) {
-      throw new UnauthorizedException('token is not valid');
+    if (!payload || !payload?.phone) {
+      throw new UnauthorizedException('Invalid or expired token.');
     }
     const { phone, id, role } = await this.userService.findUser(payload.phone);
     return {

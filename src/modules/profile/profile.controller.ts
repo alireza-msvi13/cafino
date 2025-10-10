@@ -16,15 +16,27 @@ import {
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
-import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
 import { UpdateUserDto } from './dto/update-user-dto';
-import { CreateAddressDto } from './dto/create-address-dto';
+import { AddAddressDto } from './dto/add-address-dto';
 import { UpdateAddressDto } from './dto/update-address-dto';
 import { UploadFileAws } from 'src/common/interceptors/upload-file.interceptor';
 import { MulterFileType } from 'src/common/types/multer.file.type';
 import { UpdateImageDto } from './dto/update-image-dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
+import {
+  AddAddressDoc,
+  DeleteAddressDoc,
+  GetUserAddressesDoc,
+  GetUserProfileOverviewDoc,
+  UpdateAddressDoc,
+  UpdateUserProfileImageDoc,
+  UpdateProfileByUserDoc,
+  AddItemToFavoritesDoc,
+  DeleteUserProfileImageDoc,
+  DeleteFavoriteDoc,
+  GetUserFavoritesDoc,
+} from './decorators/swagger.decorators';
 
 @Controller('profile')
 @ApiTags('Profile')
@@ -33,7 +45,7 @@ export class ProfileController {
   constructor(private profileService: ProfileService) {}
 
   @Get('overview')
-  @ApiOperation({ summary: 'Get user profile overview.' })
+  @GetUserProfileOverviewDoc()
   async getOverview(@GetUser('id') userId: string) {
     return await this.profileService.getOverview(userId);
   }
@@ -47,32 +59,35 @@ export class ProfileController {
     return await this.profileService.getUserOrders(userId, paginationDto);
   }
 
-  @Put('orders/:id')
-  @ApiOperation({ summary: 'Cancel user order.' })
-  async cancelOrder(@Query('id', UUIDValidationPipe) orderId: string) {
-    return await this.profileService.cancelOrder(orderId);
-  }
+  // @Put('orders/:id')
+  // @ApiOperation({ summary: 'Cancel order by user.' })
+  // async cancelOrder(@Query('id', UUIDValidationPipe) orderId: string) {
+  //   return await this.profileService.cancelOrder(orderId);
+  // }
 
   @Put('update')
-  @ApiOperation({ summary: 'Update user profile.' })
-  async updateUser(
+  @UpdateProfileByUserDoc()
+  async UpdateProfileByUserDoc(
     @Body() updateUserDto: UpdateUserDto,
     @GetUser('id') userId: string,
   ) {
-    return await this.profileService.updateUser(updateUserDto, userId);
+    return await this.profileService.UpdateProfileByUserDoc(
+      updateUserDto,
+      userId,
+    );
   }
 
   @Post('address')
-  @ApiOperation({ summary: 'Create new user address.' })
-  async createAddress(
-    @Body() createAddressDto: CreateAddressDto,
+  @AddAddressDoc()
+  async addAddress(
+    @Body() addAddressDto: AddAddressDto,
     @GetUser('id') userId: string,
   ) {
-    return await this.profileService.createAddress(userId, createAddressDto);
+    return await this.profileService.addAddress(userId, addAddressDto);
   }
 
   @Put('address/:id')
-  @ApiOperation({ summary: 'Update user address by address-id.' })
+  @UpdateAddressDoc()
   async updateAddress(
     @Body() updateAddressDto: UpdateAddressDto,
     @Param('id', UUIDValidationPipe) addressId: string,
@@ -81,37 +96,36 @@ export class ProfileController {
   }
 
   @Delete('address/:id')
-  @ApiOperation({ summary: 'Delete user address by address-id.' })
+  @DeleteAddressDoc()
   async deleteAddress(@Param('id', UUIDValidationPipe) addressId: string) {
     return await this.profileService.deleteAddress(addressId);
   }
 
   @Get('address')
-  @ApiOperation({ summary: 'Get all user addresses.' })
+  @GetUserAddressesDoc()
   async getAddresses(@GetUser('id') userId: string) {
     return await this.profileService.getAddresses(userId);
   }
 
   @Patch('image')
-  @ApiConsumes(SwaggerContentTypes.Multipart)
-  @ApiOperation({ summary: 'update user image' })
   @UseInterceptors(UploadFileAws('image'))
+  @UpdateUserProfileImageDoc()
   async updateImage(
     @UploadedFile() image: MulterFileType,
-    @Body() updateImageDto: UpdateImageDto,
+    @Body() _: UpdateImageDto,
     @GetUser('id') userId: string,
   ) {
     return await this.profileService.updateImage(userId, image);
   }
 
   @Delete('image')
-  @ApiOperation({ summary: 'Delete user image.' })
+  @DeleteUserProfileImageDoc()
   async deleteImage(@GetUser('id') userId: string) {
     return await this.profileService.deleteImage(userId);
   }
 
   @Post('favorite')
-  @ApiOperation({ summary: 'Add item to favorite item.' })
+  @AddItemToFavoritesDoc()
   async addToFavorite(
     @GetUser('id') userId: string,
     @Query('itemId', UUIDValidationPipe) itemId: string,
@@ -120,7 +134,7 @@ export class ProfileController {
   }
 
   @Delete('favorite')
-  @ApiOperation({ summary: 'Delete item from favorite item.' })
+  @DeleteFavoriteDoc()
   async removeFromFavorite(
     @GetUser('id') userId: string,
     @Query('itemId', UUIDValidationPipe) itemId: string,
@@ -129,7 +143,7 @@ export class ProfileController {
   }
 
   @Get('favorites')
-  @ApiOperation({ summary: 'Get user favorites.' })
+  @GetUserFavoritesDoc()
   findUserFavorites(
     @GetUser('id') userId: string,
     @Query() paginationDto: PaginationDto,

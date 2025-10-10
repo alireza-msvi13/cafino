@@ -4,9 +4,14 @@ import { CommentController } from './comment.controller';
 import { ItemModule } from '../item/item.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommentEntity } from './entities/comment.entity';
+import { RateLimitModule } from '../rate-limit/rate-limit.module';
 
 @Module({
-  imports: [ItemModule, TypeOrmModule.forFeature([CommentEntity])],
+  imports: [
+    RateLimitModule,
+    ItemModule,
+    TypeOrmModule.forFeature([CommentEntity]),
+  ],
   controllers: [CommentController],
   providers: [CommentService],
   exports: [CommentService],

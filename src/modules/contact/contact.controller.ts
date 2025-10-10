@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
 import { CreateContactDto } from './dto/create-contact.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 import { ReplyContactDto } from './dto/reply-contact.dto';
 import { ContactQueryDto } from './dto/sort-contact.dto';
@@ -22,6 +22,13 @@ import { RateLimitGuard } from '../rate-limit/guards/rate-limit.guard';
 import { OptionalJwtGuard } from '../auth/guards/optional-token.guard';
 import { Request } from 'express';
 import { parseUserAgent } from '../rate-limit/utils/user-agent.utils';
+import {
+  CreateContactDoc,
+  DeleteContactDoc,
+  GetAllContactsDoc,
+  GetContactRepliesDoc,
+  ReplyContactMessageDoc,
+} from './decorators/swagger.decorators';
 
 @Controller('contact')
 @ApiTags('Contact')
@@ -29,9 +36,9 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Post()
-  @RateLimit({ max: 10, duration: 1 })
+  @RateLimit({ max: 3, duration: 10 })
   @UseGuards(OptionalJwtGuard, RateLimitGuard)
-  @ApiOperation({ summary: 'Create a new contact message.' })
+  @CreateContactDoc()
   async create(
     @Body() createContactDto: CreateContactDto,
     @Req() req: Request,
@@ -47,14 +54,14 @@ export class ContactController {
 
   @Get()
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: 'Get all contact messages with filters.' })
+  @GetAllContactsDoc()
   async findAll(@Query() query: ContactQueryDto) {
     return this.contactService.findAll(query);
   }
 
   @Delete(':id')
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: 'Delete a contact message.' })
+  @DeleteContactDoc()
   async delete(@Param('id', UUIDValidationPipe) id: string) {
     return this.contactService.delete(id);
   }
@@ -62,7 +69,7 @@ export class ContactController {
   @Post(':id/reply')
   @RateLimit({ max: 10, duration: 1 })
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: 'Reply to a contact message.' })
+  @ReplyContactMessageDoc()
   async replyMessage(
     @Param('id', UUIDValidationPipe) id: string,
     @Body() dto: ReplyContactDto,
@@ -72,7 +79,7 @@ export class ContactController {
 
   @Get(':id/replies')
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: 'Get all replies for a contact message.' })
+  @GetContactRepliesDoc()
   async getReplies(@Param('id', UUIDValidationPipe) id: string) {
     return this.contactService.getReplies(id);
   }

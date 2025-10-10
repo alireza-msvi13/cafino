@@ -12,7 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OtpEntity } from './entities/otp.entity';
 import { UserStatus } from '../../common/enums/user-status.enum';
 import { UpdateUserDto } from '../profile/dto/update-user-dto';
-import { CreateAddressDto } from '../profile/dto/create-address-dto';
+import { AddAddressDto } from '../profile/dto/add-address-dto';
 import { AddressEntity } from './entities/address.entity';
 import { UpdateAddressDto } from '../profile/dto/update-address-dto';
 import { FavoriteEntity } from './entities/favorite.entity';
@@ -79,12 +79,16 @@ export class UserService {
       .take(limit)
       .getMany();
 
-    return new ServerResponse(HttpStatus.OK, 'Users fetched successfully.', {
-      total,
-      page,
-      limit,
-      users,
-    });
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Users list fetched successfully.',
+      {
+        total,
+        page,
+        limit,
+        users,
+      },
+    );
   }
   async changeUserPermission(
     userPermissionDto: UserPermissionDto,
@@ -115,7 +119,10 @@ export class UserService {
         rt_hash: null,
       },
     );
-    return new ServerResponse(HttpStatus.OK, 'User added to blacklist.');
+    return new ServerResponse(
+      HttpStatus.OK,
+      'User added to blacklist successfully.',
+    );
   }
   async removeUserToBlacklist(userDto: UserDto): Promise<ServerResponse> {
     await this.userRepository.update(
@@ -124,9 +131,14 @@ export class UserService {
         status: UserStatus.Normal,
       },
     );
-    return new ServerResponse(HttpStatus.OK, 'User removed from blacklist.');
+    return new ServerResponse(
+      HttpStatus.OK,
+      'User removed from blacklist successfully.',
+    );
   }
-  async getBlacklist(paginationDto: PaginationDto): Promise<ServerResponse> {
+  async getUsersBlacklist(
+    paginationDto: PaginationDto,
+  ): Promise<ServerResponse> {
     const { limit = 10, page = 1 } = paginationDto;
 
     const baseQuery = this.userRepository
@@ -178,11 +190,19 @@ export class UserService {
       },
     );
   }
-  async createAddress(
+  async addAddress(
     userId: string,
-    createAddressDto: CreateAddressDto,
+    addAddressDto: AddAddressDto,
   ): Promise<void> {
-    const { province, city, address } = createAddressDto;
+    const addresses = await this.addressRepository.find({
+      where: { user: { id: userId } },
+    });
+    if (addresses.length >= 5) {
+      throw new ConflictException(
+        'You have reached the maximum limit of 5 saved addresses.',
+      );
+    }
+    const { province, city, address } = addAddressDto;
     const newAddress = this.addressRepository.create({
       province,
       city,
@@ -247,7 +267,7 @@ export class UserService {
     });
 
     if (item) {
-      throw new BadRequestException('Item is already exist in favorites.');
+      throw new ConflictException('Item is already exist in favorites.');
     }
     const newItem = this.favoriteRepository.create({
       user: { id: userId },
@@ -329,7 +349,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('User not found.');
     }
     return user;
   }
@@ -448,7 +468,7 @@ export class UserService {
       where: { id: addressId },
     });
     if (!address) {
-      throw new NotFoundException('Address not found');
+      throw new NotFoundException('Address not found.');
     }
   }
   async findUserByAddress(
@@ -462,7 +482,7 @@ export class UserService {
       },
     });
 
-    if (!address) throw new NotFoundException('Address not found');
+    if (!address) throw new NotFoundException('Address not found.');
 
     return address;
   }

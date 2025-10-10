@@ -167,9 +167,13 @@ export class RateLimitService {
     if (!record) {
       throw new NotFoundException('Rate-limit record not found.');
     }
-    return new ServerResponse(HttpStatus.OK, 'Category fetched successfully.', {
-      record,
-    });
+    return new ServerResponse(
+      HttpStatus.OK,
+      'Rate-limit record fetched successfully.',
+      {
+        record,
+      },
+    );
   }
 
   async blockManually(id: string, dto: BlockUserDto): Promise<ServerResponse> {

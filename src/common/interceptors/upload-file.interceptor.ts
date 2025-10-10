@@ -12,7 +12,7 @@ export function UploadFileAws(fieldName: string) {
       const ext = extname(file.originalname);
       if (!AllowdImageFormats.includes(ext)) {
         return callback(
-          new HttpException('invalid file type', HttpStatus.BAD_REQUEST),
+          new HttpException('Invalid file type.', HttpStatus.BAD_REQUEST),
           null,
         );
       }
@@ -32,7 +32,7 @@ export function UploadMultiFilesAws(fieldName: string) {
       const ext = extname(file.originalname);
       if (!AllowdImageFormats.includes(ext)) {
         return callback(
-          new HttpException('invalid file type', HttpStatus.BAD_REQUEST),
+          new HttpException('Invalid file type.', HttpStatus.BAD_REQUEST),
           null,
         );
       }

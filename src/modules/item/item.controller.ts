@@ -5,20 +5,17 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Param,
   Post,
   Put,
   Query,
   Req,
-  Res,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { JwtGuard } from '../auth/guards/access-token.guard';
-import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { UploadMultiFilesAws } from 'src/common/interceptors/upload-file.interceptor';
 import { MulterFileType } from 'src/common/types/multer.file.type';
@@ -30,7 +27,15 @@ import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 import { SortItemDto } from './dto/sort-item.dto';
 import { OptionalJwtGuard } from '../auth/guards/optional-token.guard';
 import { SearchItemDto } from './dto/search-item.dto';
-
+import {
+  CreateItemDoc,
+  DeleteItemDoc,
+  GetAllItemDoc,
+  GetAllItemsByAdminDoc,
+  GetItemByIdDoc,
+  SearchItemDoc,
+  UpdateItemDoc,
+} from './decorators/swagger.decorators';
 @Controller('item')
 @ApiTags('Item')
 export class ItemController {
@@ -39,8 +44,7 @@ export class ItemController {
   @Post()
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadMultiFilesAws('images'))
-  @ApiConsumes(SwaggerContentTypes.Multipart)
-  @ApiOperation({ summary: 'Create new menu item by admin.' })
+  @CreateItemDoc()
   async createItem(
     @StringToArray('ingredients') _: null,
     @UploadedFiles() images: Array<MulterFileType>,
@@ -51,7 +55,7 @@ export class ItemController {
 
   @Get()
   @UseGuards(OptionalJwtGuard)
-  @ApiOperation({ summary: 'Get all items.' })
+  @GetAllItemDoc()
   async getAllItem(@Query() sortItemDto: SortItemDto, @Req() req: Request) {
     const userId = req?.user?.id || null;
     return this.itemService.getAllItems(userId, sortItemDto);
@@ -59,17 +63,14 @@ export class ItemController {
 
   @Get('admin')
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({
-    summary:
-      'Get all items by admin, including items that are not allowed to be shown.',
-  })
+  @GetAllItemsByAdminDoc()
   async getAllItemsByAdmin(@Query() sortItemDto: SortItemDto) {
     return this.itemService.getAllItemsByAdmin(sortItemDto);
   }
 
   @Get('item-:id/:slug?')
   @UseGuards(OptionalJwtGuard)
-  @ApiOperation({ summary: 'Get a item by id.' })
+  @GetItemByIdDoc()
   async findById(
     @Param('id', UUIDValidationPipe) id: string,
     // @Param('slug') slug: string,
@@ -86,9 +87,9 @@ export class ItemController {
     // return res.json(response);
   }
 
-  @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: 'Delete a menu item by admin.' })
   @Delete('/:id')
+  @UseGuards(JwtGuard, AdminGuard)
+  @DeleteItemDoc()
   async deleteItemById(@Param('id', UUIDValidationPipe) itemId: string) {
     return this.itemService.deleteItemById(itemId);
   }
@@ -99,8 +100,7 @@ export class ItemController {
     UploadMultiFilesAws('images'),
     EmptyStringToUndefindInterceptor,
   )
-  @ApiConsumes(SwaggerContentTypes.Multipart)
-  @ApiOperation({ summary: 'Update menu item by admin.' })
+  @UpdateItemDoc()
   async updateItem(
     @StringToArray('ingredients') _: null,
     @UploadedFiles() images: Array<MulterFileType>,
@@ -111,7 +111,7 @@ export class ItemController {
   }
 
   @Get('search/:search')
-  @ApiOperation({ summary: 'Search items.' })
+  @SearchItemDoc()
   async searchItem(@Query('search') query: SearchItemDto) {
     return this.itemService.searchItem(query);
   }

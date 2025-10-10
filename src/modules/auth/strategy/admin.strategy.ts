@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -23,16 +27,13 @@ export class AdminStrategy extends PassportStrategy(Strategy, 'admin') {
     });
   }
   async validate(payload: JwtPayload): Promise<{ phone: string; id: string }> {
-    if (!payload || !payload?.phone?.startsWith('09')) {
-      throw new UnauthorizedException('token is not valid');
+    if (!payload || !payload?.phone) {
+      throw new UnauthorizedException('Invalid or expired token.');
     }
     const { phone, role, id } = await this.userService.findUser(payload.phone);
-    if (role == Roles.User) {
-      throw new UnauthorizedException('you dont have access');
+    if (role === Roles.User) {
+      throw new ForbiddenException('Access denied.');
     }
-    return {
-      id,
-      phone,
-    };
+    return { id, phone };
   }
 }

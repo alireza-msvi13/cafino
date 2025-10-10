@@ -13,6 +13,8 @@ import { Response } from 'express';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
+import { PaymentGatewayDoc } from './decorators/swagger.decorators';
+import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator';
 
 @Controller('Payment')
 @ApiTags('Payment')
@@ -21,7 +23,8 @@ export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
   @Post('gateway')
-  @ApiOperation({ summary: 'Payment gateway.' })
+  @RateLimit({ max: 5, duration: 5 })
+  @PaymentGatewayDoc()
   paymentGateway(
     @Body() paymentDto: PaymentDto,
     @GetUser('id') userId: string,
@@ -30,7 +33,6 @@ export class PaymentController {
   }
 
   @Get('verify')
-  @ApiOperation({ summary: 'Payment verify.' })
   async paymentVerify(
     @Query('Authority') authority: string,
     @Query('Status') status: string,

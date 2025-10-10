@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   forwardRef,
+  GoneException,
   HttpStatus,
   Inject,
   Injectable,
@@ -41,7 +42,8 @@ export class CategoryService {
     const category = await this.categoryRepository.findOne({
       where: [{ title }],
     });
-    if (category) throw new ConflictException('Category already exist.');
+    if (category)
+      throw new ConflictException('A category with this title already exists.');
     if (isBoolean(show)) {
       show = toBoolean(show);
     }
@@ -208,10 +210,7 @@ export class CategoryService {
       .getOne();
     if (!category) throw new NotFoundException('Category not found.');
     await this.categoryRepository.softRemove(category);
-    return new ServerResponse(
-      HttpStatus.OK,
-      'Categorory deleted successfully.',
-    );
+    return new ServerResponse(HttpStatus.OK, 'Category deleted successfully.');
   }
 
   // *helper
@@ -220,6 +219,6 @@ export class CategoryService {
     const category = await this.categoryRepository.findOneBy({ id });
     if (!category) throw new NotFoundException('Category not found.');
     if (!category.show)
-      throw new BadRequestException('Category is not allow to show.');
+      throw new GoneException('Category is not allowed to show.');
   }
 }

@@ -7,7 +7,7 @@ import helmet from 'helmet';
 import * as compression from 'compression';
 import { AllowOrigins } from './common/constants/allow-origins.constant';
 import { CompressionConfig } from './common/constants/compression.constant';
-import { SwaggerConfigInit } from './config/swagger/swagger.config';
+import { SwaggerConfigInit } from './common/swagger/configs/swagger.config';
 import { SanitizePipe } from './common/pipes/sanitize.pipe';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';

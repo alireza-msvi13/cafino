@@ -14,8 +14,7 @@ import {
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SwaggerContentTypes } from 'src/common/enums/swagger.enum';
+import { ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { UploadFileAws } from 'src/common/interceptors/upload-file.interceptor';
 import { MulterFileType } from 'src/common/types/multer.file.type';
@@ -23,6 +22,15 @@ import { AdminGuard } from '../auth/guards/admin.guard';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
+import {
+  CreateCategoryDoc,
+  DeleteCategoryDoc,
+  FindAllByAdminDoc,
+  FindAllDoc,
+  FindByIdDoc,
+  FindByPaginationDoc,
+  UpdateCategoryDoc,
+} from './decorators/swagger.decorators';
 
 @Controller('category')
 @ApiTags('Category')
@@ -32,8 +40,7 @@ export class CategoryController {
   @Post()
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadFileAws('image'))
-  @ApiConsumes(SwaggerContentTypes.Multipart)
-  @ApiOperation({ summary: 'Create new category by admin.' })
+  @CreateCategoryDoc()
   create(
     @UploadedFile() image: MulterFileType,
     @Body() createCategoryDto: CreateCategoryDto,
@@ -42,28 +49,26 @@ export class CategoryController {
   }
 
   @Get('/pagination')
-  @ApiOperation({ summary: 'Get categories by pagination.' })
+  @FindByPaginationDoc()
   findByPagination(@Query() pagination: PaginationDto) {
     return this.categoryService.findByPagination(pagination);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all categories.' })
+  @FindAllDoc()
   findAll() {
     return this.categoryService.findAll();
   }
 
   @Get('admin')
-  @ApiOperation({
-    summary:
-      'Get all categories by admin, including categories that are not allowed to be shown.',
-  })
+  @UseGuards(JwtGuard, AdminGuard)
+  @FindAllByAdminDoc()
   findAllByAdmin(@Query() pagination: PaginationDto) {
     return this.categoryService.findByPaginationByAdmin(pagination);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Find a category by its Id' })
+  @FindByIdDoc()
   findById(@Param('id', UUIDValidationPipe) id: string) {
     return this.categoryService.findById(id);
   }
@@ -71,8 +76,7 @@ export class CategoryController {
   @Put(':id')
   @UseGuards(JwtGuard, AdminGuard)
   @UseInterceptors(UploadFileAws('image'), EmptyStringToUndefindInterceptor)
-  @ApiConsumes(SwaggerContentTypes.Multipart)
-  @ApiOperation({ summary: 'Update new category by admin.' })
+  @UpdateCategoryDoc()
   update(
     @Param('id', UUIDValidationPipe) categoryId: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -82,7 +86,8 @@ export class CategoryController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a category by admin.' })
+  @UseGuards(JwtGuard, AdminGuard)
+  @DeleteCategoryDoc()
   delete(@Param('id', UUIDValidationPipe) categoryId: string) {
     return this.categoryService.delete(categoryId);
   }

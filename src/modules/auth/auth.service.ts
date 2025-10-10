@@ -73,7 +73,7 @@ export class AuthService {
       otpCode,
     });
   }
-  async verfiyOtp(
+  async verifyOtp(
     phone: string,
     otpCode: string,
     res: Response,

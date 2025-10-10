@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   forwardRef,
   HttpStatus,
   Inject,
@@ -59,7 +60,7 @@ export class CommentService {
       'Comment created successfully.',
     );
   }
-  async getAllComment(sortDto: SortAdminCommentDto): Promise<ServerResponse> {
+  async getAllComments(sortDto: SortAdminCommentDto): Promise<ServerResponse> {
     const {
       limit = 10,
       page = 1,
@@ -206,8 +207,8 @@ export class CommentService {
   async acceptComment(id: string): Promise<ServerResponse> {
     const comment = await this.getCommentById(id);
 
-    if (!comment.accept)
-      throw new BadRequestException('Comment is already accepted.');
+    if (comment.accept)
+      throw new ConflictException('Comment is already accepted.');
 
     comment.accept = true;
     await this.commentRepository.save(comment);
@@ -238,7 +239,7 @@ export class CommentService {
   async rejectComment(id: string): Promise<ServerResponse> {
     const comment = await this.getCommentById(id);
     if (!comment.accept)
-      throw new BadRequestException('Comment is already rejected.');
+      throw new ConflictException('Comment is already rejected.');
     comment.accept = false;
     await this.commentRepository.save(comment);
     return new ServerResponse(

@@ -2,10 +2,12 @@ import {
   BadRequestException,
   ConflictException,
   forwardRef,
+  GoneException,
   HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { DiscountDto } from './dto/discount.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -34,13 +36,14 @@ export class DiscountService {
       code,
     });
 
-    if (isDiscountCodeExsit) throw new ConflictException('Code already exsit');
+    if (isDiscountCodeExsit)
+      throw new ConflictException('Code already exists.');
 
     const discountObject: DeepPartial<DiscountEntity> = { code };
 
     if ((!amount && !percent) || (amount && percent)) {
-      throw new BadRequestException(
-        'You must enter one of the Amount or Percent fields.',
+      throw new UnprocessableEntityException(
+        'You must enter either Amount or Percent, not both.',
       );
     }
     if (amount) discountObject.amount = amount;
@@ -93,7 +96,7 @@ export class DiscountService {
 
     return new ServerResponse(
       HttpStatus.OK,
-      'Discounts fetched successfully.',
+      'Discount codes fetched successfully.',
       {
         total,
         page,
@@ -132,11 +135,11 @@ export class DiscountService {
       discount.limit !== undefined &&
       discount.limit <= discount.usage
     ) {
-      throw new BadRequestException('Discount code expired.');
+      throw new GoneException('Discount code expired.');
     }
 
     if (discount.expires_in && discount.expires_in.getTime() <= now) {
-      throw new BadRequestException('Discount code expired.');
+      throw new GoneException('Discount code expired.');
     }
 
     if (discount.active && status === false) {

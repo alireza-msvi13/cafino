@@ -13,13 +13,22 @@ import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { AddMessageDto } from './dto/add-message.dto';
 import { JwtGuard } from '../auth/guards/access-token.guard';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { SortTicketDto } from './dto/sort-ticket.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { Roles } from 'src/common/enums/role.enum';
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator';
+import {
+  AddMessageToTicketDoc,
+  CloseTicketDoc,
+  CreateTicketDoc,
+  DeleteTicketDoc,
+  FindAllTicketsByAdminDoc,
+  FindAllUserTicketsDoc,
+  GetTicketMessagesDoc,
+} from './decorators/swagger.decorators';
 
 @ApiTags('Ticket')
 @Controller('ticket')
@@ -28,8 +37,8 @@ export class TicketController {
 
   @Post()
   @UseGuards(JwtGuard)
-  @RateLimit({ max: 10, duration: 1 })
-  @ApiOperation({ summary: 'Create a new ticket.' })
+  @RateLimit({ max: 3, duration: 10 })
+  @CreateTicketDoc()
   createTicket(
     @GetUser('id', UUIDValidationPipe) userId: string,
     @Body() createDto: CreateTicketDto,
@@ -39,14 +48,14 @@ export class TicketController {
 
   @Get()
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: 'Get all tickets By Admin.' })
+  @FindAllTicketsByAdminDoc()
   findAllTicketsByAdmin(@Query() query: SortTicketDto) {
     return this.ticketService.findAllTickets(query);
   }
 
   @Get('user')
   @UseGuards(JwtGuard)
-  @ApiOperation({ summary: 'Get all user tickets.' })
+  @FindAllUserTicketsDoc()
   findAllUserTickets(
     @GetUser('id', UUIDValidationPipe) userId: string,
     @Query() query: SortTicketDto,
@@ -56,7 +65,7 @@ export class TicketController {
 
   @Get(':id/messages')
   @UseGuards(JwtGuard)
-  @ApiOperation({ summary: 'Get all messages for a ticket.' })
+  @GetTicketMessagesDoc()
   getMessages(
     @Param('id', UUIDValidationPipe) id: string,
     @GetUser('id', UUIDValidationPipe) userId: string,
@@ -68,7 +77,7 @@ export class TicketController {
   @Post(':id/messages')
   @UseGuards(JwtGuard)
   @RateLimit({ max: 10, duration: 1 })
-  @ApiOperation({ summary: 'Add a message to a ticket.' })
+  @AddMessageToTicketDoc()
   addMessage(
     @Param('id', UUIDValidationPipe) ticketId: string,
     @Body() dto: AddMessageDto,
@@ -80,14 +89,14 @@ export class TicketController {
 
   @Patch(':id/close')
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: 'Close a ticket By Admin.' })
+  @CloseTicketDoc()
   closeTicket(@Param('id', UUIDValidationPipe) ticketId: string) {
     return this.ticketService.closeTicket(ticketId);
   }
 
   @Delete(':id')
   @UseGuards(JwtGuard, AdminGuard)
-  @ApiOperation({ summary: 'Delete a ticket By Admin.' })
+  @DeleteTicketDoc()
   deleteTicket(@Param('id', UUIDValidationPipe) ticketId: string) {
     return this.ticketService.deleteTicket(ticketId);
   }

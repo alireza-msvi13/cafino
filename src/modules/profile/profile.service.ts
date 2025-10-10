@@ -4,11 +4,12 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { StorageService } from '../storage/storage.service';
 import { UpdateUserDto } from './dto/update-user-dto';
-import { CreateAddressDto } from './dto/create-address-dto';
+import { AddAddressDto } from './dto/add-address-dto';
 import { UpdateAddressDto } from './dto/update-address-dto';
 import { ImageFolder } from 'src/common/enums/image-folder.enum';
 import { ItemService } from '../item/item.service';
@@ -31,7 +32,7 @@ export class ProfileService {
 
   // * primary
 
-  async updateUser(
+  async UpdateProfileByUserDoc(
     updateUserDto: UpdateUserDto,
     userId: string,
   ): Promise<ServerResponse> {
@@ -43,14 +44,14 @@ export class ProfileService {
 
     return new ServerResponse(HttpStatus.OK, 'User info updated successfully.');
   }
-  async createAddress(
+  async addAddress(
     userId: string,
-    createAddressDto: CreateAddressDto,
+    addAddressDto: AddAddressDto,
   ): Promise<ServerResponse> {
-    await this.userService.createAddress(userId, createAddressDto);
+    await this.userService.addAddress(userId, addAddressDto);
     return new ServerResponse(
       HttpStatus.CREATED,
-      'Address created successfully.',
+      'Address Added successfully.',
     );
   }
   async updateAddress(
@@ -102,7 +103,7 @@ export class ProfileService {
   }
   async deleteImage(userId: string): Promise<ServerResponse> {
     const { image } = await this.userService.findUserById(userId);
-    if (!image) throw new BadRequestException('User dosnt have image profile.');
+    if (!image) throw new NotFoundException('User dosnt have image profile.');
 
     const storageQuery = this.storageService.deleteFile(
       image,
@@ -120,7 +121,7 @@ export class ProfileService {
     await this.itemService.checkItemExist(itemId);
     await this.userService.addToFavorite(userId, itemId);
     return new ServerResponse(
-      HttpStatus.OK,
+      HttpStatus.CREATED,
       'Item added to favorites successfully.',
     );
   }
@@ -187,7 +188,7 @@ export class ProfileService {
 
     return new ServerResponse(
       HttpStatus.OK,
-      'User overview fetched successfully.',
+      'User profile overview fetched successfully.',
       {
         address: {
           total: addressCount,

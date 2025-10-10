@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   HttpStatus,
   Injectable,
   NotFoundException,
@@ -143,7 +144,8 @@ export class OrderService {
       generalDiscount,
     } = cart;
 
-    if (!cartItems.length) throw new BadRequestException('Cart is empty.');
+    if (!cartItems.length)
+      throw new ConflictException('Order creation failed: cart is empty.');
 
     let order = this.orderRepository.create({
       total_amount: totalAmount,

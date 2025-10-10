@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, Length, Matches } from 'class-validator';
+import { IsNotEmpty, IsNumberString, Length, Matches } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { PHONE_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 import { normalizePhoneNumber } from 'src/common/utils/phone.util';
@@ -17,7 +17,7 @@ export class VerifyOtpDto {
 
   @IsNotEmpty({ message: 'otp code is required' })
   @Length(5, 5, { message: 'otp code must be exactly 5 digits' })
-  @Matches(/^\d+$/, { message: 'otp code must be number' })
+  @IsNumberString({}, { message: 'otp code must be number' })
   @ApiProperty({
     type: 'string',
     example: '12345',

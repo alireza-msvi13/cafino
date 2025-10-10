@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { ResendCodeDto } from './dto/resend-code.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { VerifyOtpDto } from './dto/verfiy-otp.dto';
@@ -10,42 +10,43 @@ import { JwtGuard } from './guards/access-token.guard';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { RateLimitGuard } from 'src/modules/rate-limit/guards/rate-limit.guard';
 import { RateLimit } from 'src/modules/rate-limit/decorators/rate-limit.decorator';
-import { ServerResponse } from 'src/common/dto/server-response.dto';
 import {
+  LogoutDoc,
+  RefreshTokenDoc,
   ResendOtpDoc,
   SendOtpDoc,
-  VerfiyOtpDoc,
-} from 'src/common/decorators/swagger.decorators';
+  VerifyOtpDoc,
+} from 'src/modules/auth/decorators/swagger.decorators';
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('send-otp')
-  @RateLimit({ max: 10, duration: 1 })
+  @RateLimit({ max: 3, duration: 1 })
   @UseGuards(RateLimitGuard)
   @SendOtpDoc()
   async sendOtp(@Body() loginUserDto: LoginUserDto) {
     return this.authService.sendOtp(loginUserDto.phone);
   }
 
-  @Post('verfiy-otp')
-  @RateLimit({ max: 10, duration: 1 })
+  @Post('verify-otp')
+  @RateLimit({ max: 5, duration: 5 })
   @UseGuards(RateLimitGuard)
-  @VerfiyOtpDoc()
-  async verfiyOtp(
-    @Body() VerifyOtpDto: VerifyOtpDto,
+  @VerifyOtpDoc()
+  async verifyOtp(
+    @Body() verifyOtpDto: VerifyOtpDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.verfiyOtp(
-      VerifyOtpDto.phone,
-      VerifyOtpDto.otpCode,
+    return this.authService.verifyOtp(
+      verifyOtpDto.phone,
+      verifyOtpDto.otpCode,
       res,
     );
   }
 
   @Post('resend-otp')
-  @RateLimit({ max: 10, duration: 1 })
+  @RateLimit({ max: 3, duration: 1 })
   @UseGuards(RateLimitGuard)
   @ResendOtpDoc()
   async resendOtp(@Body() resendCodeDto: ResendCodeDto) {
@@ -54,7 +55,7 @@ export class AuthController {
 
   @Get('refresh')
   @UseGuards(RefreshGuard)
-  @ApiOperation({ summary: 'Generate new Tokens.' })
+  @RefreshTokenDoc()
   async refreshToken(
     @GetUser('phone') phone: string,
     @GetUser('id') userId: string,
@@ -65,7 +66,7 @@ export class AuthController {
 
   @Get('logout')
   @UseGuards(JwtGuard)
-  @ApiOperation({ summary: 'Logout user.' })
+  @LogoutDoc()
   async logout(
     @GetUser('phone') phone: string,
     @Res({ passthrough: true }) res: Response,

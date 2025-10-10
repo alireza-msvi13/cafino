@@ -68,7 +68,7 @@ export class ItemService {
     });
     if (item)
       throw new ConflictException(
-        'Item with this title or slug already exist.',
+        'Item with this title or slug already exists.',
       );
 
     let showBoolean = show;
@@ -103,10 +103,7 @@ export class ItemService {
       await this.itemImageRepository.save(imageEntities);
     }
 
-    return new ServerResponse(
-      HttpStatus.CREATED,
-      'Menu item created successfully.',
-    );
+    return new ServerResponse(HttpStatus.CREATED, 'Item created successfully.');
   }
   async updateItem(
     itemId: string,
@@ -128,7 +125,7 @@ export class ItemService {
       where: { id: itemId },
       relations: ['images'],
     });
-    if (!item) throw new NotFoundException('Menu item not found.');
+    if (!item) throw new NotFoundException('Item not found.');
 
     const updateObject: DeepPartial<ItemEntity> = {};
 
@@ -188,7 +185,7 @@ export class ItemService {
       await this.itemRepository.update({ id: itemId }, updateObject);
     }
 
-    return new ServerResponse(HttpStatus.OK, 'Menu item updated successfully.');
+    return new ServerResponse(HttpStatus.OK, 'Item updated successfully.');
   }
   async getAllItems(
     userId: string,
@@ -279,16 +276,12 @@ export class ItemService {
       isFav: favoriteItemIds.includes(item.id),
     }));
 
-    return new ServerResponse(
-      HttpStatus.OK,
-      'Menu items fetched successfully.',
-      {
-        total,
-        page,
-        limit,
-        items: dataWithFav,
-      },
-    );
+    return new ServerResponse(HttpStatus.OK, 'Items fetched successfully.', {
+      total,
+      page,
+      limit,
+      items: dataWithFav,
+    });
   }
   async getAllItemsByAdmin(sortItemDto: SortItemDto) {
     const {
@@ -365,16 +358,12 @@ export class ItemService {
       .take(limit)
       .getMany();
 
-    return new ServerResponse(
-      HttpStatus.OK,
-      'Menu items fetched successfully.',
-      {
-        total,
-        page,
-        limit,
-        items: data,
-      },
-    );
+    return new ServerResponse(HttpStatus.OK, 'Items fetched successfully.', {
+      total,
+      page,
+      limit,
+      items: data,
+    });
   }
   async getItemById(
     id: string,
@@ -418,7 +407,7 @@ export class ItemService {
       .andWhere('item.show = :show', { show: true })
       .getOne();
 
-    if (!item) throw new NotFoundException('Menu Item not found.');
+    if (!item) throw new NotFoundException('Item not found.');
 
     // if (!slug || slug !== item.slug) {
     //   return new ServerResponse(HttpStatus.MOVED_PERMANENTLY, 'Redirect', {
@@ -428,16 +417,12 @@ export class ItemService {
 
     const isFav = await this.userService.isItemFavorited(userId, item.id);
 
-    return new ServerResponse(
-      HttpStatus.OK,
-      'Menu item fetched successfully.',
-      {
-        item: {
-          ...item,
-          isFav,
-        },
+    return new ServerResponse(HttpStatus.OK, 'Item fetched successfully.', {
+      item: {
+        ...item,
+        isFav,
       },
-    );
+    });
   }
   async deleteItemById(itemId: string): Promise<ServerResponse> {
     const item = await this.itemRepository.findOne({
@@ -446,7 +431,7 @@ export class ItemService {
     });
     if (!item) throw new NotFoundException('Item not found.');
     await this.itemRepository.softRemove(item);
-    return new ServerResponse(HttpStatus.OK, 'Menu item delete successfully.');
+    return new ServerResponse(HttpStatus.OK, 'Item deleted successfully.');
   }
   async searchItem(query: SearchItemDto): Promise<ServerResponse> {
     const { page = 1, limit = 10, search = '' } = query;
@@ -470,10 +455,6 @@ export class ItemService {
       .take(limit)
       .getManyAndCount();
 
-    if (!items.length) {
-      throw new NotFoundException('No items found matching the search query.');
-    }
-
     return new ServerResponse(HttpStatus.OK, 'Search done successfully.', {
       total,
       page,
@@ -493,7 +474,7 @@ export class ItemService {
       .andWhere('item.show = :show', { show: true })
       .getOne();
 
-    if (!item) throw new NotFoundException('Menu Item not found.');
+    if (!item) throw new NotFoundException('Item not found.');
     return item;
   }
   async checkItemQuantity(itemId: string, count: number = 1): Promise<void> {
@@ -506,10 +487,11 @@ export class ItemService {
 
     if (remainingItem < 0) {
       throw new UnprocessableEntityException({
-        message: `Unfortunately, the ${item?.title} stock is less than the quantity you requested.`,
-        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        item: item?.title,
-        available_quantity: item?.quantity,
+        message: {
+          error: `Unfortunately, the ${item?.title} stock is less than the quantity you requested.`,
+          item: item?.title,
+          available_quantity: item?.quantity,
+        },
       });
     }
   }

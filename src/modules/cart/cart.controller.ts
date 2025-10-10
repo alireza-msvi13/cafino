@@ -8,12 +8,23 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { CartDto } from './dto/cart.dto';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { CartDiscountDto } from './dto/cart-discount.dto';
 import { MultiCartDto } from './dto/multi-cart.dto';
+import {
+  AddDiscountDoc,
+  AddMultiItemToCartDoc,
+  AddToCartDoc,
+  DecrementItemDoc,
+  DeleteCartDoc,
+  GetCartDoc,
+  IncrementItemDoc,
+  RemoveDiscountDoc,
+  RemoveItemFromCartDoc,
+} from './decorators/swagger.decorators';
 
 @Controller('cart')
 @ApiTags('Cart')
@@ -22,13 +33,13 @@ export class CartController {
   constructor(private cartService: CartService) {}
 
   @Post('add')
-  @ApiOperation({ summary: 'Add item to cart.' })
+  @AddToCartDoc()
   async addToCart(@Body() cartDto: CartDto, @GetUser('id') userId: string) {
     return this.cartService.addToCart(cartDto, userId);
   }
 
   @Post('add-multiple')
-  @ApiOperation({ summary: 'Add multiple items to cart after login.' })
+  @AddMultiItemToCartDoc()
   async addMultipleToCart(
     @Body() multiCartDto: MultiCartDto,
     @GetUser('id') userId: string,
@@ -37,25 +48,25 @@ export class CartController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get cart.' })
-  async getCarts(@GetUser('id') userId: string) {
+  @GetCartDoc()
+  async getCart(@GetUser('id') userId: string) {
     return this.cartService.getCart(userId);
   }
 
   @Patch('inc-item')
-  @ApiOperation({ summary: 'Increment item quantity.' })
+  @IncrementItemDoc()
   async incrementItem(@Body() cartDto: CartDto, @GetUser('id') userId: string) {
     return this.cartService.incrementItem(cartDto, userId);
   }
 
   @Patch('dec-item')
-  @ApiOperation({ summary: 'Decrement item quantity.' })
+  @DecrementItemDoc()
   async decrementItem(@Body() cartDto: CartDto, @GetUser('id') userId: string) {
     return this.cartService.decrementItem(cartDto, userId);
   }
 
   @Delete('remove')
-  @ApiOperation({ summary: 'Remove item from cart.' })
+  @RemoveItemFromCartDoc()
   async removeFromCart(
     @Body() removeCartDto: CartDto,
     @GetUser('id') userId: string,
@@ -64,21 +75,22 @@ export class CartController {
   }
 
   @Delete()
-  @ApiOperation({ summary: 'Delete cart.' })
+  @DeleteCartDoc()
   async deleteCart(@GetUser('id') userId: string) {
     return this.cartService.deleteCart(userId);
   }
 
   @Post('add-discount')
-  @ApiOperation({ summary: 'add discount to cart' })
+  @AddDiscountDoc()
   async addDiscount(
     @Body() cartDiscountDto: CartDiscountDto,
     @GetUser('id') userId: string,
   ) {
     return this.cartService.addDiscount(cartDiscountDto, userId);
   }
+
   @Delete('remove-discount')
-  @ApiOperation({ summary: 'remove discount to cart' })
+  @RemoveDiscountDoc()
   async removeDiscount(
     @Body() cartDiscountDto: CartDiscountDto,
     @GetUser('id') userId: string,

@@ -18,11 +18,11 @@ import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator';
 
 @Controller('Payment')
 @ApiTags('Payment')
-@UseGuards(JwtGuard)
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
   @Post('gateway')
+  @UseGuards(JwtGuard)
   @RateLimit({ max: 5, duration: 5 })
   @PaymentGatewayDoc()
   paymentGateway(

@@ -32,8 +32,8 @@ export class UserController {
   @Get()
   @UseGuards(JwtGuard)
   @UserInfoDoc()
-  async getUserInfo(@GetUser('phone') phone: string) {
-    return await this.userService.getUserInfo(phone);
+  async getUserInfo(@GetUser('id') id: string) {
+    return await this.userService.getUserInfo(id);
   }
 
   @Get('users-list')

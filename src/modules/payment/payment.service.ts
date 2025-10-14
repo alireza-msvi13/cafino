@@ -4,6 +4,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
@@ -44,7 +45,10 @@ export class PaymentService {
     try {
       const { addressId, description } = paymentDto;
 
-      const user = await this.userService.findUserById(userId);
+      const user = await this.userService.findUser(userId);
+
+      if (!user) throw new NotFoundException('User not found.');
+
       const cart = await this.cartService.getUserCart(userId);
 
       await Promise.all(

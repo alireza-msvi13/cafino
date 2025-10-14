@@ -17,6 +17,8 @@ import {
   SendOtpDoc,
   VerifyOtpDoc,
 } from 'src/modules/auth/decorators/swagger.decorators';
+import { Roles } from 'src/common/enums/role.enum';
+
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
@@ -57,20 +59,20 @@ export class AuthController {
   @UseGuards(RefreshGuard)
   @RefreshTokenDoc()
   async refreshToken(
-    @GetUser('phone') phone: string,
     @GetUser('id') userId: string,
+    @GetUser('role') role: Roles,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return await this.authService.refreshToken(res, userId, phone);
+    return await this.authService.refreshToken(res, userId, role);
   }
 
   @Get('logout')
   @UseGuards(JwtGuard)
   @LogoutDoc()
   async logout(
-    @GetUser('phone') phone: string,
+    @GetUser('id') id: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return await this.authService.logout(phone, res);
+    return await this.authService.logout(id, res);
   }
 }

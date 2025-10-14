@@ -22,17 +22,18 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       ]),
     });
   }
-  async validate(
-    payload: JwtPayload,
-  ): Promise<{ phone: string; id: string; role: Roles }> {
-    if (!payload || !payload?.phone) {
+  async validate(payload: JwtPayload): Promise<{ id: string; role: Roles }> {
+    if (!payload || !payload?.id) {
       throw new UnauthorizedException('Invalid or expired token.');
     }
-    const { phone, id, role } = await this.userService.findUser(payload.phone);
+    const user = await this.userService.findUser(payload.id);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid or expired token.');
+    }
     return {
-      id,
-      phone,
-      role: role as Roles,
+      id: user.id,
+      role: user.role,
     };
   }
 }

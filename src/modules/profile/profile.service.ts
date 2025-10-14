@@ -102,11 +102,15 @@ export class ProfileService {
     );
   }
   async deleteImage(userId: string): Promise<ServerResponse> {
-    const { image } = await this.userService.findUserById(userId);
-    if (!image) throw new NotFoundException('User dosnt have image profile.');
+    const user = await this.userService.findUser(userId);
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+    if (!user.image)
+      throw new NotFoundException('User dosnt have image profile.');
 
     const storageQuery = this.storageService.deleteFile(
-      image,
+      user.image,
       ImageFolder.ProfileImage,
     );
     const userQuery = this.userService.deleteImage(userId);

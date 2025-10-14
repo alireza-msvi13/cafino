@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   ForbiddenException,
   GoneException,
@@ -17,7 +16,6 @@ import * as bcrypt from 'bcryptjs';
 import { generateOtpCode } from 'src/common/utils/generate-otp-code.utils';
 import { SmsService } from '../sms/sms.service';
 import { SmsType } from 'src/common/types/sms.type';
-import { JwtPayload } from 'src/common/types/jwt-payload-type';
 import {
   AccessCookieConfig,
   RefreshCookieConfig,
@@ -109,9 +107,9 @@ export class AuthService {
       );
     }
 
-    const tokens = await this.createTokens(user.phone, user.id);
+    const tokens = await this.createTokens(user.id, user.role);
     const rtHash = await bcrypt.hash(tokens.refreshToken, 10);
-    await this.userService.saveRefreshToken(phone, rtHash);
+    await this.userService.saveRefreshToken(user.id, rtHash);
     res.cookie('access-token', tokens.accessToken, AccessCookieConfig);
     res.cookie('refresh-token', tokens.refreshToken, RefreshCookieConfig);
 
@@ -122,11 +120,11 @@ export class AuthService {
   async refreshToken(
     res: Response,
     userId: string,
-    phone: string,
+    role: Roles,
   ): Promise<ServerResponse> {
-    const tokens = await this.createTokens(phone, userId);
+    const tokens = await this.createTokens(userId, role);
     const hashRefresh = await bcrypt.hash(tokens.refreshToken, 10);
-    await this.userService.saveRefreshToken(phone, hashRefresh);
+    await this.userService.saveRefreshToken(userId, hashRefresh);
     res.cookie('access-token', tokens.accessToken, AccessCookieConfig);
     res.cookie('refresh-token', tokens.refreshToken, RefreshCookieConfig);
 
@@ -162,7 +160,7 @@ export class AuthService {
       otpCode,
     });
   }
-  async logout(phone: string, res: Response): Promise<ServerResponse> {
+  async logout(id: string, res: Response): Promise<ServerResponse> {
     res.clearCookie('refresh-token', {
       sameSite: 'none',
       httpOnly: false,
@@ -177,46 +175,65 @@ export class AuthService {
     delete res?.req?.cookies;
     delete res?.req?.rawHeaders[3];
     delete res?.req?.headers.cookie;
-    await this.userService.removeRefreshToken(phone);
+    await this.userService.removeRefreshToken(id);
 
     return new ServerResponse(HttpStatus.OK, 'You logout successfully.');
   }
 
   // * helper
 
-  async createTokens(phone: string, userId: string) {
-    const jwtPayload: JwtPayload = {
-      user: userId,
-      phone,
-    };
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(jwtPayload, {
-        secret: process.env.ACCESS_TOKEN_SECRET,
-        expiresIn: '1d',
-      }),
-      this.jwtService.signAsync(jwtPayload, {
-        secret: process.env.REFRESH_TOKEN_SECRET,
-        expiresIn: '7d',
-      }),
-    ]);
-    return {
-      accessToken,
-      refreshToken,
-    };
+  async createAccessToken(userId: string, role: Roles) {
+    const payload = { id: userId, role };
+
+    return this.jwtService.signAsync(payload, {
+      secret: process.env.ACCESS_TOKEN_SECRET,
+      expiresIn: '1d',
+    });
   }
-  async validRefreshToken(
-    refreshToken: string,
-    userPhone: string,
-  ): Promise<{ id: string; phone: string }> {
-    const { rt_hash, phone, id } = await this.userService.findUser(userPhone);
-    const isTokensEqual: boolean = await bcrypt.compare(refreshToken, rt_hash);
-    if (!isTokensEqual) throw new UnauthorizedException('Token is not valid.');
+
+  async createRefreshToken(userId: string) {
+    const payload = { id: userId };
+
+    return this.jwtService.signAsync(payload, {
+      secret: process.env.REFRESH_TOKEN_SECRET,
+      expiresIn: '7d',
+    });
+  }
+
+  async createTokens(userId: string, role: Roles) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.createAccessToken(userId, role),
+      this.createRefreshToken(userId),
+    ]);
+
+    return { accessToken, refreshToken };
+  }
+
+  async validRefreshToken(refreshToken: string, userId: string) {
+    const user = await this.userService.findUser(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid or expired token.');
+    }
+
+    const isTokensEqual: boolean = await bcrypt.compare(
+      refreshToken,
+      user.rt_hash,
+    );
+
+    if (!isTokensEqual)
+      throw new UnauthorizedException('Invalid or expired token.');
 
     const isTokenValid = await this.jwtService.verify(refreshToken, {
       secret: process.env.REFRESH_TOKEN_SECRET,
     });
-    if (!isTokenValid) throw new UnauthorizedException('Token is not valid.');
 
-    return { phone, id };
+    if (!isTokenValid)
+      throw new UnauthorizedException('Invalid or expired token.');
+
+    return {
+      id: user.id,
+      role: user.role,
+    };
   }
 }

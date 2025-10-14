@@ -26,14 +26,23 @@ export class AdminStrategy extends PassportStrategy(Strategy, 'admin') {
       ]),
     });
   }
-  async validate(payload: JwtPayload): Promise<{ phone: string; id: string }> {
-    if (!payload || !payload?.phone) {
+  async validate(payload: JwtPayload): Promise<{ id: string; role: Roles }> {
+    if (!payload || !payload?.id) {
       throw new UnauthorizedException('Invalid or expired token.');
     }
-    const { phone, role, id } = await this.userService.findUser(payload.phone);
-    if (role === Roles.User) {
+    const user = await this.userService.findUser(payload.id);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid or expired token.');
+    }
+
+    if (user.role === Roles.User) {
       throw new ForbiddenException('Access denied.');
     }
-    return { id, phone };
+
+    return {
+      id: user.id,
+      role: user.role,
+    };
   }
 }

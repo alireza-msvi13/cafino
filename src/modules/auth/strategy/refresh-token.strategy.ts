@@ -4,6 +4,7 @@ import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from '../auth.service';
 import { JwtPayload } from 'src/common/types/jwt-payload-type';
+import { Roles } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
@@ -25,18 +26,21 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
   async validate(
     request: Request,
     payload: JwtPayload,
-  ): Promise<{ phone: string; id: string }> {
-    if (!payload || !payload?.phone) {
+  ): Promise<{ id: string; role: Roles }> {
+    if (!payload || !payload?.id) {
       throw new UnauthorizedException('Invalid or expired token.');
     }
     const refreshToken = request?.cookies['refresh-token'];
-    const { phone, id } = await this.authService.validRefreshToken(
+    if (!refreshToken) {
+      throw new UnauthorizedException('Invalid or expired token.');
+    }
+    const { id, role } = await this.authService.validRefreshToken(
       refreshToken,
-      payload.phone,
+      payload.id,
     );
     return {
-      phone,
       id,
+      role: role as Roles,
     };
   }
 }

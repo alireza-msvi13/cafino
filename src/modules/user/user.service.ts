@@ -36,8 +36,11 @@ export class UserService {
 
   // *primary
 
-  async getUserInfo(phone: string): Promise<ServerResponse> {
-    const user = await this.findUser(phone, ['addressList']);
+  async getUserInfo(id: string): Promise<ServerResponse> {
+    const user = await this.findUser(id, ['addressList']);
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
     const { otp, rt_hash, new_email, new_phone, ...sanitizedUser } = user;
     return new ServerResponse(
       HttpStatus.OK,
@@ -342,29 +345,11 @@ export class UserService {
 
   // *helper
 
-  async findUser(phone: string, relations: string[] = []): Promise<UserEntity> {
-    const user = await this.userRepository.findOne({
-      where: { phone },
-      relations,
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found.');
-    }
-    return user;
-  }
-  async findUserById(
-    id: string,
-    relations: string[] = [],
-  ): Promise<UserEntity> {
+  async findUser(id: string, relations: string[] = []): Promise<UserEntity> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations,
     });
-
-    if (!user) {
-      throw new NotFoundException('user not found');
-    }
     return user;
   }
   async findByPhoneWithOtp(phone: string) {
@@ -438,18 +423,18 @@ export class UserService {
       },
     );
   }
-  async saveRefreshToken(phone: string, refreshToken: string): Promise<void> {
+  async saveRefreshToken(id: string, refreshToken: string): Promise<void> {
     await this.userRepository.update(
-      { phone },
+      { id },
       {
         rt_hash: refreshToken,
       },
     );
   }
-  async removeRefreshToken(phone?: string): Promise<void> {
-    if (!phone) return;
+  async removeRefreshToken(id?: string): Promise<void> {
+    if (!id) return;
     await this.userRepository.update(
-      { phone },
+      { id },
       {
         rt_hash: null,
       },

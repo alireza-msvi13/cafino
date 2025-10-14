@@ -4,7 +4,7 @@ export const RATE_LIMIT_OPTIONS = 'rate:options';
 
 export interface RateLimitOptions {
   max: number;
-  duration: number;
+  duration: number; // in minutes
 }
 
 export const RateLimit = (options: RateLimitOptions) =>

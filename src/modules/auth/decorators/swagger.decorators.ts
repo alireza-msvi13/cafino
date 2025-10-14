@@ -16,7 +16,7 @@ import {
 export function SendOtpDoc() {
   return applyDecorators(
     PostMethodDoc('Send OTP.'),
-    TooManyRequestsError(3, '1 minute'),
+    TooManyRequestsError(3, '5 minutes'),
     BadRequestError(`
 Invalid request - Validation rules:
 - phone:
@@ -33,7 +33,7 @@ Invalid request - Validation rules:
 export function VerifyOtpDoc() {
   return applyDecorators(
     PostMethodDoc('Verify OTP.'),
-    TooManyRequestsError(5, '5 minutes'),
+    TooManyRequestsError(3, '5 minutes'),
     BadRequestError(`
 Invalid request - Validation rules:
 - phone:
@@ -59,7 +59,7 @@ Invalid request - Validation rules:
 export function ResendOtpDoc() {
   return applyDecorators(
     PostMethodDoc('Resend OTP code.'),
-    TooManyRequestsError(3, '1 minute'),
+    TooManyRequestsError(3, '5 minutes'),
     BadRequestError(`
 Invalid request - Validation rules:
 - phone:

@@ -379,8 +379,8 @@ export class UserService {
       where: { user: { id: userId } },
     });
 
-    const LIMIT = 10;
-    const WINDOW = 1 * 60 * 1000;
+    const LIMIT = 3;
+    const WINDOW = 5 * 60 * 1000;
 
     if (otp) {
       if (
@@ -389,7 +389,11 @@ export class UserService {
       ) {
         if ((otp.request_count || 0) >= LIMIT) {
           throw new HttpException(
-            'You have reached the maximum number of OTP requests. Please try again later.',
+            {
+              message: 'You are temporarily blocked. Please try again later.',
+              blockType: 'temporary',
+              retryAfter: WINDOW,
+            },
             HttpStatus.TOO_MANY_REQUESTS,
           );
         }

@@ -9,6 +9,7 @@ import {
   BadRequestError,
   ConflictError,
   NotFoundError,
+  UnprocessableEntityError,
 } from 'src/common/swagger/decorators/swagger-errors.decorator';
 import { Roles } from 'src/common/enums/role.enum';
 import { SwaggerSharedDescriptions } from 'src/common/swagger/constants/swagger-descriptions.constants';
@@ -40,6 +41,7 @@ export function UserPermissionDoc() {
       requiresAdmin: true,
       consumes: [SwaggerContentTypes.FormUrlEncoded, SwaggerContentTypes.Json],
     }),
+    ConflictError('Role cannot be changed.'),
     BadRequestError(`Invalid request - Validation rules:
 - phone:
   - Must not be empty.
@@ -68,7 +70,8 @@ export function AddUserToBlacklistDoc() {
       requiresAuth: true,
       requiresAdmin: true,
     }),
-    ConflictError('User is already blacklisted.'),
+    UnprocessableEntityError('User is already blacklisted.'),
+    ConflictError('Admins cannot be blacklisted.'),
     BadRequestError(`Invalid request - Validation rules:
 - phone:
   - Must not be empty.

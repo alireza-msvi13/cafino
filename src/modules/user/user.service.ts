@@ -1,11 +1,11 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
@@ -100,8 +100,8 @@ export class UserService {
   ): Promise<ServerResponse> {
     const { phone, role } = userPermissionDto;
 
-    if (!['admin', 'user'].includes(role)) {
-      throw new BadRequestException('Invalid role.');
+    if (role === Roles.SuperAdmin) {
+      throw new ConflictException('Role cannot be changed.');
     }
 
     await this.userRepository.update(
@@ -124,13 +124,11 @@ export class UserService {
     }
 
     if (user.role === Roles.Admin || user.role === Roles.SuperAdmin) {
-      throw new ForbiddenException(
-        'Admins and SuperAdmins cannot be blacklisted.',
-      );
+      throw new ConflictException('Admins cannot be blacklisted.');
     }
 
     if (user.status === UserStatus.Block) {
-      throw new ConflictException('User is already blacklisted.');
+      throw new UnprocessableEntityException('User is already blacklisted.');
     }
 
     await this.userRepository.update(

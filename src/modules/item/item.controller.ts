@@ -16,7 +16,6 @@ import {
 } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { JwtGuard } from '../auth/guards/access-token.guard';
-import { AdminGuard } from '../auth/guards/admin.guard';
 import { UploadMultiFilesAws } from 'src/common/interceptors/upload-file.interceptor';
 import { MulterFileType } from 'src/common/types/multer.file.type';
 import { StringToArray } from 'src/common/decorators/string-to-array.decorator';
@@ -36,13 +35,17 @@ import {
   SearchItemDoc,
   UpdateItemDoc,
 } from './decorators/swagger.decorators';
+import { Roles } from 'src/common/enums/role.enum';
+import { RolesAllowed } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 @Controller('item')
 @ApiTags('Item')
 export class ItemController {
   constructor(private itemService: ItemService) {}
 
   @Post()
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @UseInterceptors(UploadMultiFilesAws('images'))
   @CreateItemDoc()
   async createItem(
@@ -62,7 +65,8 @@ export class ItemController {
   }
 
   @Get('admin')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @GetAllItemsByAdminDoc()
   async getAllItemsByAdmin(@Query() sortItemDto: SortItemDto) {
     return this.itemService.getAllItemsByAdmin(sortItemDto);
@@ -88,14 +92,16 @@ export class ItemController {
   }
 
   @Delete('/:id')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @DeleteItemDoc()
   async deleteItemById(@Param('id', UUIDValidationPipe) itemId: string) {
     return this.itemService.deleteItemById(itemId);
   }
 
   @Put('/:id')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @UseInterceptors(
     UploadMultiFilesAws('images'),
     EmptyStringToUndefindInterceptor,

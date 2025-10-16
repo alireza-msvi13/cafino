@@ -7,6 +7,7 @@ import {
 } from 'src/common/swagger/decorators/swagger-methods.decorator';
 import {
   BadRequestError,
+  ConflictError,
   NotFoundError,
 } from 'src/common/swagger/decorators/swagger-errors.decorator';
 import { Roles } from 'src/common/enums/role.enum';
@@ -67,6 +68,7 @@ export function AddUserToBlacklistDoc() {
       requiresAuth: true,
       requiresAdmin: true,
     }),
+    ConflictError('User is already blacklisted.'),
     BadRequestError(`Invalid request - Validation rules:
 - phone:
   - Must not be empty.

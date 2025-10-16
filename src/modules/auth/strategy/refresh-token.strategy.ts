@@ -15,10 +15,9 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
       secretOrKey: process.env.REFRESH_TOKEN_SECRET,
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          let data = request?.headers['refresh-token']
-            ? request?.headers['refresh-token']
-            : request?.cookies['refresh-token'];
-          return data ? data : null;
+          const header = request?.headers['refresh-token'];
+          const cookie = request?.cookies?.['refresh-token'];
+          return (header as string) || cookie || null;
         },
       ]),
     });
@@ -27,14 +26,16 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     request: Request,
     payload: JwtPayload,
   ): Promise<{ id: string; role: Roles }> {
-    if (!payload || !payload?.id) {
-      throw new UnauthorizedException('Invalid or expired token.');
-    }
-    const refreshToken = request?.cookies['refresh-token'];
+    if (!payload?.id) throw new UnauthorizedException('Invalid token payload.');
+
+    const refreshToken =
+      (request?.headers['refresh-token'] as string) ||
+      request?.cookies?.['refresh-token'];
+
     if (!refreshToken) {
       throw new UnauthorizedException('Invalid or expired token.');
     }
-    const { id, role } = await this.authService.validRefreshToken(
+    const { id, role } = await this.authService.validateRefreshToken(
       refreshToken,
       payload.id,
     );

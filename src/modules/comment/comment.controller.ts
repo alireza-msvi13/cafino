@@ -13,7 +13,6 @@ import { ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
-import { AdminGuard } from '../auth/guards/admin.guard';
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 import { SortAdminCommentDto, SortCommentDto } from './dto/sort-comment.dto';
 import { Roles } from 'src/common/enums/role.enum';
@@ -25,6 +24,8 @@ import {
   GetItemCommentsDoc,
   RejectCommentDoc,
 } from './decorators/swagger.decorators';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { RolesAllowed } from '../auth/decorators/roles.decorator';
 
 @Controller('comment')
 @ApiTags('Comment')
@@ -53,21 +54,24 @@ export class CommentController {
   }
 
   @Get('/')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @GetAllCommentsDoc()
   getAllComments(@Query() query: SortAdminCommentDto) {
     return this.commentService.getAllComments(query);
   }
 
   @Put('/accept/:id')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @AcceptCommentDoc()
   acceptComment(@Param('id', UUIDValidationPipe) id: string) {
     return this.commentService.acceptComment(id);
   }
 
   @Put('/reject/:id')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @RejectCommentDoc()
   rejectComment(@Param('id', UUIDValidationPipe) id: string) {
     return this.commentService.rejectComment(id);

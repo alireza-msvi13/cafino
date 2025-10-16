@@ -16,7 +16,6 @@ import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 import { ReplyContactDto } from './dto/reply-contact.dto';
 import { ContactQueryDto } from './dto/sort-contact.dto';
 import { JwtGuard } from '../auth/guards/access-token.guard';
-import { AdminGuard } from '../auth/guards/admin.guard';
 import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator';
 import { RateLimitGuard } from '../rate-limit/guards/rate-limit.guard';
 import { OptionalJwtGuard } from '../auth/guards/optional-token.guard';
@@ -29,6 +28,9 @@ import {
   GetContactRepliesDoc,
   ReplyContactMessageDoc,
 } from './decorators/swagger.decorators';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from 'src/common/enums/role.enum';
+import { RolesAllowed } from '../auth/decorators/roles.decorator';
 
 @Controller('contact')
 @ApiTags('Contact')
@@ -53,14 +55,16 @@ export class ContactController {
   }
 
   @Get()
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @GetAllContactsDoc()
   async findAll(@Query() query: ContactQueryDto) {
     return this.contactService.findAll(query);
   }
 
   @Delete(':id')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @DeleteContactDoc()
   async delete(@Param('id', UUIDValidationPipe) id: string) {
     return this.contactService.delete(id);
@@ -68,7 +72,8 @@ export class ContactController {
 
   @Post(':id/reply')
   @RateLimit({ max: 10, duration: 1 })
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @ReplyContactMessageDoc()
   async replyMessage(
     @Param('id', UUIDValidationPipe) id: string,
@@ -78,7 +83,8 @@ export class ContactController {
   }
 
   @Get(':id/replies')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @GetContactRepliesDoc()
   async getReplies(@Param('id', UUIDValidationPipe) id: string) {
     return this.contactService.getReplies(id);

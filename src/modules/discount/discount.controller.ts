@@ -9,11 +9,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { DiscountDto } from './dto/discount.dto';
 import { DiscountService } from './discount.service';
 import { JwtGuard } from '../auth/guards/access-token.guard';
-import { AdminGuard } from '../auth/guards/admin.guard';
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 import { DiscountQueryDto } from './dto/sort-discount.dto';
 import { UpdateDiscountDto } from './dto/update-dicount.dto';
@@ -24,9 +23,13 @@ import {
   GetAllDiscountCodesDoc,
   UpdateActivityStatusDoc,
 } from './decorators/swagger.decorators';
+import { Roles } from 'src/common/enums/role.enum';
+import { RolesAllowed } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 @Controller('discount')
 @ApiTags('Discount')
-@UseGuards(JwtGuard, AdminGuard)
+@UseGuards(JwtGuard, RolesGuard)
+@RolesAllowed(Roles.Admin, Roles.SuperAdmin)
 export class DiscountController {
   constructor(private discountService: DiscountService) {}
 

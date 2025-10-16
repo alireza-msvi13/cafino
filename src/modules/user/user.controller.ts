@@ -12,7 +12,6 @@ import { UserService } from './user.service';
 import { ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { JwtGuard } from '../auth/guards/access-token.guard';
-import { AdminGuard } from '../auth/guards/admin.guard';
 import { UserPermissionDto } from './dto/permission.dto';
 import { UserDto } from './dto/user.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
@@ -24,6 +23,9 @@ import {
   AddUserToBlacklistDoc,
   RemoveUserFromBlacklistDoc,
 } from './decorators/swagger.decorators';
+import { Roles } from 'src/common/enums/role.enum';
+import { RolesAllowed } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 @Controller('user')
 @ApiTags('User')
 export class UserController {
@@ -37,35 +39,40 @@ export class UserController {
   }
 
   @Get('users-list')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @UsersListDoc()
   async getUserList(@Query() paginationDto: PaginationDto) {
     return await this.userService.getUsersList(paginationDto);
   }
 
   @Patch('permission')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.SuperAdmin)
   @UserPermissionDoc()
   async changeUserPermission(@Body() userPermissionDto: UserPermissionDto) {
     return this.userService.changeUserPermission(userPermissionDto);
   }
 
   @Get('blacklist')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @UsersBlacklistDoc()
   async getUsersBlacklist(@Query() paginationDto: PaginationDto) {
     return this.userService.getUsersBlacklist(paginationDto);
   }
 
   @Post('blacklist')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @AddUserToBlacklistDoc()
   async addUserToBlacklist(@Body() userDto: UserDto) {
     return this.userService.addUserToBlacklist(userDto);
   }
 
   @Delete('blacklist')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @RemoveUserFromBlacklistDoc()
   async removeUserToBlacklist(@Body() userDto: UserDto) {
     return this.userService.removeUserToBlacklist(userDto);

@@ -18,7 +18,6 @@ import { ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/access-token.guard';
 import { UploadFileAws } from 'src/common/interceptors/upload-file.interceptor';
 import { MulterFileType } from 'src/common/types/multer.file.type';
-import { AdminGuard } from '../auth/guards/admin.guard';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { EmptyStringToUndefindInterceptor } from 'src/common/interceptors/empty-string-to-undefind.interceptor';
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
@@ -31,6 +30,9 @@ import {
   FindByPaginationDoc,
   UpdateCategoryDoc,
 } from './decorators/swagger.decorators';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { RolesAllowed } from '../auth/decorators/roles.decorator';
+import { Roles } from 'src/common/enums/role.enum';
 
 @Controller('category')
 @ApiTags('Category')
@@ -38,7 +40,8 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post()
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @UseInterceptors(UploadFileAws('image'))
   @CreateCategoryDoc()
   create(
@@ -61,7 +64,8 @@ export class CategoryController {
   }
 
   @Get('admin')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @FindAllByAdminDoc()
   findAllByAdmin(@Query() pagination: PaginationDto) {
     return this.categoryService.findByPaginationByAdmin(pagination);
@@ -74,7 +78,8 @@ export class CategoryController {
   }
 
   @Put(':id')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @UseInterceptors(UploadFileAws('image'), EmptyStringToUndefindInterceptor)
   @UpdateCategoryDoc()
   update(
@@ -86,7 +91,8 @@ export class CategoryController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @DeleteCategoryDoc()
   delete(@Param('id', UUIDValidationPipe) categoryId: string) {
     return this.categoryService.delete(categoryId);

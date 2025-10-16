@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -20,6 +21,7 @@ import { UserPermissionDto } from './dto/permission.dto';
 import { UserDto } from './dto/user.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
+import { Roles } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class UserService {
@@ -115,6 +117,22 @@ export class UserService {
     );
   }
   async addUserToBlacklist(userDto: UserDto): Promise<ServerResponse> {
+    const user = await this.findUserByPhone(userDto.phone);
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    if (user.role === Roles.Admin || user.role === Roles.SuperAdmin) {
+      throw new ForbiddenException(
+        'Admins and SuperAdmins cannot be blacklisted.',
+      );
+    }
+
+    if (user.status === UserStatus.Block) {
+      throw new ConflictException('User is already blacklisted.');
+    }
+
     await this.userRepository.update(
       { phone: userDto.phone },
       {
@@ -122,11 +140,13 @@ export class UserService {
         rt_hash: null,
       },
     );
+
     return new ServerResponse(
       HttpStatus.OK,
       'User added to blacklist successfully.',
     );
   }
+
   async removeUserToBlacklist(userDto: UserDto): Promise<ServerResponse> {
     await this.userRepository.update(
       { phone: userDto.phone },
@@ -349,6 +369,12 @@ export class UserService {
     const user = await this.userRepository.findOne({
       where: { id },
       relations,
+    });
+    return user;
+  }
+  async findUserByPhone(phone: string) {
+    const user = await this.userRepository.findOne({
+      where: { phone },
     });
     return user;
   }

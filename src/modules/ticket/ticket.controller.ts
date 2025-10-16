@@ -16,7 +16,6 @@ import { JwtGuard } from '../auth/guards/access-token.guard';
 import { ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { SortTicketDto } from './dto/sort-ticket.dto';
-import { AdminGuard } from '../auth/guards/admin.guard';
 import { Roles } from 'src/common/enums/role.enum';
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator';
@@ -29,6 +28,8 @@ import {
   FindAllUserTicketsDoc,
   GetTicketMessagesDoc,
 } from './decorators/swagger.decorators';
+import { RolesAllowed } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @ApiTags('Ticket')
 @Controller('ticket')
@@ -47,7 +48,8 @@ export class TicketController {
   }
 
   @Get()
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @FindAllTicketsByAdminDoc()
   findAllTicketsByAdmin(@Query() query: SortTicketDto) {
     return this.ticketService.findAllTickets(query);
@@ -88,14 +90,16 @@ export class TicketController {
   }
 
   @Patch(':id/close')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @CloseTicketDoc()
   closeTicket(@Param('id', UUIDValidationPipe) ticketId: string) {
     return this.ticketService.closeTicket(ticketId);
   }
 
   @Delete(':id')
-  @UseGuards(JwtGuard, AdminGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
   @DeleteTicketDoc()
   deleteTicket(@Param('id', UUIDValidationPipe) ticketId: string) {
     return this.ticketService.deleteTicket(ticketId);

@@ -14,18 +14,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       secretOrKey: process.env.ACCESS_TOKEN_SECRET,
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          let data = request?.headers['access-token']
-            ? request?.headers['access-token']
-            : request?.cookies['access-token'];
-          return data ? data : null;
+          const header = request?.headers['access-token'];
+          const cookie = request?.cookies?.['access-token'];
+          return (header as string) || cookie || null;
         },
       ]),
     });
   }
   async validate(payload: JwtPayload): Promise<{ id: string; role: Roles }> {
-    if (!payload || !payload?.id) {
-      throw new UnauthorizedException('Invalid or expired token.');
-    }
+    if (!payload?.id) throw new UnauthorizedException('Invalid token payload.');
+
     const user = await this.userService.findUser(payload.id);
 
     if (!user) {

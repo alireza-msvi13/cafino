@@ -65,6 +65,7 @@ export class ItemService {
 
     const item = await this.itemRepository.findOne({
       where: [{ slug }, { title }],
+      withDeleted: true,
     });
     if (item)
       throw new ConflictException(

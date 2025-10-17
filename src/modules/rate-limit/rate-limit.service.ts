@@ -30,12 +30,12 @@ export class RateLimitService {
     duration: number,
   ) {
     const now = new Date();
-    let record = await this.rateLimitRepository.findOne({
-      where: { identifier, endpoint },
-    });
 
-    if (!record) {
-      record = this.rateLimitRepository.create({
+    await this.rateLimitRepository
+      .createQueryBuilder()
+      .insert()
+      .into(RateLimitRecord)
+      .values({
         identifier,
         endpoint,
         requests_in_window: 1,
@@ -43,10 +43,13 @@ export class RateLimitService {
         block_status: BlockStatus.None,
         block_expires_at: null,
         violation_count: 0,
-      });
-      await this.rateLimitRepository.save(record);
-      return;
-    }
+      })
+      .orIgnore()
+      .execute();
+
+    let record = await this.rateLimitRepository.findOne({
+      where: { identifier, endpoint },
+    });
 
     if (record.block_status === BlockStatus.Permanent)
       this.throwBlocked(record);

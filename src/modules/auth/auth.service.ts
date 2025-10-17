@@ -161,22 +161,9 @@ export class AuthService {
     });
   }
   async logout(id: string, res: Response): Promise<ServerResponse> {
-    res.clearCookie('refresh-token', {
-      sameSite: 'none',
-      httpOnly: false,
-      secure: true,
-    });
-    res.clearCookie('access-token', {
-      sameSite: 'none',
-      httpOnly: false,
-      secure: true,
-    });
-    delete res?.req?.user;
-    delete res?.req?.cookies;
-    delete res?.req?.rawHeaders[3];
-    delete res?.req?.headers.cookie;
     await this.userService.removeRefreshToken(id);
-
+    res.clearCookie('access-token', AccessCookieConfig);
+    res.clearCookie('refresh-token', RefreshCookieConfig);
     return new ServerResponse(HttpStatus.OK, 'You logout successfully.');
   }
 
@@ -215,15 +202,12 @@ export class AuthService {
   ): Promise<{ id: string; role: Roles }> {
     const user = await this.userService.findUser(userId);
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid or expired token.');
-    }
-
-    if (!user.rt_hash) {
+    if (!user || !user.rt_hash) {
       throw new UnauthorizedException('Invalid or expired token.');
     }
 
     const isMatch = await bcrypt.compare(refreshToken, user.rt_hash);
+
     if (!isMatch) {
       throw new UnauthorizedException('Invalid or expired token.');
     }

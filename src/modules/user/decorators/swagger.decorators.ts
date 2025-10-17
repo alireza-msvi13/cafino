@@ -41,7 +41,7 @@ export function UserPermissionDoc() {
       requiresAdmin: true,
       consumes: [SwaggerContentTypes.FormUrlEncoded, SwaggerContentTypes.Json],
     }),
-    ConflictError('Role cannot be changed.'),
+    ConflictError('SuperUser role cannot be changed.'),
     BadRequestError(`Invalid request - Validation rules:
 - phone:
   - Must not be empty.

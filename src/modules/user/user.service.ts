@@ -65,6 +65,7 @@ export class UserService {
         'user.image',
         'user.phone',
         'user.email',
+        'user.imageUrl',
         'user.is_email_verified',
         'user.role',
         'user.status',
@@ -100,7 +101,13 @@ export class UserService {
   ): Promise<ServerResponse> {
     const { phone, role } = userPermissionDto;
 
-    if (role === Roles.Manager) {
+    const user = await this.findUserByPhone(phone);
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    if (user.role === Roles.Manager) {
       throw new ConflictException('Role cannot be changed.');
     }
 

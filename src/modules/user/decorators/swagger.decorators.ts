@@ -71,7 +71,7 @@ export function AddUserToBlacklistDoc() {
       requiresAdmin: true,
     }),
     UnprocessableEntityError('User is already blacklisted.'),
-    ConflictError('Admins cannot be blacklisted.'),
+    ConflictError('Admins and Managers cannot be blacklisted.'),
     BadRequestError(`Invalid request - Validation rules:
 - phone:
   - Must not be empty.

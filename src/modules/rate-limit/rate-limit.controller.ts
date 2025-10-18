@@ -30,7 +30,7 @@ export class RateLimitController {
 
   @Get('records')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @GetRateLimitRecordsDoc()
   async getRateLimitRecords(@Query() rateLimitQueryDto: RateLimitQueryDto) {
     return await this.rateLimitService.getRateLimitRecords(rateLimitQueryDto);
@@ -38,7 +38,7 @@ export class RateLimitController {
 
   @Get('record/:id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @GetRateLimitRecordDoc()
   async findOne(@Param('id', UUIDValidationPipe) id: string) {
     return await this.rateLimitService.findById(id);
@@ -46,7 +46,7 @@ export class RateLimitController {
 
   @Post('block/:id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.SuperAdmin)
+  @RolesAllowed(Roles.Manager)
   @BlockUserDoc()
   async blockUser(
     @Param('id', UUIDValidationPipe) id: string,
@@ -57,7 +57,7 @@ export class RateLimitController {
 
   @Post('unblock/:id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.SuperAdmin)
+  @RolesAllowed(Roles.Manager)
   @UnblockUserDoc()
   async unblockUser(@Param('id', UUIDValidationPipe) id: string) {
     return this.rateLimitService.unblockManually(id);
@@ -65,7 +65,7 @@ export class RateLimitController {
 
   @Post('reset/:id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.SuperAdmin)
+  @RolesAllowed(Roles.Manager)
   @ResetBlockUserDoc()
   reset(@Param('id', UUIDValidationPipe) id: string) {
     return this.rateLimitService.resetById(id);
@@ -73,7 +73,7 @@ export class RateLimitController {
 
   @Get('stats')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @StatsBlockUsersDoc()
   stats() {
     return this.rateLimitService.getStats();

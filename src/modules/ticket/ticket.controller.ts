@@ -49,7 +49,7 @@ export class TicketController {
 
   @Get()
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @FindAllTicketsByAdminDoc()
   findAllTicketsByAdmin(@Query() query: SortTicketDto) {
     return this.ticketService.findAllTickets(query);
@@ -91,7 +91,7 @@ export class TicketController {
 
   @Patch(':id/close')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @CloseTicketDoc()
   closeTicket(@Param('id', UUIDValidationPipe) ticketId: string) {
     return this.ticketService.closeTicket(ticketId);
@@ -99,7 +99,7 @@ export class TicketController {
 
   @Delete(':id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @DeleteTicketDoc()
   deleteTicket(@Param('id', UUIDValidationPipe) ticketId: string) {
     return this.ticketService.deleteTicket(ticketId);

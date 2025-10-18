@@ -41,7 +41,7 @@ export class CategoryController {
 
   @Post()
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @UseInterceptors(UploadFileAws('image'))
   @CreateCategoryDoc()
   create(
@@ -65,7 +65,7 @@ export class CategoryController {
 
   @Get('admin')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @FindAllByAdminDoc()
   findAllByAdmin(@Query() pagination: PaginationDto) {
     return this.categoryService.findByPaginationByAdmin(pagination);
@@ -79,7 +79,7 @@ export class CategoryController {
 
   @Put(':id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @UseInterceptors(UploadFileAws('image'), EmptyStringToUndefindInterceptor)
   @UpdateCategoryDoc()
   update(
@@ -92,7 +92,7 @@ export class CategoryController {
 
   @Delete(':id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @DeleteCategoryDoc()
   delete(@Param('id', UUIDValidationPipe) categoryId: string) {
     return this.categoryService.delete(categoryId);

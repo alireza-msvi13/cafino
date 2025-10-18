@@ -15,7 +15,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 @Controller('order')
 @ApiTags('Order')
 @UseGuards(JwtGuard, RolesGuard)
-@RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+@RolesAllowed(Roles.Admin, Roles.Manager)
 export class OrderController {
   constructor(private orderService: OrderService) {}
 

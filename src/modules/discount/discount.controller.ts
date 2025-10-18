@@ -29,7 +29,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 @Controller('discount')
 @ApiTags('Discount')
 @UseGuards(JwtGuard, RolesGuard)
-@RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+@RolesAllowed(Roles.Admin, Roles.Manager)
 export class DiscountController {
   constructor(private discountService: DiscountService) {}
 

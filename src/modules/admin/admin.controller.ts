@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ServerResponse } from '../../common/dto/server-response.dto';
 import { AdminService } from './admin.service';
@@ -8,9 +8,15 @@ import {
   FullAdminOverviewDoc,
   SalesReportDoc,
 } from './decorators/swagger.decorators';
+import { Roles } from 'src/common/enums/role.enum';
+import { RolesAllowed } from '../auth/decorators/roles.decorator';
+import { JwtGuard } from '../auth/guards/access-token.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @ApiTags('Admin Overview')
 @Controller('admin/overview')
+@UseGuards(JwtGuard, RolesGuard)
+@RolesAllowed(Roles.Admin, Roles.Manager)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 

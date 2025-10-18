@@ -40,7 +40,7 @@ export class UserController {
 
   @Get('users-list')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @UsersListDoc()
   async getUserList(@Query() paginationDto: PaginationDto) {
     return await this.userService.getUsersList(paginationDto);
@@ -48,7 +48,7 @@ export class UserController {
 
   @Patch('permission')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.SuperAdmin)
+  @RolesAllowed(Roles.Manager)
   @UserPermissionDoc()
   async changeUserPermission(@Body() userPermissionDto: UserPermissionDto) {
     return this.userService.changeUserPermission(userPermissionDto);
@@ -56,7 +56,7 @@ export class UserController {
 
   @Get('blacklist')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @UsersBlacklistDoc()
   async getUsersBlacklist(@Query() paginationDto: PaginationDto) {
     return this.userService.getUsersBlacklist(paginationDto);
@@ -64,7 +64,7 @@ export class UserController {
 
   @Post('blacklist')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @AddUserToBlacklistDoc()
   async addUserToBlacklist(@Body() userDto: UserDto) {
     return this.userService.addUserToBlacklist(userDto);
@@ -72,7 +72,7 @@ export class UserController {
 
   @Delete('blacklist')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @RemoveUserFromBlacklistDoc()
   async removeUserToBlacklist(@Body() userDto: UserDto) {
     return this.userService.removeUserToBlacklist(userDto);

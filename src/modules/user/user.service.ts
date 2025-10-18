@@ -100,7 +100,7 @@ export class UserService {
   ): Promise<ServerResponse> {
     const { phone, role } = userPermissionDto;
 
-    if (role === Roles.SuperAdmin) {
+    if (role === Roles.Manager) {
       throw new ConflictException('Role cannot be changed.');
     }
 
@@ -123,8 +123,8 @@ export class UserService {
       throw new NotFoundException('User not found.');
     }
 
-    if (user.role === Roles.Admin || user.role === Roles.SuperAdmin) {
-      throw new ConflictException('Admins cannot be blacklisted.');
+    if (user.role === Roles.Admin || user.role === Roles.Manager) {
+      throw new ConflictException('Admins and Managers cannot be blacklisted.');
     }
 
     if (user.status === UserStatus.Block) {

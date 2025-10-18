@@ -56,7 +56,7 @@ export class ContactController {
 
   @Get()
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @GetAllContactsDoc()
   async findAll(@Query() query: ContactQueryDto) {
     return this.contactService.findAll(query);
@@ -64,7 +64,7 @@ export class ContactController {
 
   @Delete(':id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @DeleteContactDoc()
   async delete(@Param('id', UUIDValidationPipe) id: string) {
     return this.contactService.delete(id);
@@ -73,7 +73,7 @@ export class ContactController {
   @Post(':id/reply')
   @RateLimit({ max: 10, duration: 1 })
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @ReplyContactMessageDoc()
   async replyMessage(
     @Param('id', UUIDValidationPipe) id: string,
@@ -84,7 +84,7 @@ export class ContactController {
 
   @Get(':id/replies')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.SuperAdmin)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @GetContactRepliesDoc()
   async getReplies(@Param('id', UUIDValidationPipe) id: string) {
     return this.contactService.getReplies(id);

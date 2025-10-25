@@ -32,9 +32,11 @@ export class DiscountService {
   async generate(discountDto: DiscountDto): Promise<ServerResponse> {
     const { amount, code, expires_in, limit, percent } = discountDto;
 
-    const isDiscountCodeExsit = await this.discountRepository.findOneBy({
-      code,
-    });
+    const isDiscountCodeExsit = await this.discountRepository
+      .createQueryBuilder('discount')
+      .withDeleted()
+      .where('discount.code = :code', { code })
+      .getOne();
 
     if (isDiscountCodeExsit)
       throw new ConflictException('Code already exists.');

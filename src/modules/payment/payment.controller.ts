@@ -8,10 +8,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { PaymentDto } from './dto/payment.dto';
+import { PaymentGatewayDto, PaymentVerifyDto } from './dto/payment.dto';
 import { Response } from 'express';
 import { JwtGuard } from '../auth/guards/access-token.guard';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { PaymentGatewayDoc } from './decorators/swagger.decorators';
 import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator';
@@ -26,19 +26,19 @@ export class PaymentController {
   @RateLimit({ max: 5, duration: 5 })
   @PaymentGatewayDoc()
   paymentGateway(
-    @Body() paymentDto: PaymentDto,
+    @Body() paymentGatewayDto: PaymentGatewayDto,
     @GetUser('id') userId: string,
   ) {
-    return this.paymentService.paymentGateway(paymentDto, userId);
+    return this.paymentService.paymentGateway(paymentGatewayDto, userId);
   }
 
   @Get('verify')
   async paymentVerify(
-    @Query('Authority') authority: string,
-    @Query('Status') status: string,
+    @Query() paymentVerifyDto: PaymentVerifyDto,
     @Res() res: Response,
   ) {
-    const result = await this.paymentService.paymentVerify(authority, status);
+    const { Authority, Status } = paymentVerifyDto;
+    const result = await this.paymentService.paymentVerify(Authority, Status);
     if (result.success) {
       return res.redirect(`${process.env.FRONTEND_URL}/payment?status=success`);
     } else {

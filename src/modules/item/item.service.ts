@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  GoneException,
   HttpStatus,
   Inject,
   Injectable,
@@ -14,7 +15,13 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { MulterFileType } from 'src/common/types/multer.file.type';
 import { ImageFolder } from 'src/common/enums/image-folder.enum';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, DeepPartial, LessThan, Repository } from 'typeorm';
+import {
+  Brackets,
+  DeepPartial,
+  EntityManager,
+  LessThan,
+  Repository,
+} from 'typeorm';
 import { CategoryService } from '../category/category.service';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { isBoolean, toBoolean } from 'src/common/utils/boolean.utils';
@@ -496,17 +503,6 @@ export class ItemService {
       });
     }
   }
-  async incrementItemQuantity(
-    itemId: string,
-    count: number = 1,
-  ): Promise<void> {
-    const item = await this.checkItemExist(itemId);
-    item.quantity += count;
-    await this.itemRepository.update(
-      { id: item.id },
-      { quantity: item.quantity },
-    );
-  }
   async decrementItemQuantity(
     itemId: string,
     count: number = 1,
@@ -540,6 +536,36 @@ export class ItemService {
       );
     }
   }
+  async validateAndDecrementStock(
+    cartItems: any,
+    transactionalManager: EntityManager,
+  ) {
+    for (const item of cartItems) {
+      if (!item.isAvailable) {
+        throw new GoneException(`Item ${item.title} is not available.`);
+      }
+
+      const result = await transactionalManager
+        .createQueryBuilder()
+        .update(ItemEntity)
+        .set({ quantity: () => `quantity - ${item.count}` })
+        .where('id = :id AND quantity >= :count', {
+          id: item.itemId,
+          count: item.count,
+        })
+        .execute();
+
+      if (result.affected === 0) {
+        throw new UnprocessableEntityException({
+          message: {
+            error: `Unfortunately, the ${item.title} stock is less than the quantity you requested.`,
+            item: item.title,
+            available_quantity: item.quantity,
+          },
+        });
+      }
+    }
+  }
   async hasSufficientStock(itemId: string, count: number): Promise<boolean> {
     const item = await this.itemRepository.findOneBy({ id: itemId });
     return item.quantity >= count;
@@ -564,6 +590,9 @@ export class ItemService {
       rate: rating,
       rate_count: ratingCount,
     });
+  }
+  async increaseQuantity(itemId: string, count: number) {
+    await this.itemRepository.increment({ id: itemId }, 'quantity', count);
   }
   // * admin dashboard reports
 

@@ -76,7 +76,7 @@ ${
         },
       );
     } catch (err) {
-      console.error('❌ Failed to send log to Telegram:', err.message);
+      // console.error('Failed to send log to Telegram:', err.message);
     }
 
     callback();

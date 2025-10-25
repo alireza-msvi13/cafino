@@ -111,8 +111,6 @@ export class CartService {
 
       return new ServerResponse(HttpStatus.OK, 'Item Removed successfully.');
     }
-
-    // await this.itemService.incrementItemQuantity(itemId)
     cartItem.count -= 1;
     await this.cartRepository.save(cartItem);
 
@@ -342,6 +340,7 @@ export class CartService {
       return {
         itemId: item.id,
         title: item.title,
+        slug: item.slug,
         description: item.description,
         count,
         quantity: item.quantity,

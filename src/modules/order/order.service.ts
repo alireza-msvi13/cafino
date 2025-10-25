@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderEntity } from './entity/order.entity';
-import { DeepPartial, In, Repository } from 'typeorm';
+import { DeepPartial, EntityManager, In, LessThan, Repository } from 'typeorm';
 import { OrderItemEntity } from './entity/order-items.entity';
 import { UserService } from '../user/user.service';
 import { OrderStatus } from 'src/common/enums/order-status.enum';
@@ -76,6 +76,7 @@ export class OrderService {
         'items.count',
         'item.id',
         'item.title',
+        'item.slug',
         'item.price',
         'itemImages.id',
         'itemImages.imageUrl',
@@ -133,9 +134,8 @@ export class OrderService {
     userId: string,
     addressId: string,
     description: string,
+    transactionalManager: EntityManager,
   ) {
-    await this.userService.findUserByAddress(userId, addressId);
-
     const {
       cartItems,
       totalAmount,
@@ -158,19 +158,17 @@ export class OrderService {
       discount: generalDiscount?.id ? { id: generalDiscount.id } : null,
     });
 
-    order = await this.orderRepository.save(order);
+    order = await transactionalManager.save(order);
 
-    let orderItems: DeepPartial<OrderItemEntity>[] = [];
-
-    for (const cartItem of cartItems) {
-      orderItems.push({
+    const orderItems: DeepPartial<OrderItemEntity>[] = cartItems.map(
+      (cartItem) => ({
         count: cartItem.count,
         item: { id: cartItem.itemId },
         order: { id: order.id },
-      });
-    }
+      }),
+    );
 
-    await this.orderItemRepository.insert(orderItems);
+    await transactionalManager.insert(OrderItemEntity, orderItems);
 
     return order;
   }
@@ -179,17 +177,22 @@ export class OrderService {
     if (!order) throw new NotFoundException('Order not found.');
     return order;
   }
-  async changeOrderStatus(orderId: string, status: OrderStatus) {
+  async changeOrderStatus(
+    orderId: string,
+    status: OrderStatus,
+    manager?: EntityManager,
+  ) {
     if (!AllowdOrderStatus.includes(status)) {
       throw new BadRequestException('Invalid status.');
     }
-    await this.orderRepository.update(
-      { id: orderId },
-      {
-        status,
-      },
-    );
+
+    if (manager) {
+      await manager.update(OrderEntity, { id: orderId }, { status });
+    } else {
+      await this.orderRepository.update({ id: orderId }, { status });
+    }
   }
+
   async getUserOrders(userId: string, paginationDto: PaginationDto) {
     const { limit = 10, page = 1 } = paginationDto;
 
@@ -221,6 +224,7 @@ export class OrderService {
         'items.count',
         'item.id',
         'item.title',
+        'item.slug',
         'item.price',
         'itemImages.id',
         'itemImages.imageUrl',
@@ -236,7 +240,8 @@ export class OrderService {
         'payments.invoice_number',
         'payments.ref_id',
         'payments.created_at',
-      ]);
+      ])
+      .orderBy('order.created_at', 'DESC');
 
     const total = await baseQuery.getCount();
 
@@ -434,5 +439,23 @@ export class OrderService {
       .getRawOne();
 
     return Math.round(Number(avg)) || 0;
+  }
+  async findExpiredPendingOrders(minutes: number) {
+    const cutoff = new Date(Date.now() - minutes * 60 * 1000);
+
+    return this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoin('order.items', 'orderItem')
+      .leftJoin('orderItem.item', 'item')
+      .where('order.status = :status', { status: OrderStatus.Pending })
+      .andWhere('order.created_at < :cutoff', { cutoff })
+      .select(['order.id', 'orderItem.id', 'orderItem.count', 'item.id'])
+      .getMany();
+  }
+
+  async cancelOrder(orderId: string) {
+    await this.orderRepository.update(orderId, {
+      status: OrderStatus.Canceled,
+    });
   }
 }

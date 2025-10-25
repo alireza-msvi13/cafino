@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
-import { TypeOrmConfig } from './config/typeorm/typeorm.config';
+import { TypeOrmConfig } from './configs/typeorm.config';
 import { SmsModule } from './modules/sms/sms.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
@@ -24,6 +24,9 @@ import { MailModule } from './modules/mail/mail.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { RateLimitModule } from './modules/rate-limit/rate-limit.module';
 import { TicketModule } from './modules/ticket/ticket.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksModule } from './modules/tasks/tasks.module';
 
 @Module({
   imports: [
@@ -35,6 +38,8 @@ import { TicketModule } from './modules/ticket/ticket.module';
       transports: winstonLogger.transports,
     }),
     TypeOrmModule.forRoot(TypeOrmConfig()),
+    ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
     UserModule,
     AuthModule,
     SmsModule,
@@ -53,6 +58,7 @@ import { TicketModule } from './modules/ticket/ticket.module';
     AdminModule,
     RateLimitModule,
     TicketModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [],

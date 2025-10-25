@@ -333,6 +333,7 @@ export class UserService {
 
         'item.id',
         'item.title',
+        'item.slug',
         'item.ingredients',
         'item.description',
         'item.price',
@@ -490,21 +491,6 @@ export class UserService {
     if (!address) {
       throw new NotFoundException('Address not found.');
     }
-  }
-  async findUserByAddress(
-    userId: string,
-    addressId: string,
-  ): Promise<AddressEntity> {
-    const address = await this.addressRepository.findOne({
-      where: {
-        id: addressId,
-        user: { id: userId },
-      },
-    });
-
-    if (!address) throw new NotFoundException('Address not found.');
-
-    return address;
   }
   async isItemFavorited(userId: string, itemId: string): Promise<boolean> {
     if (!userId) return false;

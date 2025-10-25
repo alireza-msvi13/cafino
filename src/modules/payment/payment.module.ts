@@ -10,6 +10,8 @@ import { OrderModule } from '../order/order.module';
 import { ItemModule } from '../item/item.module';
 import { DiscountModule } from '../discount/discount.module';
 import { RateLimitModule } from '../rate-limit/rate-limit.module';
+import { CartListener } from './listeners/cart.listener';
+import { DiscountListener } from './listeners/discount.listener';
 
 @Module({
   imports: [
@@ -22,7 +24,7 @@ import { RateLimitModule } from '../rate-limit/rate-limit.module';
     RateLimitModule,
     TypeOrmModule.forFeature([PaymentEntity]),
   ],
-  providers: [PaymentService],
+  providers: [PaymentService, CartListener, DiscountListener],
   controllers: [PaymentController],
   exports: [],
 })

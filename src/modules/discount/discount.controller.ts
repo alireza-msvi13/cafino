@@ -16,7 +16,6 @@ import { JwtGuard } from '../auth/guards/access-token.guard';
 import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 import { DiscountQueryDto } from './dto/sort-discount.dto';
 import { UpdateDiscountDto } from './dto/update-dicount.dto';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   CreateDiscountDoc,
   DeleteDiscountCodeDoc,
@@ -32,12 +31,6 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 @RolesAllowed(Roles.Admin, Roles.Manager)
 export class DiscountController {
   constructor(private discountService: DiscountService) {}
-
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  async handleDiscountExpiration() {
-    await this.discountService.deactivateExpiredDiscounts();
-    console.log('Expired discounts deactivated at', new Date());
-  }
 
   @Post()
   @CreateDiscountDoc()

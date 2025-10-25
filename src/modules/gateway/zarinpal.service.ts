@@ -57,7 +57,7 @@ export class ZarinpalService {
     return data;
   }
 
-  // *helper
+  // * helper
 
   private async handleRequest(url: string, data: any) {
     try {
@@ -67,7 +67,6 @@ export class ZarinpalService {
       });
       return response.data.data;
     } catch (error) {
-      console.log(error);
       throw new ServiceUnavailableException(
         'Failed to connect with Zarinpal service.',
       );

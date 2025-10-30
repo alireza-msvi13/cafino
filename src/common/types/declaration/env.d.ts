@@ -12,25 +12,24 @@ namespace NodeJS {
     DB_PASSWORD: string;
     DB_HOST: string;
 
-    //secrets
+    //Secret
     ACCESS_TOKEN_SECRET: string;
     REFRESH_TOKEN_SECRET: string;
 
     //Sms
-    SMS_USER: string;
-    SMS_PASS: string;
+    SMS_API_KEY: string;
     SMS_PATTERN_CODE: string;
     SMS_FROM_NUM: string;
     SMS_BASE_URL: string;
 
-    // aws
+    // Aws
     S3_SECRET_KEY: string;
     S3_ACCESS_KEY: string;
     S3_BUCKET_NAME: string;
     S3_ENDPOINT: string;
     S3_FILE_PATH_URL: string;
 
-    // zarinpal
+    // Zarinpal
     ZARINPAL_GATEWAY_URL: string;
     ZARINPAL_REQUEST_URL: string;
     ZARINPAL_VERIFY_URL: string;

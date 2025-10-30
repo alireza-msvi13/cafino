@@ -1,29 +1,45 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { SmsType } from 'src/common/types/sms.type';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import axios from 'axios';
+import { SmsType } from 'src/common/types/sms.type';
 
 @Injectable()
 export class SmsService {
-  async sendSms(options: SmsType): Promise<void> {
-    const { phone, code } = options;
+  private readonly baseUrl = process.env.SMS_BASE_URL;
+  private readonly apiKey = process.env.SMS_API_KEY;
+  private readonly patternCode = process.env.SMS_PATTERN_CODE;
+  private readonly fromNum = process.env.SMS_FROM_NUM;
 
-    const requestBody = {
-      op: 'pattern',
-      user: process.env.SMS_USER,
-      pass: process.env.SMS_PASS,
-      fromNum: process.env.SMS_FROM_NUM,
-      toNum: phone,
-      patternCode: process.env.SMS_PATTERN_CODE,
-      inputData: [{ 'verification-code': code }],
+  async sendSms(options: SmsType): Promise<void> {
+    const code = options.code;
+    const phone = '+98' + options.phone.slice(1);
+
+    const payload = {
+      sending_type: 'pattern',
+      from_number: this.fromNum,
+      code: this.patternCode,
+      recipients: [phone],
+      params: {
+        'verification-code': code,
+      },
     };
 
     try {
-      const response = await axios.post(process.env.SMS_BASE_URL, requestBody);
-      if (typeof response.data !== 'number' && Number(response.data[0]) !== 0) {
-        throw new InternalServerErrorException(response.data[1]);
+      const response = await axios.post(this.baseUrl, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `${this.apiKey}`,
+        },
+      });
+
+      if (!response.data?.meta.status) {
+        throw new ServiceUnavailableException(
+          response.data?.meta.message || 'SMS sending failed.',
+        );
       }
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      throw new ServiceUnavailableException(
+        error.response?.data?.meta.message || 'Failed to send SMS pattern.',
+      );
     }
   }
 }

@@ -38,7 +38,7 @@ export class RateLimitService {
       .values({
         identifier,
         endpoint,
-        requests_in_window: 1,
+        requests_in_window: 0,
         window_start_at: now,
         block_status: BlockStatus.None,
         block_expires_at: null,

@@ -50,7 +50,7 @@ export class CommentService {
       item: { id: itemId },
       parent: parent ? { id: parentId } : null,
       user: { id: userId },
-      accept: role === Roles.Admin ? true : false,
+      accept: role !== Roles.User ? true : false,
     });
 
     await this.commentRepository.save(newComment);

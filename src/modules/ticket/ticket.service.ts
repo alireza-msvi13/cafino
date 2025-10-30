@@ -116,7 +116,7 @@ export class TicketService {
       throw new NotFoundException('Ticket not found.');
     }
 
-    if (role !== Roles.Admin && ticket.user.id !== userId) {
+    if (role === Roles.User && ticket.user.id !== userId) {
       throw new ForbiddenException('Access denied.');
     }
 
@@ -160,11 +160,11 @@ export class TicketService {
       throw new ConflictException('Ticket is closed.');
     }
 
-    if (role !== Roles.Admin && ticket.user.id !== userId) {
+    if (role === Roles.User && ticket.user.id !== userId) {
       throw new ForbiddenException('Access denied.');
     }
 
-    if (role === Roles.Admin && ticket.status === TicketStatus.Open) {
+    if (role !== Roles.User && ticket.status === TicketStatus.Open) {
       ticket.status = TicketStatus.Answered;
       await this.ticketRepo.save(ticket);
     }

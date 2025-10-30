@@ -52,7 +52,7 @@ export class AuthService {
     let user = existingUser;
     if (!user) {
       const usersCount = await this.userService.countUsers();
-      const role = usersCount === 0 ? Roles.Admin : Roles.User;
+      const role = usersCount === 0 ? Roles.Manager : Roles.User;
       user = await this.userService.createUser({
         username: generateUsername(),
         phone,

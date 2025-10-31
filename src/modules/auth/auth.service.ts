@@ -14,7 +14,6 @@ import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { generateOtpCode } from 'src/common/utils/generate-otp-code.utils';
-import { SmsService } from '../sms/sms.service';
 import { SmsType } from 'src/common/types/sms.type';
 import {
   AccessCookieConfig,
@@ -24,13 +23,14 @@ import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { UserStatus } from 'src/common/enums/user-status.enum';
 import { Roles } from 'src/common/enums/role.enum';
 import { generateUsername } from 'src/common/utils/username.util';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserService,
-    private jwtService: JwtService,
-    private smsService: SmsService,
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // * primary
@@ -64,8 +64,8 @@ export class AuthService {
     const expireIn = new Date(Date.now() + 1000 * 60 * 2);
     await this.userService.saveOtp(otpCode, expireIn, user.id, phone);
 
-    // const smsOptions: SmsType = { phone, code: otpCode };
-    // await this.smsService.sendSms(smsOptions);
+    // const smsPayload: SmsType = { phone, code: otpCode };
+    // this.eventEmitter.emit('sms.otp.send', smsPayload);
 
     return new ServerResponse(HttpStatus.OK, 'Code sent successfully.', {
       otpCode,

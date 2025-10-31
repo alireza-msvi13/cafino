@@ -6,7 +6,7 @@ import { CartService } from 'src/modules/cart/cart.service';
 export class CartListener {
   constructor(private readonly cartService: CartService) {}
 
-  @OnEvent('payment.verified')
+  @OnEvent('payment.verified', { async: true })
   async handlePaymentVerified(event: { userId?: string }) {
     if (event.userId) {
       await this.cartService.clearUserCart(event.userId);

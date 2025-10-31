@@ -6,7 +6,7 @@ import { DiscountService } from 'src/modules/discount/discount.service';
 export class DiscountListener {
   constructor(private readonly discountService: DiscountService) {}
 
-  @OnEvent('payment.verified')
+  @OnEvent('payment.verified', { async: true })
   async handlePaymentVerified(event: { discountId?: string }) {
     if (event.discountId) {
       await this.discountService.incrementUsage(event.discountId);

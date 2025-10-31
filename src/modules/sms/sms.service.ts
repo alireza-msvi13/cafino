@@ -9,7 +9,7 @@ export class SmsService {
   private readonly patternCode = process.env.SMS_PATTERN_CODE;
   private readonly fromNum = process.env.SMS_FROM_NUM;
 
-  async sendSms(options: SmsType): Promise<void> {
+  async sendOtpSms(options: SmsType): Promise<void> {
     const code = options.code;
     const phone = '+98' + options.phone.slice(1);
 

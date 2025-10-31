@@ -7,6 +7,7 @@ import { RefreshStrategy } from './strategy/refresh-token.strategy';
 import { JwtStrategy } from './strategy/access-token.strategy';
 import { UserModule } from '../user/user.module';
 import { RateLimitModule } from 'src/modules/rate-limit/rate-limit.module';
+import { SmsListener } from './listeners/sms.listener';
 @Module({
   imports: [
     UserModule,
@@ -17,7 +18,7 @@ import { RateLimitModule } from 'src/modules/rate-limit/rate-limit.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, RefreshStrategy, JwtStrategy],
+  providers: [AuthService, RefreshStrategy, JwtStrategy, SmsListener],
   exports: [AuthService],
 })
 export class AuthModule {}

@@ -48,9 +48,7 @@ export class ContactQueryDto extends PaginationDto {
   })
   @Transform(({ value }) => normalizePhoneNumber(value))
   @IsOptional()
-  @Matches(PhoneRegex, {
-    message: PHONE_ERROR_MESSAGE,
-  })
+  @Matches(PhoneRegex, { message: PHONE_ERROR_MESSAGE })
   phone?: string;
 
   @ApiPropertyOptional({ type: 'boolean' })

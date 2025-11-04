@@ -9,9 +9,7 @@ import { normalizePhoneNumber } from 'src/common/utils/phone.util';
 export class UserPermissionDto {
   @IsNotEmpty({ message: PHONE_ERROR_MESSAGE })
   @Transform(({ value }) => normalizePhoneNumber(value))
-  @Matches(PhoneRegex, {
-    message: PHONE_ERROR_MESSAGE,
-  })
+  @Matches(PhoneRegex, { message: PHONE_ERROR_MESSAGE })
   @ApiProperty({
     title: 'enter phone number for change permission',
     example: '09375012365',

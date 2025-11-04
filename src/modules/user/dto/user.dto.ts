@@ -8,9 +8,7 @@ import { PhoneRegex } from 'src/common/constants/regex.constant';
 export class UserDto {
   @IsNotEmpty({ message: PHONE_ERROR_MESSAGE })
   @Transform(({ value }) => normalizePhoneNumber(value))
-  @Matches(PhoneRegex, {
-    message: PHONE_ERROR_MESSAGE,
-  })
+  @Matches(PhoneRegex, { message: PHONE_ERROR_MESSAGE })
   @ApiProperty({
     title: 'enter phone number for login',
     example: '09375012365',

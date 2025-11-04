@@ -64,8 +64,6 @@ export class SortAdminCommentDto extends PaginationDto {
   })
   @Transform(({ value }) => normalizePhoneNumber(value))
   @IsOptional()
-  @Matches(PhoneRegex, {
-    message: PHONE_ERROR_MESSAGE,
-  })
+  @Matches(PhoneRegex, { message: PHONE_ERROR_MESSAGE })
   phone?: string;
 }

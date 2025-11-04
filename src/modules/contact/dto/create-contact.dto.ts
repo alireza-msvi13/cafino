@@ -25,9 +25,7 @@ export class CreateContactDto {
 
   @IsNotEmpty({ message: PHONE_ERROR_MESSAGE })
   @Transform(({ value }) => normalizePhoneNumber(value))
-  @Matches(PhoneRegex, {
-    message: PHONE_ERROR_MESSAGE,
-  })
+  @Matches(PhoneRegex, { message: PHONE_ERROR_MESSAGE })
   @ApiProperty({
     title: 'enter phone number',
     example: '09375012365',

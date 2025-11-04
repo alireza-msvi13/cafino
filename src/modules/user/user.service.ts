@@ -412,7 +412,7 @@ export class UserService {
     });
 
     const LIMIT = 3;
-    const WINDOW = 5 * 60 * 1000;
+    const WINDOW = 10 * 60 * 1000;
 
     if (otp) {
       if (

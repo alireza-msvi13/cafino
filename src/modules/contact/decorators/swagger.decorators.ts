@@ -10,6 +10,7 @@ import {
   DeleteMethodDoc,
 } from 'src/common/swagger/decorators/swagger-methods.decorator';
 import { SwaggerSharedDescriptions } from 'src/common/swagger/constants/swagger-descriptions.constants';
+import { PhoneRegex } from 'src/common/constants/regex.constant';
 
 export function CreateContactDoc() {
   return applyDecorators(
@@ -27,7 +28,7 @@ export function CreateContactDoc() {
   - Must be a valid email address.
 - phone:
   - Required.
-  - Must match the regex /^09\\d{9}$/.
+  - Must match the regex ${PhoneRegex}.
 - message:
   - Required.
   - Must be a string.
@@ -59,7 +60,7 @@ ${SwaggerSharedDescriptions.Pagination}
   - Must be a valid email.
 - phone:
   - Optional.
-  - Must match the regex /^09\\d{9}$/.
+  - Must match the regex ${PhoneRegex}.
 - hasReply:
   - Optional.
   - Boolean.`),

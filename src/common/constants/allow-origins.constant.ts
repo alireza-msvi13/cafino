@@ -1,1 +1,2 @@
-export const AllowOrigins: string[] = ['http://localhost:3000'];
+export const AllowOrigins: string[] =
+  process.env.ALLOWED_ORIGINS?.split(',') ?? [];

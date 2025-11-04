@@ -14,6 +14,7 @@ import {
 import { Roles } from 'src/common/enums/role.enum';
 import { SwaggerSharedDescriptions } from 'src/common/swagger/constants/swagger-descriptions.constants';
 import { SwaggerContentTypes } from 'src/common/swagger/enums/swagger-content-types.enum';
+import { PhoneRegex } from 'src/common/constants/regex.constant';
 
 export function UserInfoDoc() {
   return applyDecorators(
@@ -46,7 +47,7 @@ export function UserPermissionDoc() {
     BadRequestError(`Invalid request - Validation rules:
 - phone:
   - Must not be empty.
-  - Must match the regex /^09\\d{9}$/.
+  - Must match the regex ${PhoneRegex}
 - role:
   - Must be a valid enum value: ${Object.values(Roles).join(', ')}.
 `),
@@ -76,7 +77,7 @@ export function AddUserToBlacklistDoc() {
     BadRequestError(`Invalid request - Validation rules:
 - phone:
   - Must not be empty.
-  - Must match the regex /^09\\d{9}$/
+  - Must match the regex ${PhoneRegex}
 `),
   );
 }
@@ -90,7 +91,7 @@ export function RemoveUserFromBlacklistDoc() {
     BadRequestError(`Invalid request - Validation rules:
 - phone:
   - Must not be empty.
-  - Must match the regex /^09\\d{9}$/
+  - Must match the regex ${PhoneRegex}
 `),
   );
 }

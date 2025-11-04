@@ -44,7 +44,10 @@ async function bootstrap() {
   app.useLogger(logger);
   app.useGlobalFilters(new GlobalExceptionFilter(logger));
 
-  app.enableCors({ credentials: true, origin: true });
+  app.enableCors({
+    credentials: true,
+    origin: AllowOrigins,
+  });
 
   SwaggerConfigInit(app);
 

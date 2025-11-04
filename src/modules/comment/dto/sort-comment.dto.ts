@@ -15,6 +15,7 @@ import { SortCommentOption } from '../enum/comment.enum';
 import { Transform, Type } from 'class-transformer';
 import { PHONE_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 import { normalizePhoneNumber } from 'src/common/utils/phone.util';
+import { PhoneRegex } from 'src/common/constants/regex.constant';
 
 export class SortCommentDto extends PaginationDto {
   @ApiPropertyOptional({
@@ -63,6 +64,8 @@ export class SortAdminCommentDto extends PaginationDto {
   })
   @Transform(({ value }) => normalizePhoneNumber(value))
   @IsOptional()
-  @Matches(/^09\d{9}$/, { message: PHONE_ERROR_MESSAGE })
+  @Matches(PhoneRegex, {
+    message: PHONE_ERROR_MESSAGE,
+  })
   phone?: string;
 }

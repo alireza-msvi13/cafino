@@ -25,7 +25,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('send-otp')
-  @RateLimit({ max: 3, duration: 5 })
+  @RateLimit({ max: 3, duration: 10 })
   @UseGuards(RateLimitGuard)
   @SendOtpDoc()
   async sendOtp(@Body() loginUserDto: LoginUserDto) {
@@ -33,7 +33,7 @@ export class AuthController {
   }
 
   @Post('verify-otp')
-  @RateLimit({ max: 3, duration: 5 })
+  @RateLimit({ max: 3, duration: 10 })
   @UseGuards(RateLimitGuard)
   @VerifyOtpDoc()
   async verifyOtp(
@@ -48,7 +48,7 @@ export class AuthController {
   }
 
   @Post('resend-otp')
-  @RateLimit({ max: 3, duration: 5 })
+  @RateLimit({ max: 3, duration: 10 })
   @UseGuards(RateLimitGuard)
   @ResendOtpDoc()
   async resendOtp(@Body() resendCodeDto: ResendCodeDto) {

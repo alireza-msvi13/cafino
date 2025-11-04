@@ -20,10 +20,10 @@ export class RateLimitGuard implements CanActivate {
     const userId = req?.user && req.user['id'];
     const ip = req.ip;
 
-    const rawUA = req.headers['user-agent'] || '';
-    const ua = parseUserAgent(rawUA);
+    // const rawUA = req.headers['user-agent'] || '';
+    // const ua = parseUserAgent(rawUA);
 
-    const identifier = userId ?? `${ip}:${ua.browser}:${ua.os}:${ua.device}`;
+    const identifier = userId ?? ip;
     const endpoint = req.route.path;
 
     const options = this.reflector.get<RateLimitOptions>(

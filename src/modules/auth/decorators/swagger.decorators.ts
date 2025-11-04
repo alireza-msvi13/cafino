@@ -12,6 +12,7 @@ import {
   TooManyRequestsError,
   UnprocessableEntityError,
 } from 'src/common/swagger/decorators/swagger-errors.decorator';
+import { PhoneRegex } from 'src/common/constants/regex.constant';
 
 export function SendOtpDoc() {
   return applyDecorators(
@@ -21,7 +22,7 @@ export function SendOtpDoc() {
 Invalid request - Validation rules:
 - phone:
   - Must not be empty.
-  - Must match the regex /^09\\d{9}$/.
+  - Must match the regex ${PhoneRegex}.
 `),
     ForbiddenError('Unfortunately, you are in the blacklist.'),
     ConflictError(
@@ -38,7 +39,7 @@ export function VerifyOtpDoc() {
 Invalid request - Validation rules:
 - phone:
   - Must not be empty.
-  - Must match the regex /^09\\d{9}$/.
+  - Must match the regex ${PhoneRegex}.
 - otpCode:
   - Must not be empty.
   - Must be a number string (only digits).
@@ -64,7 +65,7 @@ export function ResendOtpDoc() {
 Invalid request - Validation rules:
 - phone:
   - Must not be empty.
-  - Must match the regex /^09\\d{9}$/.
+  - Must match the regex ${PhoneRegex}.
 `),
     NotFoundError('No account is registered with this phone number.'),
     ForbiddenError('Unfortunately, you are in the blacklist.'),

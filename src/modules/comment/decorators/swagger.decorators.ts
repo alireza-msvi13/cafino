@@ -12,6 +12,7 @@ import {
 } from 'src/common/swagger/decorators/swagger-errors.decorator';
 import { SortCommentOption } from '../enum/comment.enum';
 import { SwaggerSharedDescriptions } from 'src/common/swagger/constants/swagger-descriptions.constants';
+import { PhoneRegex } from 'src/common/constants/regex.constant';
 
 export function CreateCommentDoc() {
   return applyDecorators(
@@ -72,7 +73,7 @@ export function GetAllCommentsDoc() {
     - Must be a valid id (UUID v4).
 - phone:
     - Optional.
-    - Must match the regex /^09\\d{9}$/.`),
+    - Must match the regex ${PhoneRegex}.`),
   );
 }
 

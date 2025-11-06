@@ -63,7 +63,7 @@ export class CommentController {
 
   @Put('/accept/:id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.Manager)
+  @RolesAllowed(Roles.Manager)
   @AcceptCommentDoc()
   acceptComment(@Param('id', UUIDValidationPipe) id: string) {
     return this.commentService.acceptComment(id);
@@ -71,7 +71,7 @@ export class CommentController {
 
   @Put('/reject/:id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.Manager)
+  @RolesAllowed(Roles.Manager)
   @RejectCommentDoc()
   rejectComment(@Param('id', UUIDValidationPipe) id: string) {
     return this.commentService.rejectComment(id);

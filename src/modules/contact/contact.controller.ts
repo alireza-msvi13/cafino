@@ -64,7 +64,7 @@ export class ContactController {
 
   @Delete(':id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.Manager)
+  @RolesAllowed(Roles.Manager)
   @DeleteContactDoc()
   async delete(@Param('id', UUIDValidationPipe) id: string) {
     return this.contactService.delete(id);
@@ -73,7 +73,7 @@ export class ContactController {
   @Post(':id/reply')
   @RateLimit({ max: 10, duration: 1 })
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.Manager)
+  @RolesAllowed(Roles.Manager)
   @ReplyContactMessageDoc()
   async replyMessage(
     @Param('id', UUIDValidationPipe) id: string,

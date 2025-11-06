@@ -45,7 +45,7 @@ export class ItemController {
 
   @Post()
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.Manager)
+  @RolesAllowed(Roles.Manager)
   @UseInterceptors(UploadMultiFilesAws('images'))
   @CreateItemDoc()
   async createItem(
@@ -93,7 +93,7 @@ export class ItemController {
 
   @Delete('/:id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.Manager)
+  @RolesAllowed(Roles.Manager)
   @DeleteItemDoc()
   async deleteItemById(@Param('id', UUIDValidationPipe) itemId: string) {
     return this.itemService.deleteItemById(itemId);
@@ -101,7 +101,7 @@ export class ItemController {
 
   @Put('/:id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.Manager)
+  @RolesAllowed(Roles.Manager)
   @UseInterceptors(
     UploadMultiFilesAws('images'),
     EmptyStringToUndefindInterceptor,

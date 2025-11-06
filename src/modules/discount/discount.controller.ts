@@ -27,24 +27,28 @@ import { RolesAllowed } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 @Controller('discount')
 @ApiTags('Discount')
-@UseGuards(JwtGuard, RolesGuard)
-@RolesAllowed(Roles.Admin, Roles.Manager)
 export class DiscountController {
   constructor(private discountService: DiscountService) {}
 
   @Post()
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Manager)
   @CreateDiscountDoc()
   generate(@Body() discountDto: DiscountDto) {
     return this.discountService.generate(discountDto);
   }
 
   @Get()
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Admin, Roles.Manager)
   @GetAllDiscountCodesDoc()
   findAll(@Query() query: DiscountQueryDto) {
     return this.discountService.findAll(query);
   }
 
   @Put('/:id')
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Manager)
   @UpdateActivityStatusDoc()
   update(
     @Param('id', UUIDValidationPipe) id: string,
@@ -54,6 +58,8 @@ export class DiscountController {
   }
 
   @Delete('/:id')
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesAllowed(Roles.Manager)
   @DeleteDiscountCodeDoc()
   remove(@Param('id', UUIDValidationPipe) id: string) {
     return this.discountService.delete(id);

@@ -64,7 +64,7 @@ export class UserController {
 
   @Post('blacklist')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.Manager)
+  @RolesAllowed(Roles.Manager)
   @AddUserToBlacklistDoc()
   async addUserToBlacklist(@Body() userDto: UserDto) {
     return this.userService.addUserToBlacklist(userDto);
@@ -72,7 +72,7 @@ export class UserController {
 
   @Delete('blacklist')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.Manager)
+  @RolesAllowed(Roles.Manager)
   @RemoveUserFromBlacklistDoc()
   async removeUserToBlacklist(@Body() userDto: UserDto) {
     return this.userService.removeUserToBlacklist(userDto);

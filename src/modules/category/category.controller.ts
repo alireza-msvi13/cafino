@@ -41,7 +41,7 @@ export class CategoryController {
 
   @Post()
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.Manager)
+  @RolesAllowed(Roles.Manager)
   @UseInterceptors(UploadFileAws('image'))
   @CreateCategoryDoc()
   create(
@@ -79,7 +79,7 @@ export class CategoryController {
 
   @Put(':id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.Manager)
+  @RolesAllowed(Roles.Manager)
   @UseInterceptors(UploadFileAws('image'), EmptyStringToUndefindInterceptor)
   @UpdateCategoryDoc()
   update(
@@ -92,7 +92,7 @@ export class CategoryController {
 
   @Delete(':id')
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesAllowed(Roles.Admin, Roles.Manager)
+  @RolesAllowed(Roles.Manager)
   @DeleteCategoryDoc()
   delete(@Param('id', UUIDValidationPipe) categoryId: string) {
     return this.categoryService.delete(categoryId);

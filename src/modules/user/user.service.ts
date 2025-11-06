@@ -101,14 +101,14 @@ export class UserService {
   ): Promise<ServerResponse> {
     const { phone, role } = userPermissionDto;
 
+    if (role === Roles.Manager) {
+      throw new ConflictException('Role cannot be changed.');
+    }
+
     const user = await this.findUserByPhone(phone);
 
     if (!user) {
       throw new NotFoundException('User not found.');
-    }
-
-    if (user.role === Roles.Manager) {
-      throw new ConflictException('Role cannot be changed.');
     }
 
     await this.userRepository.update(

@@ -26,6 +26,7 @@ import {
 } from './decorators/swagger.decorators';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { RolesAllowed } from '../auth/decorators/roles.decorator';
+import { RateLimitGuard } from '../rate-limit/guards/rate-limit.guard';
 
 @Controller('comment')
 @ApiTags('Comment')
@@ -33,8 +34,8 @@ export class CommentController {
   constructor(private commentService: CommentService) {}
 
   @Post('/')
-  @UseGuards(JwtGuard)
   @RateLimit({ max: 3, duration: 10 })
+  @UseGuards(JwtGuard, RateLimitGuard)
   @CreateCommentDoc()
   createComment(
     @Body() createCommentDto: CreateCommentDto,

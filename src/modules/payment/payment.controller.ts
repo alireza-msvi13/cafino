@@ -15,6 +15,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { PaymentGatewayDoc } from './decorators/swagger.decorators';
 import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator';
+import { RateLimitGuard } from '../rate-limit/guards/rate-limit.guard';
 
 @Controller('Payment')
 @ApiTags('Payment')
@@ -22,8 +23,8 @@ export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
   @Post('gateway')
-  @UseGuards(JwtGuard)
   @RateLimit({ max: 5, duration: 5 })
+  @UseGuards(JwtGuard, RateLimitGuard)
   @PaymentGatewayDoc()
   paymentGateway(
     @Body() paymentGatewayDto: PaymentGatewayDto,

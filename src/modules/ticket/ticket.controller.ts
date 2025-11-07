@@ -30,6 +30,7 @@ import {
 } from './decorators/swagger.decorators';
 import { RolesAllowed } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { RateLimitGuard } from '../rate-limit/guards/rate-limit.guard';
 
 @ApiTags('Ticket')
 @Controller('ticket')
@@ -37,8 +38,8 @@ export class TicketController {
   constructor(private readonly ticketService: TicketService) {}
 
   @Post()
-  @UseGuards(JwtGuard)
   @RateLimit({ max: 3, duration: 10 })
+  @UseGuards(JwtGuard, RateLimitGuard)
   @CreateTicketDoc()
   createTicket(
     @GetUser('id', UUIDValidationPipe) userId: string,
@@ -77,8 +78,8 @@ export class TicketController {
   }
 
   @Post(':id/messages')
-  @UseGuards(JwtGuard)
   @RateLimit({ max: 10, duration: 1 })
+  @UseGuards(JwtGuard, RateLimitGuard)
   @AddMessageToTicketDoc()
   addMessage(
     @Param('id', UUIDValidationPipe) ticketId: string,

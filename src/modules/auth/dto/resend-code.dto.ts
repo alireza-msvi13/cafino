@@ -15,4 +15,11 @@ export class ResendCodeDto {
     nullable: false,
   })
   phone: string;
+
+  @IsNotEmpty({ message: 'Captcha token is required' })
+  @ApiProperty({
+    title: 'Google reCAPTCHA v2 token',
+    nullable: false,
+  })
+  captchaToken: string;
 }

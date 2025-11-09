@@ -23,6 +23,8 @@ Invalid request - Validation rules:
 - phone:
   - Must not be empty.
   - Must match the regex ${PhoneRegex}.
+- captchaToken: 
+  - Must not be empty.
 `),
     ForbiddenError('Unfortunately, you are in the blacklist.'),
     ConflictError(
@@ -66,6 +68,8 @@ Invalid request - Validation rules:
 - phone:
   - Must not be empty.
   - Must match the regex ${PhoneRegex}.
+- captchaToken: 
+  - Must not be empty.
 `),
     NotFoundError('No account is registered with this phone number.'),
     ForbiddenError('Unfortunately, you are in the blacklist.'),

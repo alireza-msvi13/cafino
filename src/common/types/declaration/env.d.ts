@@ -4,6 +4,7 @@ namespace NodeJS {
     PORT: number;
     NODE_ENV: string;
     FRONTEND_URL: string;
+    ALLOWED_ORIGINS: string;
 
     //Database
     DB_PORT: number;
@@ -46,5 +47,9 @@ namespace NodeJS {
     SMTP_USER: string;
     SMTP_PASS: string;
     SMTP_FROM: string;
+
+    // Captcha
+    RECAPTCHA_SECRET_KEY: string;
+    RECAPTCHA_VERIFY_URL: string;
   }
 }

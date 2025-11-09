@@ -15,4 +15,13 @@ export class LoginUserDto {
     nullable: false,
   })
   phone: string;
+
+  @IsNotEmpty({ message: 'Captcha token is required' })
+  @ApiProperty({
+    title: 'Google reCAPTCHA v2 token',
+    example: '03AFcWeA8...',
+    description: 'Client-side reCAPTCHA token returned by Google reCAPTCHA v2',
+    nullable: false,
+  })
+  captchaToken: string;
 }

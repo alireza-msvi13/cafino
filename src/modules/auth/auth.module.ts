@@ -8,10 +8,12 @@ import { JwtStrategy } from './strategy/access-token.strategy';
 import { UserModule } from '../user/user.module';
 import { RateLimitModule } from 'src/modules/rate-limit/rate-limit.module';
 import { SmsListener } from './listeners/sms.listener';
+import { CaptchaModule } from '../captcha/captcha.module';
 @Module({
   imports: [
     UserModule,
     RateLimitModule,
+    CaptchaModule,
     PassportModule.register({}),
     JwtModule.register({
       global: true,

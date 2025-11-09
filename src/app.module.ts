@@ -27,6 +27,7 @@ import { TicketModule } from './modules/ticket/ticket.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { CaptchaModule } from './modules/captcha/captcha.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { TasksModule } from './modules/tasks/tasks.module';
     RateLimitModule,
     TicketModule,
     TasksModule,
+    CaptchaModule,
   ],
   controllers: [AppController],
   providers: [],

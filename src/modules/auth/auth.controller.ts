@@ -18,6 +18,7 @@ import {
   VerifyOtpDoc,
 } from 'src/modules/auth/decorators/swagger.decorators';
 import { Roles } from 'src/common/enums/role.enum';
+import { CaptchaGuard } from '../captcha/guard/captcha.guard';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -26,7 +27,7 @@ export class AuthController {
 
   @Post('send-otp')
   @RateLimit({ max: 3, duration: 10 })
-  @UseGuards(RateLimitGuard)
+  @UseGuards(RateLimitGuard, CaptchaGuard)
   @SendOtpDoc()
   async sendOtp(@Body() loginUserDto: LoginUserDto) {
     return this.authService.sendOtp(loginUserDto.phone);
@@ -49,7 +50,7 @@ export class AuthController {
 
   @Post('resend-otp')
   @RateLimit({ max: 3, duration: 10 })
-  @UseGuards(RateLimitGuard)
+  @UseGuards(RateLimitGuard, CaptchaGuard)
   @ResendOtpDoc()
   async resendOtp(@Body() resendCodeDto: ResendCodeDto) {
     return this.authService.resendOtp(resendCodeDto);

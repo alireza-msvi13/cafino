@@ -21,7 +21,7 @@ export class CaptchaService {
         params,
       );
 
-      if (!data.success) {
+      if (!data.success || data.score < 0.5) {
         throw new UnauthorizedException('Captcha verification failed.');
       }
 

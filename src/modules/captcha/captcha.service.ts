@@ -1,34 +1,34 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import axios from 'axios';
 
 @Injectable()
 export class CaptchaService {
   async validate(token: string, userIp?: string): Promise<boolean> {
     if (!token) {
-      throw new UnauthorizedException('Captcha token is missing.');
+      throw new UnprocessableEntityException('Captcha token is missing.');
     }
-
-    const params = new URLSearchParams({
-      secret: process.env.RECAPTCHA_SECRET_KEY,
-      response: token,
-    });
-
-    if (userIp) params.append('remoteip', userIp);
 
     try {
       const { data } = await axios.post(
-        process.env.RECAPTCHA_VERIFY_URL,
-        params,
+        process.env.CLOUDFLARE_TURNSTILE_VERIFY_URL,
+        new URLSearchParams({
+          secret: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY,
+          response: token,
+          remoteip: userIp || '',
+        }),
+        {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        },
       );
 
-      if (!data.success || data.score < 0.5) {
-        throw new UnauthorizedException('Captcha verification failed.');
+      if (!data.success) {
+        throw new UnprocessableEntityException('Captcha verification failed.');
       }
 
       return true;
     } catch (err) {
       console.log(err);
-      throw new UnauthorizedException('Captcha verification error.');
+      throw new UnprocessableEntityException('Captcha verification error.');
     }
   }
 }

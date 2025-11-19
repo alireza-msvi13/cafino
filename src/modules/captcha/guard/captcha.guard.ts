@@ -2,7 +2,7 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CaptchaService } from '../captcha.service';
 
@@ -19,7 +19,7 @@ export class CaptchaGuard implements CanActivate {
       request.query?.captchaToken;
 
     if (!captchaToken) {
-      throw new UnauthorizedException('Captcha token is missing.');
+      throw new UnprocessableEntityException('Captcha token is missing.');
     }
 
     await this.captchaService.validate(captchaToken, request.ip);

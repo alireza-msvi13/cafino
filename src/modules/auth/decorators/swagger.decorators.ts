@@ -30,6 +30,7 @@ Invalid request - Validation rules:
     ConflictError(
       'Your previous OTP Code is still valid. Please use it before requesting a new one.',
     ),
+    UnprocessableEntityError('Captcha verification failed.'),
   );
 }
 
@@ -76,6 +77,7 @@ Invalid request - Validation rules:
     ConflictError(
       'Your previous OTP Code is still valid. Please use it before requesting a new one.',
     ),
+    UnprocessableEntityError('Captcha verification failed.'),
   );
 }
 

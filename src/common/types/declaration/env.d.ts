@@ -49,7 +49,7 @@ namespace NodeJS {
     SMTP_FROM: string;
 
     // Captcha
-    RECAPTCHA_SECRET_KEY: string;
-    RECAPTCHA_VERIFY_URL: string;
+    CLOUDFLARE_TURNSTILE_SECRET_KEY: string;
+    CLOUDFLARE_TURNSTILE_VERIFY_URL: string;
   }
 }

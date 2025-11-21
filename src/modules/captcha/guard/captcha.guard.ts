@@ -5,6 +5,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { CaptchaService } from '../captcha.service';
+import { getRealIp } from 'src/common/utils/ip.util';
 
 @Injectable()
 export class CaptchaGuard implements CanActivate {
@@ -22,7 +23,9 @@ export class CaptchaGuard implements CanActivate {
       throw new UnprocessableEntityException('Captcha token is missing.');
     }
 
-    await this.captchaService.validate(captchaToken, request.ip);
+    const ip = getRealIp(request);
+
+    await this.captchaService.validate(captchaToken, ip);
 
     return true;
   }

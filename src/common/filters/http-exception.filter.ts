@@ -11,6 +11,7 @@ import { Request, Response } from 'express';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { INTERNAL_SERVER_ERROR_MESSAGE } from 'src/common/constants/error.constant';
 import { parseUserAgent } from 'src/modules/rate-limit/utils/user-agent.utils';
+import { getRealIp } from '../utils/ip.util';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -34,7 +35,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       ? this.extractMessage(exception)
       : INTERNAL_SERVER_ERROR_MESSAGE;
 
-    const ip = req.ip;
+    const ip = getRealIp(req);
 
     const rawUserAgent = req.headers['user-agent'] || '';
     const userAgent = parseUserAgent(rawUserAgent);

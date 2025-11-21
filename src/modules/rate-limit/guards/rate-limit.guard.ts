@@ -6,7 +6,7 @@ import {
   RateLimitOptions,
 } from '../decorators/rate-limit.decorator';
 import { parseUserAgent } from 'src/modules/rate-limit/utils/user-agent.utils';
-import { Request } from 'express';
+import { getRealIp } from 'src/common/utils/ip.util';
 
 @Injectable()
 export class RateLimitGuard implements CanActivate {
@@ -19,7 +19,7 @@ export class RateLimitGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
 
     const userId = req?.user && req.user['id'];
-    const ip = this.getFinalIp(req);
+    const ip = getRealIp(req);
 
     // const rawUA = req.headers['user-agent'] || '';
     // const ua = parseUserAgent(rawUA);
@@ -36,15 +36,5 @@ export class RateLimitGuard implements CanActivate {
 
     await this.rateLimitService.action(identifier, endpoint, max, duration);
     return true;
-  }
-
-  private getFinalIp(req: Request): string {
-    const cfIp = req.headers['cf-connecting-ip'];
-
-    if (!cfIp) {
-      throw new Error('Cloudflare IP not found !');
-    }
-
-    return Array.isArray(cfIp) ? cfIp[0] : cfIp;
   }
 }

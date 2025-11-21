@@ -31,6 +31,7 @@ import {
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from 'src/common/enums/role.enum';
 import { RolesAllowed } from '../auth/decorators/roles.decorator';
+import { getRealIp } from 'src/common/utils/ip.util';
 
 @Controller('contact')
 @ApiTags('Contact')
@@ -46,7 +47,7 @@ export class ContactController {
     @Req() req: Request,
   ) {
     const userId = req?.user && req.user['id'];
-    const ip = req.ip;
+    const ip = getRealIp(req);
     const rawUA = req.headers['user-agent'] || '';
     const ua = parseUserAgent(rawUA);
     const identifier = userId ?? `${ip}:${ua.browser}:${ua.os}:${ua.device}`;

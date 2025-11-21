@@ -10,12 +10,13 @@ import {
 } from 'typeorm';
 
 @Entity(EntityName.RateLimitRecord)
-@Index(['identifier', 'ip', 'endpoint'], { unique: true })
+@Index(['identifier', 'endpoint'], { unique: true })
+@Index(['ip'])
 export class RateLimitRecord extends BaseEntity {
   @Column({ type: 'varchar', length: 100 })
   identifier: string;
 
-  @Column({ type: 'varchar', length: 15, nullable: true })
+  @Column({ type: 'varchar', length: 15 })
   ip: string;
 
   @Column({ type: 'varchar', length: 100 })

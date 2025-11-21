@@ -16,7 +16,7 @@ export class RateLimitRecord extends BaseEntity {
   @Column({ type: 'varchar', length: 100 })
   identifier: string;
 
-  @Column({ type: 'varchar', length: 15 })
+  @Column({ type: 'varchar', length: 15, nullable: true })
   ip: string;
 
   @Column({ type: 'varchar', length: 100 })

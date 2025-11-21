@@ -19,7 +19,7 @@ async function bootstrap() {
 
   app.set('trust proxy', true);
 
-  app.use(cookieParser());
+  app.use(cookieParser(process.env.SECRET_KEY));
 
   app.use(helmet());
 

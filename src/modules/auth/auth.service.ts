@@ -17,6 +17,7 @@ import { generateOtpCode } from 'src/common/utils/generate-otp-code.utils';
 import { SmsType } from 'src/common/types/sms.type';
 import {
   AccessCookieConfig,
+  RateLimitCookieConfig,
   RefreshCookieConfig,
 } from 'src/common/constants/token-config.constants';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
@@ -164,6 +165,7 @@ export class AuthService {
     await this.userService.removeRefreshToken(id);
     res.clearCookie('access-token', AccessCookieConfig);
     res.clearCookie('refresh-token', RefreshCookieConfig);
+    res.clearCookie('rlid', RateLimitCookieConfig);
     return new ServerResponse(HttpStatus.OK, 'You logout successfully.');
   }
 

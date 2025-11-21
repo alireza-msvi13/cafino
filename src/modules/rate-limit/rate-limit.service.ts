@@ -10,6 +10,8 @@ import { Repository } from 'typeorm';
 import { BlockStatus } from 'src/modules/rate-limit/enums/block-status.enum';
 import { BlockUserDto, RateLimitQueryDto } from './dto/rate-limit-query.dto';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
+import { Response } from 'express';
+import { RateLimitCookieConfig } from 'src/common/constants/token-config.constants';
 
 @Injectable()
 export class RateLimitService {
@@ -25,6 +27,7 @@ export class RateLimitService {
 
   async action(
     identifier: string,
+    ip: string,
     endpoint: string,
     max: number,
     duration: number,
@@ -37,6 +40,7 @@ export class RateLimitService {
       .into(RateLimitRecord)
       .values({
         identifier,
+        ip,
         endpoint,
         requests_in_window: 0,
         window_start_at: now,
@@ -334,5 +338,32 @@ export class RateLimitService {
       default:
         return 7 * 24 * 60 * 60 * 1000; // 1 week (won't be used if permanent)
     }
+  }
+
+  // Resolves or creates a guest identifier and sets it as a cookie.
+  async resolveGuestIdentifier(
+    ip: string,
+    signedCookieId: string,
+    res: Response,
+  ): Promise<string> {
+    if (signedCookieId) {
+      return signedCookieId;
+    }
+
+    const existingByIp = await this.rateLimitRepository.findOne({
+      where: { ip },
+      order: { window_start_at: 'DESC' },
+    });
+
+    if (existingByIp) {
+      res.cookie('rlid', existingByIp.identifier, RateLimitCookieConfig);
+      return existingByIp.identifier;
+    }
+
+    const newId = crypto.randomUUID();
+    const fullIdentifier = `guest-${newId}`;
+
+    res.cookie('rlid', fullIdentifier, RateLimitCookieConfig);
+    return fullIdentifier;
   }
 }

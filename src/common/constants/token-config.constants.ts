@@ -13,3 +13,11 @@ export const RefreshCookieConfig: CookieOptions = {
   secure: process.env.NODE_ENV === 'production',
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
+
+export const RateLimitCookieConfig: CookieOptions = {
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  httpOnly: true,
+  signed: true,
+  secure: process.env.NODE_ENV === 'production',
+  maxAge: 30 * 24 * 60 * 60 * 1000,
+};

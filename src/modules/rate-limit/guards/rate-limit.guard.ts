@@ -17,15 +17,24 @@ export class RateLimitGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
+    const res = context.switchToHttp().getResponse();
 
     const userId = req?.user && req.user['id'];
     const ip = getRealIp(req);
-
-    // const rawUA = req.headers['user-agent'] || '';
-    // const ua = parseUserAgent(rawUA);
-
-    const identifier = userId ?? ip;
+    const signedCookieId = req.signedCookies?.['rlid'];
     const endpoint = req.route.path;
+
+    let identifier: string;
+
+    if (userId) {
+      identifier = `user-${userId}`;
+    } else {
+      identifier = await this.rateLimitService.resolveGuestIdentifier(
+        ip,
+        signedCookieId,
+        res,
+      );
+    }
 
     const options = this.reflector.get<RateLimitOptions>(
       RATE_LIMIT_OPTIONS,
@@ -34,7 +43,7 @@ export class RateLimitGuard implements CanActivate {
     const max = options?.max ?? 10;
     const duration = options?.duration ?? 1;
 
-    await this.rateLimitService.action(identifier, endpoint, max, duration);
+    await this.rateLimitService.action(identifier, ip, endpoint, max, duration);
     return true;
   }
 }

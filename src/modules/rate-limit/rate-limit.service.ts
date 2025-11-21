@@ -40,7 +40,6 @@ export class RateLimitService {
       .into(RateLimitRecord)
       .values({
         identifier,
-        ip,
         endpoint,
         requests_in_window: 0,
         window_start_at: now,
@@ -105,6 +104,7 @@ export class RateLimitService {
       }
     }
 
+    record.ip = ip;
     await this.rateLimitRepository.save(record);
 
     if (record.block_status === BlockStatus.Permanent)

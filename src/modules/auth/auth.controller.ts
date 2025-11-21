@@ -27,7 +27,7 @@ export class AuthController {
 
   @Post('send-otp')
   @RateLimit({ max: 3, duration: 10 })
-  @UseGuards(RateLimitGuard, CaptchaGuard)
+  @UseGuards(CaptchaGuard, RateLimitGuard)
   @SendOtpDoc()
   async sendOtp(@Body() loginUserDto: LoginUserDto) {
     return this.authService.sendOtp(loginUserDto.phone);
@@ -50,7 +50,7 @@ export class AuthController {
 
   @Post('resend-otp')
   @RateLimit({ max: 3, duration: 10 })
-  @UseGuards(RateLimitGuard, CaptchaGuard)
+  @UseGuards(CaptchaGuard, RateLimitGuard)
   @ResendOtpDoc()
   async resendOtp(@Body() resendCodeDto: ResendCodeDto) {
     return this.authService.resendOtp(resendCodeDto);

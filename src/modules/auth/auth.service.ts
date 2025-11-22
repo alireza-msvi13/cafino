@@ -65,12 +65,10 @@ export class AuthService {
     const expireIn = new Date(Date.now() + 1000 * 60 * 2);
     await this.userService.saveOtp(otpCode, expireIn, user.id, phone);
 
-    // const smsPayload: SmsType = { phone, code: otpCode };
-    // this.eventEmitter.emit('sms.otp.send', smsPayload);
+    const smsPayload: SmsType = { phone, code: otpCode };
+    this.eventEmitter.emit('sms.otp.send', smsPayload);
 
-    return new ServerResponse(HttpStatus.OK, 'Code sent successfully.', {
-      otpCode,
-    });
+    return new ServerResponse(HttpStatus.OK, 'Code sent successfully.');
   }
   async verifyOtp(
     phone: string,
@@ -154,12 +152,10 @@ export class AuthService {
     const expireIn = new Date(Date.now() + 1000 * 60 * 2);
     await this.userService.saveOtp(otpCode, expireIn, user.id, phone);
 
-    // const smsOptions: SmsType = { phone, code: otpCode };
-    // await this.smsService.sendSms(smsOptions);
+    const smsPayload: SmsType = { phone, code: otpCode };
+    this.eventEmitter.emit('sms.otp.send', smsPayload);
 
-    return new ServerResponse(HttpStatus.OK, 'Code send successfully.', {
-      otpCode,
-    });
+    return new ServerResponse(HttpStatus.OK, 'Code send successfully.');
   }
   async logout(id: string, res: Response): Promise<ServerResponse> {
     await this.userService.removeRefreshToken(id);

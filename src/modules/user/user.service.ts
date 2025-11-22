@@ -80,10 +80,21 @@ export class UserService {
 
     const total = await baseQuery.getCount();
 
-    const users = await baseQuery
+    let users = await baseQuery
       .skip((page - 1) * limit)
       .take(limit)
       .getMany();
+
+    users = users.map((user) => {
+      if (
+        user.phone &&
+        user.phone.startsWith('09') &&
+        user.phone.length >= 11
+      ) {
+        user.phone = user.phone.replace(/^(\d{4})\d+(\d{3})$/, '$1****$2');
+      }
+      return user;
+    });
 
     return new ServerResponse(
       HttpStatus.OK,
@@ -96,6 +107,7 @@ export class UserService {
       },
     );
   }
+
   async changeUserPermission(
     userPermissionDto: UserPermissionDto,
   ): Promise<ServerResponse> {
@@ -175,10 +187,21 @@ export class UserService {
 
     const total = await baseQuery.getCount();
 
-    const data = await baseQuery
+    let users = await baseQuery
       .skip((page - 1) * limit)
       .take(limit)
       .getMany();
+
+    users = users.map((user) => {
+      if (
+        user.phone &&
+        user.phone.startsWith('09') &&
+        user.phone.length >= 11
+      ) {
+        user.phone = user.phone.replace(/^(\d{4})\d+(\d{3})$/, '$1****$2');
+      }
+      return user;
+    });
 
     return new ServerResponse(
       HttpStatus.OK,
@@ -187,10 +210,11 @@ export class UserService {
         total,
         page,
         limit,
-        users: data,
+        users,
       },
     );
   }
+
   async deleteUser(delteUserDto: UserDto): Promise<ServerResponse> {
     await this.userRepository.delete({
       phone: delteUserDto.phone,

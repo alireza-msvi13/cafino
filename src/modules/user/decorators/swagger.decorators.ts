@@ -45,9 +45,7 @@ export function UserPermissionDoc() {
     ConflictError('SuperUser role cannot be changed.'),
     NotFoundError('User not found.'),
     BadRequestError(`Invalid request - Validation rules:
-- phone:
-  - Must not be empty.
-  - Must match the regex ${PhoneRegex}
+${SwaggerSharedDescriptions.UUID}
 - role:
   - Must be a valid enum value: ${Object.values(Roles).join(', ')}.
 `),
@@ -74,10 +72,9 @@ export function AddUserToBlacklistDoc() {
     }),
     UnprocessableEntityError('User is already blacklisted.'),
     ConflictError('Admins and Managers cannot be blacklisted.'),
-    BadRequestError(`Invalid request - Validation rules:
-- phone:
-  - Must not be empty.
-  - Must match the regex ${PhoneRegex}
+    BadRequestError(`
+Invalid request - Validation rules:
+${SwaggerSharedDescriptions.UUID}
 `),
   );
 }
@@ -88,10 +85,5 @@ export function RemoveUserFromBlacklistDoc() {
       requiresAuth: true,
       requiresAdmin: true,
     }),
-    BadRequestError(`Invalid request - Validation rules:
-- phone:
-  - Must not be empty.
-  - Must match the regex ${PhoneRegex}
-`),
   );
 }

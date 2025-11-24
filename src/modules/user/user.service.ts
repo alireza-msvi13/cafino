@@ -101,22 +101,23 @@ export class UserService {
   }
 
   async changeUserPermission(
+    id: string,
     userPermissionDto: UserPermissionDto,
   ): Promise<ServerResponse> {
-    const { phone, role } = userPermissionDto;
+    const { role } = userPermissionDto;
 
     if (role === Roles.Manager) {
       throw new ConflictException('Role cannot be changed.');
     }
 
-    const user = await this.findUserByPhone(phone);
+    const user = await this.findUser(id);
 
     if (!user) {
       throw new NotFoundException('User not found.');
     }
 
     await this.userRepository.update(
-      { phone },
+      { id },
       {
         role,
       },
@@ -127,8 +128,8 @@ export class UserService {
       `User role changed to ${role} successfully.`,
     );
   }
-  async addUserToBlacklist(userDto: UserDto): Promise<ServerResponse> {
-    const user = await this.findUserByPhone(userDto.phone);
+  async addUserToBlacklist(id: string): Promise<ServerResponse> {
+    const user = await this.findUser(id);
 
     if (!user) {
       throw new NotFoundException('User not found.');
@@ -143,7 +144,7 @@ export class UserService {
     }
 
     await this.userRepository.update(
-      { phone: userDto.phone },
+      { id },
       {
         status: UserStatus.Block,
         rt_hash: null,
@@ -156,9 +157,9 @@ export class UserService {
     );
   }
 
-  async removeUserToBlacklist(userDto: UserDto): Promise<ServerResponse> {
+  async removeUserToBlacklist(id: string): Promise<ServerResponse> {
     await this.userRepository.update(
-      { phone: userDto.phone },
+      { id },
       {
         status: UserStatus.Normal,
       },

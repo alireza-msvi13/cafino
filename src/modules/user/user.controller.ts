@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Patch,
   Post,
   Query,
@@ -26,6 +27,7 @@ import {
 import { Roles } from 'src/common/enums/role.enum';
 import { RolesAllowed } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { UUIDValidationPipe } from 'src/common/pipes/uuid-validation.pipe';
 @Controller('user')
 @ApiTags('User')
 export class UserController {
@@ -46,12 +48,15 @@ export class UserController {
     return await this.userService.getUsersList(paginationDto);
   }
 
-  @Patch('permission')
+  @Patch('permission/:id')
   @UseGuards(JwtGuard, RolesGuard)
   @RolesAllowed(Roles.Manager)
   @UserPermissionDoc()
-  async changeUserPermission(@Body() userPermissionDto: UserPermissionDto) {
-    return this.userService.changeUserPermission(userPermissionDto);
+  async changeUserPermission(
+    @Param('id', UUIDValidationPipe) id: string,
+    @Body() userPermissionDto: UserPermissionDto,
+  ) {
+    return this.userService.changeUserPermission(id, userPermissionDto);
   }
 
   @Get('blacklist')
@@ -62,19 +67,19 @@ export class UserController {
     return this.userService.getUsersBlacklist(paginationDto);
   }
 
-  @Post('blacklist')
+  @Post('blacklist/:id')
   @UseGuards(JwtGuard, RolesGuard)
   @RolesAllowed(Roles.Manager)
   @AddUserToBlacklistDoc()
-  async addUserToBlacklist(@Body() userDto: UserDto) {
-    return this.userService.addUserToBlacklist(userDto);
+  async addUserToBlacklist(@Param('id', UUIDValidationPipe) id: string) {
+    return this.userService.addUserToBlacklist(id);
   }
 
-  @Delete('blacklist')
+  @Delete('blacklist/:id')
   @UseGuards(JwtGuard, RolesGuard)
   @RolesAllowed(Roles.Manager)
   @RemoveUserFromBlacklistDoc()
-  async removeUserToBlacklist(@Body() userDto: UserDto) {
-    return this.userService.removeUserToBlacklist(userDto);
+  async removeUserToBlacklist(@Param('id', UUIDValidationPipe) id: string) {
+    return this.userService.removeUserToBlacklist(id);
   }
 }

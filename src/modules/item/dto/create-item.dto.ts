@@ -59,7 +59,7 @@ export class CreateItemDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsUUID('4', { message: 'categoryId is not valid' })
+  @IsUUID('4', { message: 'CategoryId is not valid.' })
   category: string;
 
   @ApiProperty({ type: 'boolean', default: true })

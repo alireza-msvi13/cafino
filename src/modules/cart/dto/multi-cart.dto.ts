@@ -14,7 +14,7 @@ import {
 
 class SingleCartDto {
   @ApiProperty()
-  @IsUUID('4', { message: 'itemId is not valid' })
+  @IsUUID('4', { message: 'ItemId is not valid.' })
   @IsNotEmpty()
   itemId: string;
 

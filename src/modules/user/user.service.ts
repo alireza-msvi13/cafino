@@ -101,10 +101,9 @@ export class UserService {
   }
 
   async changeUserPermission(
-    id: string,
     userPermissionDto: UserPermissionDto,
   ): Promise<ServerResponse> {
-    const { role } = userPermissionDto;
+    const { role, id } = userPermissionDto;
 
     if (role === Roles.Manager) {
       throw new ConflictException('Role cannot be changed.');

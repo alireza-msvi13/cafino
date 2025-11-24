@@ -11,7 +11,7 @@ import {
 
 export class PaymentGatewayDto {
   @ApiProperty()
-  @IsUUID('4', { message: 'addressId is not valid' })
+  @IsUUID('4', { message: 'AddressId is not valid.' })
   @IsNotEmpty()
   addressId: string;
 

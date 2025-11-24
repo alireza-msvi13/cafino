@@ -20,12 +20,12 @@ export class CreateCommentDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsUUID('4', { message: 'itemId is not valid' })
+  @IsUUID('4', { message: 'ItemId is not valid.' })
   itemId: string;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsUUID('4', { message: 'parentId is not valid' })
+  @IsUUID('4', { message: 'ParentId is not valid.' })
   parentId?: string;
 
   @ApiPropertyOptional({ minimum: 1, maximum: 5, default: 5, type: Number })

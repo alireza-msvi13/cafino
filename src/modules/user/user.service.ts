@@ -22,6 +22,7 @@ import { UserDto } from './dto/user.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { Roles } from 'src/common/enums/role.enum';
+import { maskPhones } from 'src/common/utils/mask-phone.util';
 
 @Injectable()
 export class UserService {
@@ -85,16 +86,7 @@ export class UserService {
       .take(limit)
       .getMany();
 
-    users = users.map((user) => {
-      if (
-        user.phone &&
-        user.phone.startsWith('09') &&
-        user.phone.length >= 11
-      ) {
-        user.phone = user.phone.replace(/^(\d{4})\d+(\d{3})$/, '$1****$2');
-      }
-      return user;
-    });
+    users = maskPhones(users);
 
     return new ServerResponse(
       HttpStatus.OK,
@@ -192,16 +184,7 @@ export class UserService {
       .take(limit)
       .getMany();
 
-    users = users.map((user) => {
-      if (
-        user.phone &&
-        user.phone.startsWith('09') &&
-        user.phone.length >= 11
-      ) {
-        user.phone = user.phone.replace(/^(\d{4})\d+(\d{3})$/, '$1****$2');
-      }
-      return user;
-    });
+    users = maskPhones(users);
 
     return new ServerResponse(
       HttpStatus.OK,

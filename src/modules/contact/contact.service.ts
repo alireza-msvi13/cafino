@@ -9,6 +9,7 @@ import { ContactQueryDto } from './dto/sort-contact.dto';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { MailService } from '../mail/mail.service';
 import { SortContactOption } from './enum/contact.enum';
+import { maskPhones } from 'src/common/utils/mask-phone.util';
 @Injectable()
 export class ContactService {
   constructor(
@@ -87,7 +88,8 @@ export class ContactService {
         qb.orderBy('contact.created_at', 'DESC');
     }
 
-    const contacts = await qb.getMany();
+    let contacts = await qb.getMany();
+    contacts = maskPhones(contacts);
     const totalUnreplied = await this.countUnrepliedMessages();
 
     return new ServerResponse(

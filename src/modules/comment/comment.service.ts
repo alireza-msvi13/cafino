@@ -120,7 +120,6 @@ export class CommentService {
         'user.first_name',
         'user.last_name',
         'user.username',
-        'user.phone',
         'item.id',
         'item.title',
         'parent.id',
@@ -166,7 +165,6 @@ export class CommentService {
         'user.first_name',
         'user.last_name',
         'user.username',
-        'user.phone',
         'user.email',
 
         // Child comments
@@ -179,7 +177,6 @@ export class CommentService {
         'childUser.first_name',
         'childUser.last_name',
         'childUser.username',
-        'childUser.phone',
         'childUser.email',
       ])
       .orderBy(

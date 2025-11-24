@@ -17,6 +17,7 @@ import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { OrderQueryDto } from './dto/sort-order.dto';
 import { OrderSortField } from './enum/order.enum';
+import { maskPhones } from 'src/common/utils/mask-phone.util';
 
 @Injectable()
 export class OrderService {
@@ -119,19 +120,7 @@ export class OrderService {
       .take(limit)
       .getMany();
 
-    orders = orders.map((order) => {
-      if (
-        order.user.phone &&
-        order.user.phone.startsWith('09') &&
-        order.user.phone.length >= 11
-      ) {
-        order.user.phone = order.user.phone.replace(
-          /^(\d{4})\d+(\d{3})$/,
-          '$1****$2',
-        );
-      }
-      return order;
-    });
+    orders = maskPhones(orders);
 
     return new ServerResponse(HttpStatus.OK, 'Orders fetched successfully.', {
       total,

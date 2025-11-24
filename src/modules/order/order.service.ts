@@ -66,6 +66,7 @@ export class OrderService {
         'user.id',
         'user.first_name',
         'user.last_name',
+        'user.username',
         'user.phone',
 
         'address.id',

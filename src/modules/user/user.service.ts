@@ -22,7 +22,7 @@ import { UserDto } from './dto/user.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { Roles } from 'src/common/enums/role.enum';
-import { maskPhones } from 'src/common/utils/mask-phone.util';
+import { maskFields } from 'src/common/utils/mask-fields.util';
 
 @Injectable()
 export class UserService {
@@ -86,7 +86,7 @@ export class UserService {
       .take(limit)
       .getMany();
 
-    users = maskPhones(users);
+    users = maskFields(users, ['phone']);
 
     return new ServerResponse(
       HttpStatus.OK,
@@ -184,7 +184,7 @@ export class UserService {
       .take(limit)
       .getMany();
 
-    users = maskPhones(users);
+    users = maskFields(users, ['phone']);
 
     return new ServerResponse(
       HttpStatus.OK,

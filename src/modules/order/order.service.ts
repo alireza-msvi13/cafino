@@ -17,7 +17,7 @@ import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { OrderQueryDto } from './dto/sort-order.dto';
 import { OrderSortField } from './enum/order.enum';
-import { maskPhones } from 'src/common/utils/mask-phone.util';
+import { maskFields } from 'src/common/utils/mask-fields.util';
 
 @Injectable()
 export class OrderService {
@@ -120,7 +120,7 @@ export class OrderService {
       .take(limit)
       .getMany();
 
-    orders = maskPhones(orders);
+    orders = maskFields(orders, ['user.phone']);
 
     return new ServerResponse(HttpStatus.OK, 'Orders fetched successfully.', {
       total,

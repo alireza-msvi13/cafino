@@ -114,10 +114,24 @@ export class OrderService {
 
     const total = await baseQuery.getCount();
 
-    const orders = await baseQuery
+    let orders = await baseQuery
       .skip((page - 1) * limit)
       .take(limit)
       .getMany();
+
+    orders = orders.map((order) => {
+      if (
+        order.user.phone &&
+        order.user.phone.startsWith('09') &&
+        order.user.phone.length >= 11
+      ) {
+        order.user.phone = order.user.phone.replace(
+          /^(\d{4})\d+(\d{3})$/,
+          '$1****$2',
+        );
+      }
+      return order;
+    });
 
     return new ServerResponse(HttpStatus.OK, 'Orders fetched successfully.', {
       total,

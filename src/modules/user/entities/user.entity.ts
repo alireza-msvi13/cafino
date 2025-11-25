@@ -58,6 +58,9 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   is_email_verified: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  is_phone_verified: boolean;
+
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.Normal })
   status: UserStatus;
 

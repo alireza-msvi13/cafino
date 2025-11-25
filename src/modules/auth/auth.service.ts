@@ -108,7 +108,7 @@ export class AuthService {
 
     const tokens = await this.createTokens(user.id, user.role);
     const rtHash = await bcrypt.hash(tokens.refreshToken, 10);
-    await this.userService.saveRefreshToken(user.id, rtHash);
+    await this.userService.verifyPhone(user.id, rtHash);
     res.cookie('access-token', tokens.accessToken, AccessCookieConfig);
     res.cookie('refresh-token', tokens.refreshToken, RefreshCookieConfig);
 

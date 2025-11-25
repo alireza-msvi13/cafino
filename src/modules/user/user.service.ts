@@ -68,6 +68,7 @@ export class UserService {
         'user.email',
         'user.imageUrl',
         'user.is_email_verified',
+        'user.is_phone_verified',
         'user.role',
         'user.status',
         'user.created_at',
@@ -463,6 +464,15 @@ export class UserService {
       { id: otpId },
       {
         is_used: true,
+      },
+    );
+  }
+  async verifyPhone(id: string, refreshToken: string): Promise<void> {
+    await this.userRepository.update(
+      { id },
+      {
+        rt_hash: refreshToken,
+        is_phone_verified: true,
       },
     );
   }

@@ -12,7 +12,7 @@ import { UserService } from '../user/user.service';
 import { ResendCodeDto } from './dto/resend-code.dto';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
+import * as argon2 from 'argon2';
 import { generateOtpCode } from 'src/common/utils/generate-otp-code.utils';
 import { SmsType } from 'src/common/types/sms.type';
 import {
@@ -107,7 +107,7 @@ export class AuthService {
     }
 
     const tokens = await this.createTokens(user.id, user.role);
-    const rtHash = await bcrypt.hash(tokens.refreshToken, 10);
+    const rtHash = await argon2.hash(tokens.refreshToken);
     await this.userService.verifyPhone(user.id, rtHash);
     res.cookie('access-token', tokens.accessToken, AccessCookieConfig);
     res.cookie('refresh-token', tokens.refreshToken, RefreshCookieConfig);
@@ -122,7 +122,7 @@ export class AuthService {
     role: Roles,
   ): Promise<ServerResponse> {
     const tokens = await this.createTokens(userId, role);
-    const hashRefresh = await bcrypt.hash(tokens.refreshToken, 10);
+    const hashRefresh = await argon2.hash(tokens.refreshToken);
     await this.userService.saveRefreshToken(userId, hashRefresh);
     res.cookie('access-token', tokens.accessToken, AccessCookieConfig);
     res.cookie('refresh-token', tokens.refreshToken, RefreshCookieConfig);
@@ -204,7 +204,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired token.');
     }
 
-    const isMatch = await bcrypt.compare(refreshToken, user.rt_hash);
+    const isMatch = await argon2.verify(user.rt_hash, refreshToken);
+
+    console.log(isMatch, user.rt_hash, refreshToken);
 
     if (!isMatch) {
       throw new UnauthorizedException('Invalid or expired token.');

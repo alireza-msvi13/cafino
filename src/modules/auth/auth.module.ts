@@ -9,6 +9,7 @@ import { UserModule } from '../user/user.module';
 import { RateLimitModule } from 'src/modules/rate-limit/rate-limit.module';
 import { SmsListener } from './listeners/sms.listener';
 import { CaptchaModule } from '../captcha/captcha.module';
+import { RtListener } from './listeners/rt.listener';
 @Module({
   imports: [
     UserModule,
@@ -20,7 +21,13 @@ import { CaptchaModule } from '../captcha/captcha.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, RefreshStrategy, JwtStrategy, SmsListener],
+  providers: [
+    AuthService,
+    RefreshStrategy,
+    JwtStrategy,
+    SmsListener,
+    RtListener,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

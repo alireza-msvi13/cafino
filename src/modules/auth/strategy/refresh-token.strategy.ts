@@ -28,9 +28,7 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
   ): Promise<{ id: string; role: Roles }> {
     if (!payload?.id) throw new UnauthorizedException('Invalid token payload.');
 
-    const refreshToken =
-      (request?.headers['refresh-token'] as string) ||
-      request?.cookies?.['refresh-token'];
+    const refreshToken = request?.cookies?.['refresh-token'];
 
     if (!refreshToken) {
       throw new UnauthorizedException('Invalid or expired token.');

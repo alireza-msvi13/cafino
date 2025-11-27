@@ -23,6 +23,7 @@ import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
 import { Roles } from 'src/common/enums/role.enum';
 import { maskFields } from 'src/common/utils/mask-fields.util';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class UserService {
@@ -484,8 +485,12 @@ export class UserService {
       },
     );
   }
-  async removeRefreshToken(id?: string): Promise<void> {
+  async removeRefreshToken(id: string, refreshToken: string): Promise<void> {
     if (!id) return;
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user || !user.rt_hash) return;
+    const isMatch = await argon2.verify(user.rt_hash, refreshToken);
+    if (!isMatch) return;
     await this.userRepository.update(
       { id },
       {

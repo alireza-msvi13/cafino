@@ -10,14 +10,13 @@ import {
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { ResendCodeDto } from './dto/resend-code.dto';
-import { Response } from 'express';
+import { CookieOptions, Request, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { generateOtpCode } from 'src/common/utils/generate-otp-code.utils';
 import { SmsType } from 'src/common/types/sms.type';
 import {
   AccessCookieConfig,
-  RateLimitCookieConfig,
   RefreshCookieConfig,
 } from 'src/common/constants/token-config.constants';
 import { ServerResponse } from 'src/common/dto/server-response.dto';
@@ -157,11 +156,30 @@ export class AuthService {
 
     return new ServerResponse(HttpStatus.OK, 'Code send successfully.');
   }
-  async logout(id: string, res: Response): Promise<ServerResponse> {
-    await this.userService.removeRefreshToken(id);
-    res.clearCookie('access-token', AccessCookieConfig);
-    res.clearCookie('refresh-token', RefreshCookieConfig);
-    res.clearCookie('rlid', RateLimitCookieConfig);
+  async logout(
+    id: string,
+    res: Response,
+    req: Request,
+  ): Promise<ServerResponse> {
+    const refreshToken = req?.cookies?.['refresh-token'];
+    this.eventEmitter.emit('rt.remove', { id, refreshToken });
+
+    const clearCookie = (
+      name: string,
+      options: Partial<CookieOptions> = {},
+    ) => {
+      res.clearCookie(name, {
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        ...options,
+      });
+    };
+
+    clearCookie('access-token');
+    clearCookie('refresh-token');
+    clearCookie('rlid', { signed: true });
+
     return new ServerResponse(HttpStatus.OK, 'You logout successfully.');
   }
 

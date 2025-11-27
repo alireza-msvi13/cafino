@@ -1,6 +1,14 @@
-import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { ResendCodeDto } from './dto/resend-code.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -73,7 +81,8 @@ export class AuthController {
   async logout(
     @GetUser('id') id: string,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
   ) {
-    return await this.authService.logout(id, res);
+    return await this.authService.logout(id, res, req);
   }
 }

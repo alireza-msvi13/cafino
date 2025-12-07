@@ -15,7 +15,7 @@
   <img src="https://img.shields.io/badge/Winston-14354C?style=for-the-badge&logo=winston&logoColor=white" />
 </p>
 
-## ☕ Cafe Platform +50 route
+## ☕ Cafe Platform
 
 This is a full-featured cafe platform developed using NestJS
 
@@ -36,4 +36,5 @@ If this project have been helpful to you, I’d appreciate your support by givin
 - Apply Discounts on cart
   
 - Payemnt mangement - zarinpal gateway payment
+
 

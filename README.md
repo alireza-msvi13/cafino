@@ -52,4 +52,30 @@ If this project have been helpful to you, I’d appreciate your support by givin
 
 - **Containerization**: Docker & Docker Compose ready
 
+## ⚙️ Setup
+
+1.Clone the `repo` using the following command:
+   ```sh
+   git clone https://github.com/alireza-msvi13/cafino
+   ```
+
+2.Create and configure the .env file
+   ```sh
+   cp .env.example .env
+   ```
+
+3.Build and start the containers
+   ```sh
+   docker compose up --build -d
+   ```
+Access URLs :
+- API → `http://localhost:3000`
+- Adminer → `http://localhost:8080`
+- Swagger Api Documentation → `http://localhost:3000/v1/api-docs`
+
+## 📬 Keep in touch with me
+
+If you have any questions or find any 🪲 you can easily send me a message
+
+<a href="https://t.me/Alireza_msvi13" target="blank"><img align="center" src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" height="30" width="40" /></a>
 

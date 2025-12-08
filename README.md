@@ -77,8 +77,14 @@ Access URLs :
 - Adminer → `http://localhost:8080`
 - Swagger Api Documentation → `http://localhost:5000/v1/api-docs`
 
-## 📬 Keep in touch with me
+## 👥 Contributors
 
-If you have any questions or find any 🪲 you can easily send me a message
+- Frontend Dev: [AbbasRostami](https://github.com/AbbasRostami)
+- Backend Dev: [AlirezaMousavi](https://github.com/alireza-msvi13)
+
+Also If you have any questions or find any 🪲 you can easily send me a message
 
 <a href="https://t.me/Alireza_msvi13" target="blank"><img align="center" src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" height="30" width="40" /></a>
+
+
+

@@ -37,9 +37,17 @@ export class SmsService {
         );
       }
     } catch (error) {
-      throw new ServiceUnavailableException(
-        error.response?.data?.meta.message || 'Failed to send SMS pattern.',
-      );
+      console.error('SMS ERROR:', error);
+
+      if (axios.isAxiosError(error)) {
+        throw new ServiceUnavailableException(
+          error.response?.data?.meta?.message ||
+            error.message ||
+            'Failed to send SMS pattern.',
+        );
+      }
+
+      throw new ServiceUnavailableException('SMS service crashed.');
     }
   }
 }

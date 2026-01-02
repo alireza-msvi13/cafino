@@ -223,9 +223,6 @@ export class AuthService {
     }
 
     const isMatch = await argon2.verify(user.rt_hash, refreshToken);
-
-    console.log(isMatch, user.rt_hash, refreshToken);
-
     if (!isMatch) {
       throw new UnauthorizedException('Invalid or expired token.');
     }

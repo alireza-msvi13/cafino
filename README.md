@@ -21,6 +21,8 @@
 
 ## ☕ Cafe Platform +90 API endpoints
 
+A sample implementation of a real-world project 🎭
+
 A scalable, production-ready NestJS platform with Modular & EDA architecture, secure OTP auth, advanced custom rate limiting, analytics dashboard, Cloudflare Turnstile security, AWS S3 integration, and full Dockerized deployment.
 
 If this project have been helpful to you, I’d appreciate your support by giving this repo a Star ⭐.

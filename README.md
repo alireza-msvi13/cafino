@@ -81,8 +81,8 @@ Access URLs :
 
 ## 👥 Contributors
 
-- Frontend Dev: [AbbasRostami](https://github.com/AbbasRostami)
-- Backend Dev: [AlirezaMousavi](https://github.com/alireza-msvi13)
+- Frontend Developer: [AbbasRostami](https://github.com/AbbasRostami)
+- Backend Developer: [AlirezaMousavi](https://github.com/alireza-msvi13)
 
 Also If you have any questions or find any 🪲 you can easily send me a message
 
